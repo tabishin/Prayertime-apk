@@ -56,6 +56,22 @@ html, body {
     text-decoration: underline;
 }
 
+.settings-link {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 0.9em;
+    opacity: 0.55;
+    text-decoration: none;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+.settings-link:hover {
+    opacity: 1;
+    transform: rotate(30deg);
+}
+
 .clock-container {
     width: 100%;
     height: 100%;
