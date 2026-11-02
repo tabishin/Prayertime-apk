@@ -1,1 +1,1 @@
-{"city":"Mumbai","state":"Maharashtra","country":"India","calcMethod":"1","asrMethod":"hanafi","adjustment":"1","alarmTime":"00:00","alarmAudio":"azan/silent.mp3","reminders":[{"time":"10:00","audio":"azan/590e615aa1d3f.mp3","repeat":false}],"theme":"light","layout":"modern"}
+{"city":"Mumbai","state":"Maharashtra","country":"India","calcMethod":"1","asrMethod":"hanafi","adjustment":"1","alarmTime":"00:00","alarmAudio":"azan/silent.mp3","reminders":[{"time":"10:00","audio":"azan/590e615aa1d3f.mp3","repeat":false}],"theme":"default","layout":"default"}
