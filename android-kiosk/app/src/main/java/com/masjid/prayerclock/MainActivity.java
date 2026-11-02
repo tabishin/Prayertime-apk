@@ -16,10 +16,10 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebViewAssetLoader;
-import androidx.webkit.WebViewClientCompat;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                 .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
                 .build();
 
-        webView.setWebViewClient(new WebViewClientCompat() {
+        webView.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
                 if (assetLoader != null) {
@@ -101,11 +101,23 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @Override
-            public void onReceivedError(@NonNull WebView view, @NonNull WebResourceRequest request, @NonNull WebResourceError error) {
+            public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
                 super.onReceivedError(view, request, error);
-                Log.w(TAG, "WebView error loading: " + request.getUrl() + ", error: " + error.getDescription());
-                // If appassets failed for any reason, fallback to file URL
-                if (request.getUrl().toString().contains("index.html") && !request.getUrl().toString().startsWith("file:")) {
+                if (request != null && request.getUrl() != null) {
+                    Log.w(TAG, "WebView error loading: " + request.getUrl());
+                    // If appassets failed for any reason, fallback to file URL
+                    if (request.getUrl().toString().contains("index.html") && !request.getUrl().toString().startsWith("file:")) {
+                        view.loadUrl("file:///android_asset/index.html");
+                    }
+                }
+            }
+
+            @SuppressWarnings("deprecation")
+            @Override
+            public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                super.onReceivedError(view, errorCode, description, failingUrl);
+                Log.w(TAG, "WebView error loading: " + failingUrl + " - " + description);
+                if (failingUrl != null && failingUrl.contains("index.html") && !failingUrl.startsWith("file:")) {
                     view.loadUrl("file:///android_asset/index.html");
                 }
             }
