@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:scaleX="0.5"
+        android:scaleY="0.5"
+        android:translateX="27"
+        android:translateY="27">
+        <!-- Mosque Dome -->
+        <path
+            android:fillColor="#FFE082"
+            android:pathData="M54,20 C42,32 35,46 35,66 L73,66 C73,46 66,32 54,20 Z" />
+        <!-- Minaret Left -->
+        <path
+            android:fillColor="#FFD54F"
+            android:pathData="M24,44 L30,44 L30,66 L24,66 Z" />
+        <path
+            android:fillColor="#FFE082"
+            android:pathData="M27,36 L24,44 L30,44 Z" />
+        <!-- Minaret Right -->
+        <path
+            android:fillColor="#FFD54F"
+            android:pathData="M78,44 L84,44 L84,66 L78,66 Z" />
+        <path
+            android:fillColor="#FFE082"
+            android:pathData="M81,36 L78,44 L84,44 Z" />
+        <!-- Crescent -->
+        <path
+            android:fillColor="#FFF59D"
+            android:pathData="M54,8 C51,8 48,10 48,14 C48,18 52,21 56,20 C54,19 53,17 53,15 C53,12 55,10 57,9 C56,8 55,8 54,8 Z" />
+        <!-- Clock Base -->
+        <path
+            android:fillColor="#FFE082"
+            android:pathData="M54,74 C47,74 41,80 41,87 C41,94 47,100 54,100 C61,100 67,94 67,87 C67,80 61,74 54,74 Z M54,98 C48,98 43,93 43,87 C43,81 48,76 54,76 C60,76 65,81 65,87 C65,93 60,98 54,98 Z" />
+        <!-- Clock Hands -->
+        <path
+            android:strokeColor="#FFE082"
+            android:strokeWidth="2"
+            android:strokeLineCap="round"
+            android:pathData="M54,87 L54,80 M54,87 L60,87" />
+    </group>
+</vector>
