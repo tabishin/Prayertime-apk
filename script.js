@@ -209,8 +209,8 @@ async function pollSettings() {
             }
             const prayerGrid = document.querySelector('.prayer-grid');
             if (prayerGrid) {
-                prayerGrid.classList.remove('layout-default', 'layout-compact', 'layout-modern');
-                if (settings.layout) prayerGrid.classList.add(`layout-${settings.layout}`);
+                prayerGrid.classList.remove('layout-compact', 'layout-modern');
+                prayerGrid.classList.add('layout-default');
             }
             playedAzans = { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
             playedAlarm = false;
@@ -952,13 +952,11 @@ async function init() {
         document.body.classList.add(`theme-${settings.theme}`);
     }
 
-    // Apply layout from settings
+    // Apply layout (always enforce layout-default 2x3 board grid for TV & Kiosk)
     const prayerGrid = document.querySelector('.prayer-grid');
     if (prayerGrid) {
-        prayerGrid.classList.remove('layout-default', 'layout-compact', 'layout-modern');
-        if (settings.layout) {
-            prayerGrid.classList.add(`layout-${settings.layout}`);
-        }
+        prayerGrid.classList.remove('layout-compact', 'layout-modern');
+        prayerGrid.classList.add('layout-default');
     }
 
     currentTimings = await fetchPrayerTimes();
