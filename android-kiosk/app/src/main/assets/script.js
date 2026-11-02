@@ -150,15 +150,26 @@ async function loadSettings() {
         return loaded;
     } catch (error) {
         console.warn("Could not fetch fresh settings from server, using local cache:", error.message || error);
-        const storedSettings = JSON.parse(localStorage.getItem('settings')) || defaultSettings;
-        return storedSettings;
+        let storedSettings = JSON.parse(localStorage.getItem('settings'));
+        if (!storedSettings) {
+            try {
+                const bundleRes = await fetch('settings.json');
+                if (bundleRes.ok) {
+                    storedSettings = await bundleRes.json();
+                    localStorage.setItem('settings', JSON.stringify(storedSettings));
+                }
+            } catch (bundleErr) {
+                // ignore
+            }
+        }
+        return storedSettings || defaultSettings;
     }
 }
 
 
 async function pollSettings() {
-    // Only poll if browser reports online to avoid unnecessary failed requests
-    if (!navigator.onLine) {
+    // Only poll if on web server with PHP support and online
+    if (!navigator.onLine || window.location.origin.includes('appassets') || window.location.protocol === 'file:') {
         return;
     }
 
