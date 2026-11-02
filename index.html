@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Prayer Times Wall Clock</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1B5E20">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="apple-touch-icon" href="assets/icon-192.png">
+    <link rel="icon" type="image/svg+xml" href="assets/icon-192.svg">
+    <link rel="icon" type="image/png" href="assets/icon-192.png">
+</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NPJPD5P5LX"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NPJPD5P5LX');
+</script>
+<body>
+    <div class="clock-container">
+        <!-- Top Bar -->
+        <div class="top-bar">
+            <div class="current-time" id="current-time">09:54:08 AM</div>
+            <div class="next-prayer" id="next-prayer">Next Prayer: Loading...</div>
+            <div class="date-info">
+                <span id="gregorian-date">Loading...</span> | 
+                <span id="islamic-date">Loading...</span>
+            </div>
+            <div id="location">Location: <span id="current-city"></span></div>
+        </div>
+
+        <!-- Prayer Times Grid -->
+        <div class="prayer-grid">
+            <div class="prayer-box" id="fajr-box">
+                <div class="prayer-name">FAJR</div>
+                <div class="prayer-time" id="fajr-jamaat">5:41</div>
+                <div class="prayer-details">
+                    <div>SEHRI END <span id="fajr-begins">05:41</span></div>
+                    <div>SUBAH SADIQ <span id="fajr-additional">05:33</span></div>
+                </div>
+            </div>
+            <div class="prayer-box" id="dhuhr-box">
+                <div class="prayer-name">ZOHR</div>
+                <div class="prayer-time" id="dhuhr-jamaat">12:51</div>
+                <div class="prayer-details">
+                    <div>CHASHT <span id="dhuhr-additional">06:43</span></div>
+                    <div>AWWAL <span id="dhuhr-begins">12:51</span></div>
+                </div>
+            </div>
+            <div class="prayer-box" id="asr-box">
+                <div class="prayer-name">ASR</div>
+                <div class="prayer-time" id="asr-jamaat">17:16</div>
+                <div class="prayer-details">
+                    <div>HANFI AWWAL <span id="asr-begins">17:16</span></div>
+                    <div>SHAFI AWWAL <span id="asr-additional">18:51</span></div>
+                </div>
+            </div>
+            <div class="prayer-box" id="maghrib-box">
+                <div class="prayer-name">MAGHRIB</div>
+                <div class="prayer-time" id="maghrib-jamaat">18:50</div>
+                <div class="prayer-details">
+                    <div>SUNSET <span id="maghrib-additional">18:51</span></div>
+                    <div>IFTAAR <span id="maghrib-begins">18:50</span></div>
+                </div>
+            </div>
+            <div class="prayer-box" id="isha-box">
+                <div class="prayer-name">ISHA</div>
+                <div class="prayer-time" id="isha-jamaat">19:39</div>
+                <div class="prayer-details">
+                    <div>AWWAL <span id="isha-begins">19:39</span></div>
+                    <div>QAZA <span id="isha-qaza">21:39</span></div>
+                </div>
+            </div>
+            <!-- Hadith Box -->
+            <div class="hadith-box" id="hadith-box">
+                <div class="hadith-title" id="hadith-title">HADITH</div>
+                <div class="hadith-content" id="hadith-english">Loading Hadith...</div>
+                <div class="hadith-source" id="hadith-source">Loading Source...</div>
+            </div>
+        </div>
+    </div>
+    <div id="interaction-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 5px; z-index: 1000;">
+        <p>Please click anywhere on the page to enable audio</p>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

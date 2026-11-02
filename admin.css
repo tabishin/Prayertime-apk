@@ -1,0 +1,508 @@
+/* Admin Page Styles */
+.admin-page {
+    background-color: #f5f7fa;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: Arial, sans-serif;
+}
+
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    width: 100%;
+}
+
+/* Header Styles */
+.admin-header {
+    background: linear-gradient(135deg, #1B5E20, #2E7D32);
+    color: white;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.admin-header h1 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.admin-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.status-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+
+.status-indicator.online {
+    background-color: #4CAF50;
+    box-shadow: 0 0 6px #4CAF50;
+}
+
+.status-text {
+    font-size: 12px;
+    opacity: 0.9;
+}
+
+/* Navigation Styles */
+.admin-nav {
+    background: #f8f9fa;
+    padding: 0;
+    border-bottom: 1px solid #e9ecef;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1px;
+    flex-shrink: 0;
+}
+
+.nav-tab {
+    flex: 1;
+    padding: 12px 16px;
+    border: none;
+    background: none;
+    color: #495057;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.3s ease;
+    min-width: 100px;
+}
+
+.nav-tab:hover {
+    background: #e9ecef;
+    color: #1B5E20;
+}
+
+.nav-tab.active {
+    background: white;
+    color: #1B5E20;
+    border-bottom: 2px solid #1B5E20;
+}
+
+/* Content Styles */
+.admin-content {
+    padding: 20px;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    background: #f5f7fa;
+    margin-bottom: 60px; /* Space for fixed footer */
+}
+
+/* Ensure sections take up minimal space */
+.settings-section {
+    display: none;
+    min-height: 0; /* Prevent unnecessary height expansion */
+}
+
+.settings-section.active {
+    display: block;
+}
+
+.settings-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.settings-card h2 {
+    margin: 0 0 15px 0;
+    color: #212529;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    color: #495057;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.form-control {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #1B5E20;
+    box-shadow: 0 0 0 2px rgba(27, 94, 32, 0.1);
+}
+
+/* Button Styles */
+.btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-primary {
+    background: #1B5E20;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2E7D32;
+}
+
+.btn-primary.active {
+    background: #2E7D32;
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-large {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+/* Theme and Layout Grid */
+.theme-grid, .layout-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.theme-card, .layout-card {
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.theme-card:hover, .layout-card:hover {
+    transform: translateY(-2px);
+}
+
+.theme-preview, .layout-preview {
+    height: 100px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.theme-name, .layout-name {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 6px;
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    text-align: center;
+    font-size: 12px;
+}
+
+/* Theme Preview Colors */
+.theme-default {
+    background: linear-gradient(135deg, #1B5E20, #2E7D32);
+}
+
+.theme-blue {
+    background: linear-gradient(135deg, #1a237e, #283593);
+}
+
+.theme-dark {
+    background: linear-gradient(135deg, #121212, #1f1f1f);
+}
+
+.theme-light {
+    background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+}
+
+/* Layout Preview Styles */
+.layout-default, .layout-compact, .layout-modern {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+}
+
+/* Reminders List */
+.reminders-list {
+    margin-bottom: 10px;
+}
+
+.reminder-item {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 6px;
+    margin-bottom: 6px;
+    flex-wrap: wrap;
+}
+
+.reminder-item input[type="time"] {
+    width: 100px;
+}
+
+.reminder-item select {
+    flex: 1;
+    min-width: 100px;
+}
+
+/* Footer Styles */
+.admin-footer {
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 10;
+    box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.admin-footer .btn-large {
+    width: 100%;
+    justify-content: center;
+}
+
+/* Icons */
+.icon-general::before { content: "⚙️"; }
+.icon-alarm::before { content: "⏰"; }
+.icon-theme::before { content: "🎨"; }
+.icon-plus::before { content: "➕"; }
+.icon-save::before { content: "💾"; }
+.icon-delete::before { content: "🗑️"; }
+
+/* Active States */
+.theme-card.active, .layout-card.active {
+    border: 2px solid #1B5E20;
+}
+
+.theme-card.active .theme-preview, .layout-card.active .layout-preview {
+    box-shadow: 0 0 0 2px #1B5E20;
+}
+
+/* Notification Styles */
+.notification {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    background: #1B5E20;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-container {
+        margin: 0;
+        border-radius: 0;
+        height: 100vh;
+    }
+
+    .admin-header {
+        padding: 10px 15px;
+    }
+
+    .admin-header h1 {
+        font-size: 18px;
+    }
+
+    .nav-tab {
+        padding: 10px;
+        font-size: 12px;
+        min-width: 0;
+    }
+
+    .admin-content {
+        padding: 15px;
+        margin-bottom: 50px; /* Adjusted for fixed footer */
+    }
+
+    .settings-card {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+
+    .settings-card h2 {
+        font-size: 14px;
+    }
+
+    .form-group {
+        margin-bottom: 10px;
+    }
+
+    .form-group label {
+        font-size: 12px;
+    }
+
+    .form-control {
+        padding: 6px 8px;
+        font-size: 12px;
+    }
+
+    .btn {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .btn-large {
+        padding: 8px 16px;
+        font-size: 14px;
+    }
+
+    .button-group {
+        gap: 8px;
+    }
+
+    .theme-grid, .layout-grid {
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: 10px;
+    }
+
+    .theme-preview, .layout-preview {
+        height: 80px;
+    }
+
+    .theme-name, .layout-name {
+        font-size: 10px;
+        padding: 4px;
+    }
+
+    .reminder-item {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px;
+    }
+
+    .reminder-item input[type="time"] {
+        width: 100%;
+    }
+
+    .reminder-item select {
+        width: 100%;
+    }
+
+    .admin-footer {
+        padding: 10px 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-header h1 {
+        font-size: 16px;
+    }
+
+    .status-text {
+        font-size: 10px;
+    }
+
+    .nav-tab {
+        padding: 8px;
+        font-size: 10px;
+    }
+
+    /* Optimize layout grid for small screens */
+    .theme-grid, .layout-grid {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); /* Smaller min width */
+        gap: 8px;
+    }
+
+    .theme-preview, .layout-preview {
+        height: 60px; /* Reduced height for better fit */
+    }
+
+    .theme-name, .layout-name {
+        font-size: 10px;
+        padding: 3px;
+    }
+
+    /* Ensure content fits within smaller viewport */
+    .admin-content {
+        padding: 10px;
+        margin-bottom: 50px;
+    }
+
+    .settings-card {
+        padding: 10px;
+        margin-bottom: 10px;
+    }
+
+    .settings-card h2 {
+        font-size: 12px;
+        margin-bottom: 10px;
+    }
+
+    .form-group {
+        margin-bottom: 8px;
+    }
+
+    .form-control {
+        padding: 5px 6px;
+        font-size: 11px;
+    }
+
+    .btn {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+
+    .btn-large {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}

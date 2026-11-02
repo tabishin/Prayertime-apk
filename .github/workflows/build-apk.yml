@@ -1,0 +1,47 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Package Assets
+        run: |
+          chmod +x android-kiosk/package-assets.sh
+          ./android-kiosk/package-assets.sh
+
+      - name: Grant Execute Permission for Gradle Wrapper
+        run: |
+          cd android-kiosk
+          gradle wrapper || true
+
+      - name: Build Debug APK
+        run: |
+          cd android-kiosk
+          gradle assembleDebug --stacktrace
+
+      - name: Upload Debug APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PrayerClock-Debug-APK
+          path: android-kiosk/app/build/outputs/apk/debug/*.apk
+          retention-days: 14

@@ -1,0 +1,39 @@
+{
+  "id": "/",
+  "name": "Prayer Times Wall Clock",
+  "short_name": "Prayer Clock",
+  "description": "Digital Prayer Times Wall Clock with Hadith, Countdown & Offline Support",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "landscape",
+  "theme_color": "#1B5E20",
+  "background_color": "#1B5E20",
+  "categories": ["utilities", "lifestyle"],
+  "icons": [
+    {
+      "src": "assets/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
