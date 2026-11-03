@@ -2,11 +2,18 @@
 let userInteracted = false;
 let audioEnabled = false;
 
-const isKiosk = new URLSearchParams(window.location.search).has("kiosk");
+// Safe kiosk detection without relying on URLSearchParams (compatible with older Android TV/Signage WebViews)
+const isKiosk = (typeof window !== 'undefined' && window.location) ? (
+    (window.location.search && window.location.search.indexOf("kiosk") !== -1) ||
+    (window.location.origin && window.location.origin.indexOf("appassets") !== -1) ||
+    window.location.protocol === "file:"
+) : false;
+
 if (isKiosk) {
     userInteracted = true;
     audioEnabled = true;
 }
+
 const audioPlayer = new Audio();
 audioPlayer.preload = "auto";
 audioPlayer.volume = 1.0;
@@ -25,6 +32,45 @@ let currentHadithData = null; // Caching current hadith
 let currentHolidays = [];     // Caching current holidays
 let holidayIndex = 0;
 let lastCheckedPrayer = "";
+
+// Reliable baseline offline prayer timings (ensures clock & countdown NEVER block on cold boot)
+const fallbackTimings = {
+    Fajr: "05:28",
+    Sunrise: "06:44",
+    Dhuhr: "12:29",
+    Asr: "16:38",
+    Sunset: "18:04",
+    Maghrib: "18:04",
+    Isha: "19:27",
+    Imsak: "05:20"
+};
+
+function getTodayFormattedDate() {
+    const now = new Date();
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    return `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+}
+
+// Tick live clock immediately every second - runs synchronously from frame 1
+function tickLiveClock() {
+    try {
+        const now = new Date();
+        const timeDisplay = document.getElementById('current-time');
+        if (timeDisplay) {
+            timeDisplay.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        }
+        const gregorianElement = document.getElementById('gregorian-date');
+        if (gregorianElement && (!gregorianElement.textContent || gregorianElement.textContent === 'Loading...' || gregorianElement.textContent === 'N/A')) {
+            gregorianElement.textContent = getTodayFormattedDate();
+        }
+    } catch (e) {
+        console.warn("Live clock tick error:", e);
+    }
+}
+
+// Start live clock immediately
+tickLiveClock();
+setInterval(tickLiveClock, 1000);
 
 const azaanFiles = {
     Fajr: 'azan/fajr.mp3',
@@ -122,50 +168,76 @@ async function loadSettings() {
         theme: 'default',
         layout: 'default'
     };
-    try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
-        const response = await fetch(`${BASE_URL}/save_settings.php`, {
-            signal: controller.signal,
-            cache: 'no-cache'
-        });
-        clearTimeout(timeoutId);
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const loadedSettings = await response.json();
-        const loaded = {
-            city: loadedSettings.city || loadedSettings.location || 'Mumbai',
-            state: loadedSettings.state || '',
-            country: loadedSettings.country || 'India',
-            calcMethod: loadedSettings.calcMethod || '2',
-            asrMethod: loadedSettings.asrMethod || 'hanafi',
-            adjustment: loadedSettings.adjustment || '0',
-            alarmTime: loadedSettings.alarmTime || '00:00',
-            alarmAudio: loadedSettings.alarmAudio || '',
-            reminders: loadedSettings.reminders || [],
-            theme: loadedSettings.theme || 'default',
-            layout: loadedSettings.layout || 'default'
-        };
-        console.log("Loaded settings from server:", loaded);
-        localStorage.setItem('settings', JSON.stringify(loaded));
-        return loaded;
-    } catch (error) {
-        console.warn("Could not fetch fresh settings from server, using local cache:", error.message || error);
-        let storedSettings = JSON.parse(localStorage.getItem('settings'));
-        if (!storedSettings) {
-            try {
-                const bundleRes = await fetch('settings.json');
-                if (bundleRes.ok) {
-                    storedSettings = await bundleRes.json();
-                    localStorage.setItem('settings', JSON.stringify(storedSettings));
-                }
-            } catch (bundleErr) {
-                // ignore
-            }
-        }
-        return storedSettings || defaultSettings;
-    }
-}
 
+    const isLocalApp = window.location.origin.includes('appassets') || window.location.protocol === 'file:' || !navigator.onLine;
+
+    // Check cached settings in localStorage first
+    let storedSettings = null;
+    try {
+        const storedStr = localStorage.getItem('settings');
+        if (storedStr) storedSettings = JSON.parse(storedStr);
+    } catch (e) {}
+
+    // On local/Android offline app, prioritize cached or settings.json directly
+    if (isLocalApp && storedSettings) {
+        return storedSettings;
+    }
+
+    if (!isLocalApp) {
+        try {
+            let signal = undefined;
+            let timeoutId = null;
+            if (typeof AbortController !== 'undefined') {
+                try {
+                    const controller = new AbortController();
+                    timeoutId = setTimeout(() => { try { controller.abort(); } catch (e) {} }, 3000);
+                    signal = controller.signal;
+                } catch (e) {}
+            }
+
+            const response = await fetch(`${BASE_URL}/save_settings.php`, {
+                signal: signal,
+                cache: 'no-cache'
+            });
+            if (timeoutId) clearTimeout(timeoutId);
+            if (response.ok) {
+                const loadedSettings = await response.json();
+                const loaded = {
+                    city: loadedSettings.city || loadedSettings.location || 'Mumbai',
+                    state: loadedSettings.state || '',
+                    country: loadedSettings.country || 'India',
+                    calcMethod: loadedSettings.calcMethod || '2',
+                    asrMethod: loadedSettings.asrMethod || 'hanafi',
+                    adjustment: loadedSettings.adjustment || '0',
+                    alarmTime: loadedSettings.alarmTime || '00:00',
+                    alarmAudio: loadedSettings.alarmAudio || '',
+                    reminders: loadedSettings.reminders || [],
+                    theme: loadedSettings.theme || 'default',
+                    layout: loadedSettings.layout || 'default'
+                };
+                localStorage.setItem('settings', JSON.stringify(loaded));
+                return loaded;
+            }
+        } catch (error) {
+            console.warn("Server settings fetch skipped, using local fallback");
+        }
+    }
+
+    if (storedSettings) return storedSettings;
+
+    try {
+        const bundleRes = await fetch('settings.json');
+        if (bundleRes.ok) {
+            storedSettings = await bundleRes.json();
+            localStorage.setItem('settings', JSON.stringify(storedSettings));
+            return storedSettings;
+        }
+    } catch (bundleErr) {
+        // ignore
+    }
+
+    return defaultSettings;
+}
 
 async function pollSettings() {
     // Only poll if on web server with PHP support and online
@@ -174,13 +246,21 @@ async function pollSettings() {
     }
 
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 4000);
+        let signal = undefined;
+        let timeoutId = null;
+        if (typeof AbortController !== 'undefined') {
+            try {
+                const controller = new AbortController();
+                timeoutId = setTimeout(() => { try { controller.abort(); } catch (e) {} }, 3000);
+                signal = controller.signal;
+            } catch (e) {}
+        }
+
         const response = await fetch(`${BASE_URL}/save_settings.php`, {
-            signal: controller.signal,
+            signal: signal,
             cache: 'no-cache'
         });
-        clearTimeout(timeoutId);
+        if (timeoutId) clearTimeout(timeoutId);
         if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
         const newSettings = await response.json();
         
@@ -415,7 +495,22 @@ async function fetchPrayerTimes() {
         return cached.timings;
     }
 
-    return null;
+    // 4. Reliable baseline offline timings (never leave UI stuck or blank on cold start)
+    const fallbackTimings = {
+        Fajr: "05:28",
+        Sunrise: "06:44",
+        Dhuhr: "12:29",
+        Asr: "16:38",
+        Sunset: "18:04",
+        Maghrib: "18:04",
+        Isha: "19:27",
+        Imsak: "05:20"
+    };
+    const now = new Date();
+    const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    const fallbackDate = `${now.getDate()} ${monthNames[now.getMonth()]} ${now.getFullYear()}`;
+    updatePrayerUI(fallbackTimings, fallbackDate, "Islamic Calendar");
+    return fallbackTimings;
 }
 
 async function fetchDayPrayerTimes(date) {
@@ -530,7 +625,7 @@ function updatePrayerUI(timings, readableDate, hijriDate) {
 }
 
 async function fetchHadith(day, prayer) {
-    const cachedHadiths = JSON.parse(localStorage.getItem('cachedHadiths')) || {};
+    const cachedHadiths = JSON.parse(localStorage.getItem('cachedHadiths') || '{}');
     const hadithCacheKey = `hadith-${day}-${prayer}`;
     const cachedHadith = cachedHadiths[hadithCacheKey];
 
@@ -538,25 +633,34 @@ async function fetchHadith(day, prayer) {
         return cachedHadith;
     }
 
-    if (!isOnline()) {
-        toggleOfflineIndicator(true);
-        return { Day: String(day), Prayer: prayer, English: 'Offline: No cached Hadith', Source: 'N/A' };
+    const defaultHadith = {
+        Day: String(day),
+        Prayer: prayer,
+        English: "The best among you are those who have the best manners and character.",
+        Source: "Sahih al-Bukhari 6035"
+    };
+
+    const isLocalApp = (typeof window !== 'undefined' && window.location) ? (
+        window.location.origin.includes('appassets') || 
+        window.location.protocol === 'file:' || 
+        !navigator.onLine
+    ) : false;
+
+    if (!isLocalApp) {
+        try {
+            const response = await fetch(`${BASE_URL}/load_hadith.php?prayer=${prayer}&day=${day}`);
+            if (response.ok) {
+                const hadith = await response.json();
+                cachedHadiths[hadithCacheKey] = hadith;
+                localStorage.setItem('cachedHadiths', JSON.stringify(cachedHadiths));
+                return hadith;
+            }
+        } catch (error) {}
     }
 
     try {
-        // FIXED TYPO: Changed load_hadiths.php to load_hadith.php
-        const response = await fetch(`${BASE_URL}/load_hadith.php?prayer=${prayer}&day=${day}`);
-        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        const hadith = await response.json();
-        cachedHadiths[hadithCacheKey] = hadith;
-        localStorage.setItem('cachedHadiths', JSON.stringify(cachedHadiths));
-        toggleOfflineIndicator(false);
-        return hadith;
-    } catch (error) {
-        console.error(`Error fetching Hadith: ${error.message}`);
-        try {
-            const fallbackResponse = await fetch('hadiths.json');
-            if (!fallbackResponse.ok) throw new Error(`HTTP error! Status: ${fallbackResponse.status}`);
+        const fallbackResponse = await fetch('hadiths.json');
+        if (fallbackResponse.ok) {
             const hadiths = await fallbackResponse.json();
             const hadith = hadiths.find(h => h.Day === String(day) && h.Prayer === prayer);
             if (hadith) {
@@ -564,12 +668,10 @@ async function fetchHadith(day, prayer) {
                 localStorage.setItem('cachedHadiths', JSON.stringify(cachedHadiths));
                 return hadith;
             }
-            throw new Error('No Hadith found');
-        } catch (fallbackError) {
-            console.error("Error fetching fallback Hadith:", fallbackError);
-            return { Day: String(day), Prayer: prayer, English: 'Unable to load Hadith', Source: 'N/A' };
         }
-    }
+    } catch (fallbackError) {}
+
+    return defaultHadith;
 }
 
 // FIXED: This function is called every second. We fetch and compile hadiths and holidays
@@ -926,7 +1028,11 @@ async function updateTimeAndNextPrayer(timings) {
         }
     }
 
-    await displayHadithAndHolidays(timings);
+    try {
+        displayHadithAndHolidays(timings);
+    } catch (e) {
+        console.warn("displayHadithAndHolidays error:", e);
+    }
 }
 
 window.addEventListener('storage', async (event) => {
@@ -943,52 +1049,74 @@ window.addEventListener('storage', async (event) => {
 });
 
 async function init() {
-    settings = await loadSettings();
-    if (!settings) return;
-
-    // Apply theme from settings
-    document.body.classList.remove('theme-blue', 'theme-dark', 'theme-light');
-    if (settings.theme && settings.theme !== 'default') {
-        document.body.classList.add(`theme-${settings.theme}`);
+    // 1. Immediately populate prayer UI and countdown with cached or baseline fallback
+    let initialTimings = fallbackTimings;
+    try {
+        const cached30 = JSON.parse(localStorage.getItem('prayerTimes30Days') || '{}');
+        const today = getTodayDate();
+        if (cached30 && cached30[today] && cached30[today].timings) {
+            initialTimings = cached30[today].timings;
+            updatePrayerUI(initialTimings, cached30[today].readableDate, cached30[today].hijriDate);
+        } else {
+            updatePrayerUI(fallbackTimings, getTodayFormattedDate(), "Islamic Calendar");
+        }
+    } catch (e) {
+        updatePrayerUI(fallbackTimings, getTodayFormattedDate(), "Islamic Calendar");
     }
 
-    // Apply layout (always enforce layout-default 2x3 board grid for TV & Kiosk)
-    const prayerGrid = document.querySelector('.prayer-grid');
-    if (prayerGrid) {
-        prayerGrid.classList.remove('layout-compact', 'layout-modern');
-        prayerGrid.classList.add('layout-default');
-    }
+    currentTimings = initialTimings;
+    updateTimeAndNextPrayer(currentTimings);
 
-    currentTimings = await fetchPrayerTimes();
-    
+    // 2. Start high-frequency update interval for next prayer countdown and clock
+    setInterval(() => {
+        updateTimeAndNextPrayer(currentTimings || fallbackTimings);
+    }, 1000);
+
+    // 3. Audio kiosk unlock
     if (isKiosk) {
         const popup = document.getElementById('interaction-popup');
         if (popup) popup.remove();
-    }
-
-    if (isKiosk) {
         autoEnableAudio();
     } else {
         showInteractionPopup();
     }
-    updateTimeAndNextPrayer(currentTimings);
-    fetchPrayerTimes30Days();
 
-    // Poll for settings changes every 5 seconds
+    // 4. Load settings asynchronously
+    try {
+        settings = await loadSettings();
+        if (settings) {
+            document.body.classList.remove('theme-blue', 'theme-dark', 'theme-light');
+            if (settings.theme && settings.theme !== 'default') {
+                document.body.classList.add(`theme-${settings.theme}`);
+            }
+        }
+    } catch (settingsErr) {
+        console.warn("Settings load warning:", settingsErr);
+    }
+
+    // 5. Fetch fresh prayer times asynchronously
+    try {
+        const liveTimings = await fetchPrayerTimes();
+        if (liveTimings) {
+            currentTimings = liveTimings;
+            updateTimeAndNextPrayer(currentTimings);
+        }
+    } catch (prayerErr) {
+        console.warn("Prayer times fetch warning:", prayerErr);
+    }
+
+    try {
+        fetchPrayerTimes30Days();
+    } catch (e) {}
+
+    // 6. Settings polling & periodic stability reload
     setInterval(pollSettings, 5000);
-
-    // Update time every second (always run, even if prayer times aren't returned yet)
-    setInterval(() => {
-        updateTimeAndNextPrayer(currentTimings);
-    }, 1000);
-
-    // Automatically refresh the page every 1 hour and 5 minutes (3900000 ms) to keep the app highly stable and fetch fresh data
     setInterval(() => {
         console.log("[Auto Reload] Refreshing page for kiosk stability and fresh data fetch...");
         window.location.reload();
     }, 65 * 60 * 1000);
 
-    // Request screen wake lock so Android screens never sleep
+    // 7. Request screen wake lock
     requestScreenWakeLock();
 }
 
@@ -1037,5 +1165,13 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-window.onload = init;
+// Start init on DOM ready or immediately if document already loaded
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+window.addEventListener('load', () => {
+    if (!currentTimings) init();
+});
 

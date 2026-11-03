@@ -16,27 +16,46 @@
     <link rel="apple-touch-icon" href="assets/icon-192.png">
     <link rel="icon" type="image/svg+xml" href="assets/icon-192.svg">
     <link rel="icon" type="image/png" href="assets/icon-192.png">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-NPJPD5P5LX"></script>
+    <!-- Google Analytics (Safe conditional load for kiosk/offline) -->
     <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-      gtag('config', 'G-NPJPD5P5LX');
+      if (navigator.onLine && window.location.protocol.indexOf('http') === 0 && !window.location.origin.includes('appassets')) {
+        var s = document.createElement('script');
+        s.async = true;
+        s.src = "https://www.googletagmanager.com/gtag/js?id=G-NPJPD5P5LX";
+        document.head.appendChild(s);
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-NPJPD5P5LX');
+      }
     </script>
 </head>
 <body>
     <div class="clock-container">
         <!-- Top Bar -->
         <div class="top-bar">
-            <div class="current-time" id="current-time">09:54:08 AM</div>
-            <div class="next-prayer" id="next-prayer">Next Prayer: Loading...</div>
+            <div class="current-time" id="current-time">--:--:--</div>
+            <div class="next-prayer" id="next-prayer">Next Prayer: Calculating...</div>
             <div class="date-info">
-                <span id="gregorian-date">Loading...</span> | 
-                <span id="islamic-date">Loading...</span>
+                <span id="gregorian-date"></span> | 
+                <span id="islamic-date"></span>
             </div>
-            <div id="location">Location: <span id="current-city"></span> <a href="admin.html" class="settings-link" title="Open Settings & Reminders" aria-label="Settings">⚙️</a></div>
+            <div id="location">Location: <span id="current-city">Mumbai</span> <a href="admin.html" class="settings-link" title="Open Settings & Reminders" aria-label="Settings">⚙️</a></div>
         </div>
+        <script>
+            (function() {
+                try {
+                    var d = new Date();
+                    var timeElem = document.getElementById('current-time');
+                    if (timeElem) timeElem.textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                    var dateElem = document.getElementById('gregorian-date');
+                    if (dateElem) {
+                        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                        dateElem.textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+                    }
+                } catch (e) {}
+            })();
+        </script>
 
         <!-- Prayer Times Grid -->
         <div class="prayer-grid layout-default">
