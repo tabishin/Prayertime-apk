@@ -489,24 +489,24 @@ function formatTo12Hour(timeStr) {
 
 function updatePrayerUI(timings, readableDate, hijriDate) {
     const fields = [
-        { id: 'fajr-begins', value: timings?.Fajr },
-        { id: 'fajr-jamaat', value: timings?.Fajr },
-        { id: 'fajr-additional', value: timings?.Imsak },
-        { id: 'dhuhr-begins', value: timings?.Dhuhr },
-        { id: 'dhuhr-jamaat', value: timings?.Dhuhr },
-        { id: 'dhuhr-additional', value: timings?.Sunrise },
-        { id: 'asr-begins', value: timings?.Asr },
-        { id: 'asr-jamaat', value: timings?.Asr },
-        { id: 'asr-additional', value: timings?.Sunset },
-        { id: 'maghrib-begins', value: timings?.Maghrib },
-        { id: 'maghrib-jamaat', value: timings?.Maghrib },
-        { id: 'maghrib-additional', value: timings?.Sunset },
-        { id: 'isha-begins', value: timings?.Isha },
-        { id: 'isha-jamaat', value: timings?.Isha },
-        { id: 'isha-qaza', value: timings?.Isha ? calculateQazaTime(timings.Isha) : 'N/A' },
+        { id: 'fajr-begins', value: timings ? timings.Fajr : '' },
+        { id: 'fajr-jamaat', value: timings ? timings.Fajr : '' },
+        { id: 'fajr-additional', value: timings ? timings.Imsak : '' },
+        { id: 'dhuhr-begins', value: timings ? timings.Dhuhr : '' },
+        { id: 'dhuhr-jamaat', value: timings ? timings.Dhuhr : '' },
+        { id: 'dhuhr-additional', value: timings ? timings.Sunrise : '' },
+        { id: 'asr-begins', value: timings ? timings.Asr : '' },
+        { id: 'asr-jamaat', value: timings ? timings.Asr : '' },
+        { id: 'asr-additional', value: timings ? timings.Sunset : '' },
+        { id: 'maghrib-begins', value: timings ? timings.Maghrib : '' },
+        { id: 'maghrib-jamaat', value: timings ? timings.Maghrib : '' },
+        { id: 'maghrib-additional', value: timings ? timings.Sunset : '' },
+        { id: 'isha-begins', value: timings ? timings.Isha : '' },
+        { id: 'isha-jamaat', value: timings ? timings.Isha : '' },
+        { id: 'isha-qaza', value: (timings && timings.Isha) ? calculateQazaTime(timings.Isha) : 'N/A' },
         { id: 'gregorian-date', value: readableDate },
         { id: 'islamic-date', value: hijriDate },
-        { id: 'current-city', value: settings.city },
+        { id: 'current-city', value: settings ? settings.city : '' },
     ];
     fields.forEach(field => {
         const element = document.getElementById(field.id);
@@ -702,7 +702,7 @@ async function updateTimeAndNextPrayer(timings) {
     const islamicElement = document.getElementById('islamic-date');
     if (islamicElement && (islamicElement.textContent === 'Loading...' || !islamicElement.textContent || islamicElement.textContent === 'N/A')) {
         const todayDate = getTodayDate();
-        if (prayerTimes30Days[todayDate]?.hijriDate) {
+        if (prayerTimes30Days[todayDate] && prayerTimes30Days[todayDate].hijriDate) {
             islamicElement.textContent = prayerTimes30Days[todayDate].hijriDate;
         }
     }
@@ -786,8 +786,8 @@ async function updateTimeAndNextPrayer(timings) {
         }
     }
 
-    const alarmTime = settings?.alarmTime || '00:00';
-    const alarmAudio = settings?.alarmAudio || '';
+    const alarmTime = (settings && settings.alarmTime) ? settings.alarmTime : '00:00';
+    const alarmAudio = (settings && settings.alarmAudio) ? settings.alarmAudio : '';
     const alarmSeconds = timeToSeconds(alarmTime);
     if (alarmSeconds !== -1) {
         const alarmDiff = currentSeconds - alarmSeconds;
@@ -801,11 +801,11 @@ async function updateTimeAndNextPrayer(timings) {
         }
     }
 
-    const reminders = settings?.reminders || [];
+    const reminders = (settings && settings.reminders) ? settings.reminders : [];
     reminders.forEach((reminder, index) => {
-        const time = reminder?.time;
-        let audio = reminder?.audio;
-        const repeat = reminder?.repeat || false;
+        const time = reminder ? reminder.time : null;
+        let audio = reminder ? reminder.audio : null;
+        const repeat = (reminder && reminder.repeat) ? true : false;
         if (!time) return;
         if (audio && !audio.startsWith('azan/')) audio = `azan/${audio}`;
         const reminderSeconds = timeToSeconds(time);
@@ -876,7 +876,7 @@ async function updateTimeAndNextPrayer(timings) {
             nextPrayerElement.classList.remove('play-prompt');
             nextPrayerElement.onclick = null;
         } else if (currentlyPlayingReminder !== null) {
-            const reminderData = settings?.reminders?.[currentlyPlayingReminder];
+            const reminderData = (settings && settings.reminders && settings.reminders[currentlyPlayingReminder]) ? settings.reminders[currentlyPlayingReminder] : null;
             const reminderAudio = reminderData ? reminderData.audio.split('/').pop().replace(/\.[^/.]+$/, '') : "Reminder";
             
             const timeElapsed = Date.now() % 25000;

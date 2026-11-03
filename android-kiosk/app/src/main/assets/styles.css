@@ -102,17 +102,23 @@ html, body {
 }
 
 .current-time {
-    font-size: clamp(1.4rem, 4.5vh, 3.2rem);
+    font-size: 2.2rem;
+    font-size: 4.8vh;
+    font-size: clamp(1.4rem, 4.8vh, 3.2rem);
     font-weight: 800;
     letter-spacing: -0.5px;
 }
 
 .next-prayer {
+    font-size: 1.1rem;
+    font-size: 2.2vh;
     font-size: clamp(0.85rem, 2vh, 1.35rem);
     font-weight: 600;
 }
 
 .date-info {
+    font-size: 1.1rem;
+    font-size: 2.2vh;
     font-size: clamp(0.85rem, 2.2vh, 1.4rem);
     display: flex;
     align-items: center;
@@ -121,6 +127,8 @@ html, body {
 }
 
 #location {
+    font-size: 1.1rem;
+    font-size: 2.2vh;
     font-size: clamp(0.85rem, 2vh, 1.35rem);
     opacity: 0.95;
 }
@@ -136,33 +144,71 @@ html, body {
     }
 }
 
-/* Prayer Grid (Default Landscape View for Screens, Monitors & Android TV) */
+/* Prayer Grid (Universal 2x3 Grid with Flexbox fallback for older Android TV/Signage boxes) */
 .prayer-grid {
+    box-sizing: border-box;
+    width: 100%;
+    height: calc(100% - 9vh);
+    padding: 10px;
+    padding: clamp(6px, 1.2vmin, 16px);
+    overflow: hidden;
+    flex: 1 1 auto;
+    min-height: 0;
+
+    /* Fallback 1: Flexbox 2-column layout (Supported on Android 4.4 / 5 / 6 / 7) */
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-wrap: wrap;
+    flex-wrap: wrap;
+    -webkit-justify-content: space-between;
+    justify-content: space-between;
+    -webkit-align-content: stretch;
+    align-content: stretch;
+
+    /* Fallback 2: Modern CSS Grid (Chrome 57+) */
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     grid-template-rows: repeat(3, 1fr);
+    gap: 10px;
     gap: clamp(6px, 1.5vmin, 16px);
-    width: 100%;
-    height: calc(100% - 9vh);
-    padding: clamp(6px, 1.2vmin, 16px);
-    flex: 1 1 auto;
-    min-height: 0; /* Prevents grid overflow */
-    overflow: hidden;
 }
 
-/* Prayer Box Styles */
+/* Prayer Box Styles (Universal Card Sizing) */
 .prayer-box, .hadith-box {
+    box-sizing: border-box;
     background-color: var(--theme-secondary);
-    padding: clamp(6px, 1.2vmin, 16px);
+    border-radius: 10px;
     border-radius: clamp(6px, 1vmin, 12px);
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    padding: 10px;
+    padding: clamp(6px, 1.2vmin, 16px);
     overflow: hidden;
     transition: background-color 0.3s ease, transform 0.2s ease;
     position: relative;
     min-height: 0;
+
+    /* Flexbox dimensions for older WebViews: 2 columns x 3 rows */
+    width: 48.8%;
+    height: 31%;
+    margin-bottom: 1.2%;
+
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-direction: column;
+    flex-direction: column;
+    -webkit-justify-content: center;
+    justify-content: center;
+    -webkit-align-items: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* When CSS Grid is natively supported, clear manual flex sizing */
+@supports (display: grid) {
+    .prayer-box, .hadith-box {
+        width: auto !important;
+        height: auto !important;
+        margin-bottom: 0 !important;
+    }
 }
 
 /* Layout 1: Default Layout */
@@ -171,7 +217,10 @@ html, body {
     align-items: center;
 }
 
-.layout-default .prayer-name {
+.layout-default .prayer-name,
+.prayer-name {
+    font-size: 1.8rem;
+    font-size: 4vmin;
     font-size: clamp(1.1rem, 4.2vmin, 3rem);
     font-weight: 800;
     text-transform: uppercase;
@@ -182,7 +231,10 @@ html, body {
     letter-spacing: 0.5px;
 }
 
-.layout-default .prayer-time {
+.layout-default .prayer-time,
+.prayer-time {
+    font-size: 2.8rem;
+    font-size: 6.5vmin;
     font-size: clamp(1.5rem, 6vmin, 4.5rem);
     font-weight: 900;
     margin: 0.3vmin 0;
@@ -191,19 +243,26 @@ html, body {
     line-height: 1.05;
 }
 
-.layout-default .prayer-details {
+.layout-default .prayer-details,
+.prayer-details {
+    font-size: 1rem;
+    font-size: 2.2vmin;
     font-size: clamp(0.75rem, 2.2vmin, 1.6rem);
     text-align: center;
     width: 100%;
+    display: -webkit-flex;
     display: flex;
+    -webkit-flex-direction: column;
     flex-direction: column;
+    -webkit-align-items: center;
     align-items: center;
     margin-top: 0.4vmin;
-    line-height: 1.2;
+    line-height: 1.25;
     opacity: 0.95;
 }
 
-.layout-default .prayer-details div {
+.layout-default .prayer-details div,
+.prayer-details div {
     margin: 0.1vmin 0;
     width: 100%;
     text-align: center;
@@ -339,6 +398,8 @@ html, body {
 }
 
 .hadith-title {
+    font-size: 1.4rem;
+    font-size: 2.8vmin;
     font-size: clamp(0.9rem, 2.8vmin, 2rem);
     font-weight: 800;
     text-transform: uppercase;
@@ -347,6 +408,8 @@ html, body {
 }
 
 .hadith-content {
+    font-size: 1.1rem;
+    font-size: 2.2vmin;
     font-size: clamp(0.8rem, 2.2vmin, 1.45rem);
     margin: 0.3vmin 0;
     line-height: 1.35;
@@ -355,6 +418,8 @@ html, body {
 }
 
 .hadith-source {
+    font-size: 0.85rem;
+    font-size: 1.8vmin;
     font-size: clamp(0.7rem, 1.8vmin, 1.15rem);
     font-style: italic;
     opacity: 0.85;
