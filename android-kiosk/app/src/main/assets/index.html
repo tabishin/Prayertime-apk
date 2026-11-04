@@ -38,78 +38,695 @@
             <div class="next-prayer" id="next-prayer">Next Prayer: Calculating...</div>
             <div class="date-info">
                 <span id="gregorian-date"></span> | 
-                <span id="islamic-date"></span>
+                <span id="islamic-date" style="font-family: inherit, 'Noto Naskh Arabic', 'Segoe UI', Tahoma, sans-serif;"></span>
             </div>
-            <div id="location">Location: <span id="current-city">Mumbai</span> <a href="admin.html" class="settings-link" title="Open Settings & Reminders" aria-label="Settings">⚙️</a></div>
+            <div id="location">Location: <span id="current-city">Mumbai</span> <button id="open-settings-btn" class="settings-btn" type="button" title="Open Settings" aria-label="Settings">⚙️</button></div>
         </div>
-        <script>
-            (function() {
-                try {
-                    var d = new Date();
-                    var timeElem = document.getElementById('current-time');
-                    if (timeElem) timeElem.textContent = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-                    var dateElem = document.getElementById('gregorian-date');
-                    if (dateElem) {
-                        var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                        dateElem.textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
-                    }
-                } catch (e) {}
-            })();
-        </script>
 
         <!-- Prayer Times Grid -->
         <div class="prayer-grid layout-default">
             <div class="prayer-box" id="fajr-box">
                 <div class="prayer-name">FAJR</div>
-                <div class="prayer-time" id="fajr-jamaat">5:41</div>
+                <div class="prayer-time" id="fajr-jamaat">05:28 AM</div>
                 <div class="prayer-details">
-                    <div>SEHRI END <span id="fajr-begins">05:41</span></div>
-                    <div>SUBAH SADIQ <span id="fajr-additional">05:33</span></div>
+                    <div>SEHRI END <span id="fajr-begins">05:28 AM</span></div>
+                    <div>SUBAH SADIQ <span id="fajr-additional">05:20 AM</span></div>
                 </div>
             </div>
             <div class="prayer-box" id="dhuhr-box">
                 <div class="prayer-name">ZOHR</div>
-                <div class="prayer-time" id="dhuhr-jamaat">12:51</div>
+                <div class="prayer-time" id="dhuhr-jamaat">12:29 PM</div>
                 <div class="prayer-details">
-                    <div>CHASHT <span id="dhuhr-additional">06:43</span></div>
-                    <div>AWWAL <span id="dhuhr-begins">12:51</span></div>
+                    <div>CHASHT <span id="dhuhr-additional">06:44 AM</span></div>
+                    <div>AWWAL <span id="dhuhr-begins">12:29 PM</span></div>
                 </div>
             </div>
             <div class="prayer-box" id="asr-box">
                 <div class="prayer-name">ASR</div>
-                <div class="prayer-time" id="asr-jamaat">17:16</div>
+                <div class="prayer-time" id="asr-jamaat">04:38 PM</div>
                 <div class="prayer-details">
-                    <div>HANFI AWWAL <span id="asr-begins">17:16</span></div>
-                    <div>SHAFI AWWAL <span id="asr-additional">18:51</span></div>
+                    <div>HANFI AWWAL <span id="asr-begins">04:38 PM</span></div>
+                    <div>SHAFI AWWAL <span id="asr-additional">06:05 PM</span></div>
                 </div>
             </div>
             <div class="prayer-box" id="maghrib-box">
                 <div class="prayer-name">MAGHRIB</div>
-                <div class="prayer-time" id="maghrib-jamaat">18:50</div>
+                <div class="prayer-time" id="maghrib-jamaat">06:04 PM</div>
                 <div class="prayer-details">
-                    <div>SUNSET <span id="maghrib-additional">18:51</span></div>
-                    <div>IFTAAR <span id="maghrib-begins">18:50</span></div>
+                    <div>SUNSET <span id="maghrib-additional">06:05 PM</span></div>
+                    <div>IFTAAR <span id="maghrib-begins">06:04 PM</span></div>
                 </div>
             </div>
             <div class="prayer-box" id="isha-box">
                 <div class="prayer-name">ISHA</div>
-                <div class="prayer-time" id="isha-jamaat">19:39</div>
+                <div class="prayer-time" id="isha-jamaat">07:27 PM</div>
                 <div class="prayer-details">
-                    <div>AWWAL <span id="isha-begins">19:39</span></div>
-                    <div>QAZA <span id="isha-qaza">21:39</span></div>
+                    <div>AWWAL <span id="isha-begins">07:27 PM</span></div>
+                    <div>QAZA <span id="isha-qaza">09:43 PM</span></div>
                 </div>
             </div>
             <!-- Hadith Box -->
             <div class="hadith-box" id="hadith-box">
                 <div class="hadith-title" id="hadith-title">HADITH</div>
-                <div class="hadith-content" id="hadith-english">Loading Hadith...</div>
-                <div class="hadith-source" id="hadith-source">Loading Source...</div>
+                <div class="hadith-content" id="hadith-english">The best among you are those who have the best manners and character.</div>
+                <div class="hadith-source" id="hadith-source">Sahih al-Bukhari 6035</div>
             </div>
         </div>
     </div>
     <div id="interaction-popup" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(0,0,0,0.8); color: white; padding: 20px; border-radius: 5px; z-index: 1000;">
         <p>Please click anywhere on the page to enable audio</p>
     </div>
+
+    <!-- In-App Dynamic Settings Modal (Single Page Application, TV-ready, High-Contrast) -->
+    <div id="settings-modal" class="settings-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div class="settings-modal-card">
+            <div class="settings-modal-header">
+                <div class="settings-modal-title" id="settings-title">⚙️ Prayer Clock Settings</div>
+                <button type="button" class="settings-modal-close" id="close-settings-btn" aria-label="Close Settings">✕</button>
+            </div>
+            <div class="settings-tabs">
+                <button type="button" class="settings-tab-btn active" data-tab="tab-location">📍 Location</button>
+                <button type="button" class="settings-tab-btn" data-tab="tab-calculation">🕌 Calculation</button>
+                <button type="button" class="settings-tab-btn" data-tab="tab-theme">🎨 Theme</button>
+                <button type="button" class="settings-tab-btn" data-tab="tab-audio">⏰ Azan & Audio</button>
+            </div>
+            <div class="settings-modal-body">
+                <!-- Tab 1: Location -->
+                <div id="tab-location" class="settings-tab-content active">
+                    <div class="settings-form-group">
+                        <label class="settings-label" for="setting-city">City Name</label>
+                        <input type="text" id="setting-city" class="settings-input" placeholder="e.g. Mumbai, Karachi, London, New York" value="Mumbai">
+                    </div>
+                    <div class="settings-row">
+                        <div class="settings-form-group">
+                            <label class="settings-label" for="setting-state">State / Province (Optional)</label>
+                            <input type="text" id="setting-state" class="settings-input" placeholder="e.g. Maharashtra">
+                        </div>
+                        <div class="settings-form-group">
+                            <label class="settings-label" for="setting-country">Country</label>
+                            <input type="text" id="setting-country" class="settings-input" placeholder="e.g. India" value="India">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Calculation -->
+                <div id="tab-calculation" class="settings-tab-content">
+                    <div class="settings-form-group">
+                        <label class="settings-label" for="setting-calc-method">Calculation Method</label>
+                        <select id="setting-calc-method" class="settings-select">
+                            <option value="1">University of Islamic Sciences, Karachi</option>
+                            <option value="2" selected>Islamic Society of North America (ISNA)</option>
+                            <option value="3">Muslim World League (MWL)</option>
+                            <option value="4">Umm Al-Qura University, Makkah</option>
+                            <option value="5">Egyptian General Authority of Survey</option>
+                            <option value="7">Institute of Geophysics, University of Tehran</option>
+                            <option value="8">Gulf Region</option>
+                            <option value="9">Kuwait</option>
+                            <option value="10">Qatar</option>
+                            <option value="11">Majlis Ugama Islam Singapura, Singapore</option>
+                            <option value="12">Union Organization islamic de France</option>
+                            <option value="13">Diyanet İşleri Başkanlığı, Turkey</option>
+                            <option value="14">Spiritual Administration of Muslims of Russia</option>
+                        </select>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-label">Asr Jurisprudential School</label>
+                        <div class="asr-button-group">
+                            <button type="button" id="btn-asr-hanafi" class="asr-toggle-btn active">Hanafi (Standard Subcontinent)</button>
+                            <button type="button" id="btn-asr-shafi" class="asr-toggle-btn">Shafi / Maliki / Hanbali</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-form-group">
+                        <label class="settings-label" for="setting-hijri-adj">Hijri / Urdu Date Adjustment (Moon Sighting)</label>
+                        <select id="setting-hijri-adj" class="settings-select">
+                            <option value="-2">-2 Days</option>
+                            <option value="-1">-1 Day</option>
+                            <option value="0" selected>0 Days (Astronomical Calculation)</option>
+                            <option value="1">+1 Day (Common India/Pakistan sighting)</option>
+                            <option value="2">+2 Days</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Theme -->
+                <div id="tab-theme" class="settings-tab-content">
+                    <div class="settings-form-group">
+                        <label class="settings-label">Select Color Theme</label>
+                        <div class="theme-button-grid">
+                            <button type="button" class="theme-select-btn active" data-theme="default">🌿 Classic Forest Green</button>
+                            <button type="button" class="theme-select-btn" data-theme="blue">🌌 Deep Navy Blue</button>
+                            <button type="button" class="theme-select-btn" data-theme="dark">⬛ Midnight Charcoal</button>
+                            <button type="button" class="theme-select-btn" data-theme="light">⚪ Clean Minimal Light</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 4: Audio & Reminders -->
+                <div id="tab-audio" class="settings-tab-content">
+                    <div class="settings-form-group">
+                        <label class="settings-label">Azan & Alert Sounds</label>
+                        <p style="font-size: 0.9rem; color: #a5d6a7; margin-top: 0; line-height: 1.4;">
+                            Azan audio plays automatically at each prayer time on Android Kiosk. You can test buzzers below:
+                        </p>
+                        <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                            <button type="button" id="btn-test-hourly" class="btn-secondary">🔔 Test Hourly Chime</button>
+                            <button type="button" id="btn-test-makruh" class="btn-secondary">⚠️ Test Makruh Buzzer</button>
+                        </div>
+                    </div>
+                    <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <a href="admin.html" style="color: #81c784; text-decoration: underline; font-size: 0.95rem;">Looking for advanced custom MP3 uploads and multi-reminders? Open Full Admin Page →</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-modal-footer">
+                <span id="settings-save-status" class="settings-status-msg">✓ Settings saved & applied!</span>
+                <div style="display: flex; gap: 10px; margin-left: auto;">
+                    <button type="button" class="btn-secondary" id="cancel-settings-btn">Cancel</button>
+                    <button type="button" class="btn-primary" id="save-settings-btn">💾 Save & Apply Now</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pure ES5 Universal Kiosk Engine (Runs 100% reliably on Android 4.4 - 14, Smart TVs, WebViews) -->
+    <script>
+    (function() {
+        var defaultTimings = {
+            Fajr: "05:28",
+            Sunrise: "06:44",
+            Dhuhr: "12:29",
+            Asr: "16:38",
+            Sunset: "18:04",
+            Maghrib: "18:04",
+            Isha: "19:27",
+            Imsak: "05:20"
+        };
+
+        var curTimings = defaultTimings;
+
+        function timeToSeconds(timeStr) {
+            if (!timeStr || typeof timeStr !== 'string') return -1;
+            var clean = timeStr.split(' ')[0];
+            var parts = clean.split(':');
+            if (parts.length < 2) return -1;
+            var h = parseInt(parts[0], 10);
+            var m = parseInt(parts[1], 10);
+            if (isNaN(h) || isNaN(m)) return -1;
+            return h * 3600 + m * 60;
+        }
+
+        function secondsToHHMM(seconds) {
+            if (seconds < 0) return '00:00:00';
+            var h = Math.floor(seconds / 3600);
+            var m = Math.floor((seconds % 3600) / 60);
+            var s = Math.floor(seconds % 60);
+            return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+        }
+
+        function format12Hour(timeStr) {
+            if (!timeStr) return '';
+            var clean = timeStr.split(' ')[0];
+            var p = clean.split(':');
+            if (p.length < 2) return timeStr;
+            var h = parseInt(p[0], 10);
+            var m = p[1];
+            if (isNaN(h)) return timeStr;
+            var ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            if (!h) h = 12;
+            return (h < 10 ? '0' : '') + h + ':' + m + ' ' + ampm;
+        }
+
+        function calculateQaza(ishaTime) {
+            var ishaSec = timeToSeconds(ishaTime);
+            if (ishaSec === -1) return '09:43 PM';
+            var midnight = 24 * 3600;
+            var qazaSec = Math.floor((ishaSec + midnight) / 2);
+            var h = Math.floor(qazaSec / 3600);
+            var m = Math.floor((qazaSec % 3600) / 60);
+            var ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12;
+            if (!h) h = 12;
+            return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
+        }
+
+        // Offline Astronomical Hijri / Urdu Date Calculator
+        function getHijriUrduDate(adjustment) {
+            var adj = 0;
+            try {
+                if (typeof adjustment !== 'undefined' && adjustment !== null) {
+                    adj = parseInt(adjustment, 10);
+                } else {
+                    var s = localStorage.getItem('settings');
+                    if (s) {
+                        var parsed = JSON.parse(s);
+                        if (parsed && typeof parsed.adjustment !== 'undefined') adj = parseInt(parsed.adjustment, 10);
+                    }
+                }
+            } catch (e) {}
+
+            var date = new Date();
+            date.setDate(date.getDate() + adj);
+            var day = date.getDate(), month = date.getMonth(), year = date.getFullYear();
+            var m = month + 1, y = year;
+            if (m < 3) { y -= 1; m += 12; }
+            var a = Math.floor(y / 100);
+            var b = 2 - a + Math.floor(a / 4);
+            if (y < 1583) b = 0;
+            var jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + day + b - 1524;
+            var epochastro = 1948084;
+            var z = jd - epochastro;
+            var cyc = Math.floor(z / 10631.0);
+            z = z - 10631 * cyc;
+            var j = Math.floor((z - 8.01 / 60.0) / (10631.0 / 30.0));
+            var iy = 30 * cyc + j;
+            z = z - Math.floor(j * (10631.0 / 30.0) + (8.01 / 60.0));
+            var im = Math.floor((z + 28.5001) / 29.5);
+            if (im === 13) im = 12;
+            var id = Math.floor(z - Math.floor(29.5001 * im - 29));
+            var islamicMonthsUrdu = [
+                "محرم الحرام", "صفر المظفر", "ربیع الاول", "ربیع الثانی",
+                "جمادی الاول", "جمادی الثانی", "رجب المرجب", "شعبان المعظم",
+                "رمضان المبارک", "شوال المکرم", "ذی القعدہ", "ذی الحجہ"
+            ];
+            var idx = Math.max(0, Math.min(11, im - 1));
+            return id + " " + islamicMonthsUrdu[idx] + " " + iy + " ھ";
+        }
+
+        var curatedHadiths = [
+            {
+                text: "The best among you are those who have the best manners and character.",
+                source: "Sahih al-Bukhari 6035"
+            },
+            {
+                text: "The most beloved deeds to Allah are those done regularly, even if small.",
+                source: "Sahih al-Bukhari 6464"
+            },
+            {
+                text: "Whoever prays the dawn (Fajr) and afternoon (Asr) prayers will enter Paradise.",
+                source: "Sahih al-Bukhari 574"
+            },
+            {
+                text: "A Muslim is the one from whose tongue and hands other Muslims are safe.",
+                source: "Sahih al-Bukhari 10"
+            },
+            {
+                text: "Cleanliness is half of faith, and Alhamdulillah fills the scale.",
+                source: "Sahih Muslim 223"
+            }
+        ];
+
+        function applyTimingsToUI(t) {
+            if (!t) return;
+            var setElem = function(id, val) {
+                var el = document.getElementById(id);
+                if (el && val) el.textContent = val;
+            };
+            setElem('fajr-jamaat', format12Hour(t.Fajr));
+            setElem('fajr-begins', format12Hour(t.Fajr));
+            setElem('fajr-additional', format12Hour(t.Imsak || t.Fajr));
+
+            setElem('dhuhr-jamaat', format12Hour(t.Dhuhr));
+            setElem('dhuhr-begins', format12Hour(t.Dhuhr));
+            setElem('dhuhr-additional', format12Hour(t.Sunrise));
+
+            setElem('asr-jamaat', format12Hour(t.Asr));
+            setElem('asr-begins', format12Hour(t.Asr));
+            setElem('asr-additional', format12Hour(t.Sunset));
+
+            setElem('maghrib-jamaat', format12Hour(t.Maghrib));
+            setElem('maghrib-begins', format12Hour(t.Maghrib));
+            setElem('maghrib-additional', format12Hour(t.Sunset));
+
+            setElem('isha-jamaat', format12Hour(t.Isha));
+            setElem('isha-begins', format12Hour(t.Isha));
+            setElem('isha-qaza', calculateQaza(t.Isha));
+        }
+
+        // Apply saved settings (city, theme, etc.) on startup
+        try {
+            var savedStr = localStorage.getItem('settings');
+            if (savedStr) {
+                var sObj = JSON.parse(savedStr);
+                if (sObj) {
+                    if (sObj.city) {
+                        var cityEl = document.getElementById('current-city');
+                        if (cityEl) cityEl.textContent = sObj.city;
+                    }
+                    if (sObj.theme && sObj.theme !== 'default') {
+                        document.body.classList.remove('theme-blue', 'theme-dark', 'theme-light');
+                        document.body.classList.add('theme-' + sObj.theme);
+                    }
+                }
+            }
+        } catch (e) {}
+
+        // Check if cached timings exist in localStorage
+        try {
+            var nowD = new Date();
+            var dayK = nowD.getFullYear() + '-' + ((nowD.getMonth() + 1) < 10 ? '0' : '') + (nowD.getMonth() + 1) + '-' + (nowD.getDate() < 10 ? '0' : '') + nowD.getDate();
+            var cached30 = localStorage.getItem('prayerTimes30Days');
+            if (cached30) {
+                var p30 = JSON.parse(cached30);
+                if (p30 && p30[dayK] && p30[dayK].timings) {
+                    curTimings = p30[dayK].timings;
+                }
+            }
+        } catch (e) {}
+
+        applyTimingsToUI(curTimings);
+
+        function tickKiosk() {
+            try {
+                var now = new Date();
+
+                // 1. Live Time (12-hour AM/PM)
+                var timeElem = document.getElementById('current-time');
+                if (timeElem) {
+                    timeElem.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                }
+
+                // 2. Gregorian Date
+                var gregElem = document.getElementById('gregorian-date');
+                if (gregElem) {
+                    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    gregElem.textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+                }
+
+                // 3. Urdu Islamic Date (Always populated)
+                var islamElem = document.getElementById('islamic-date');
+                if (islamElem) {
+                    islamElem.textContent = getHijriUrduDate();
+                }
+
+                // 4. Next Prayer Countdown & Box Highlighting
+                var currentSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+                var prayers = [
+                    { name: 'Fajr', sec: timeToSeconds(curTimings.Fajr), id: 'fajr-box' },
+                    { name: 'Dhuhr', sec: timeToSeconds(curTimings.Dhuhr), id: 'dhuhr-box' },
+                    { name: 'Asr', sec: timeToSeconds(curTimings.Asr), id: 'asr-box' },
+                    { name: 'Maghrib', sec: timeToSeconds(curTimings.Maghrib), id: 'maghrib-box' },
+                    { name: 'Isha', sec: timeToSeconds(curTimings.Isha), id: 'isha-box' }
+                ];
+
+                var currentPrayer = prayers[prayers.length - 1]; // default Isha
+                var nextPrayer = null;
+
+                for (var i = 0; i < prayers.length; i++) {
+                    if (currentSec >= prayers[i].sec) {
+                        currentPrayer = prayers[i];
+                    }
+                    if (prayers[i].sec > currentSec && !nextPrayer) {
+                        nextPrayer = prayers[i];
+                    }
+                }
+
+                var nextDiff = 0;
+                if (nextPrayer) {
+                    nextDiff = nextPrayer.sec - currentSec;
+                } else {
+                    nextPrayer = prayers[0]; // Fajr tomorrow
+                    nextDiff = (prayers[0].sec + 86400) - currentSec;
+                }
+
+                var nextElem = document.getElementById('next-prayer');
+                if (nextElem && !nextElem.classList.contains('play-prompt')) {
+                    nextElem.textContent = 'Next Prayer: ' + nextPrayer.name + ' in ' + secondsToHHMM(nextDiff);
+                }
+
+                // Highlight current active prayer box
+                var boxIds = ['fajr-box', 'dhuhr-box', 'asr-box', 'maghrib-box', 'isha-box'];
+                for (var b = 0; b < boxIds.length; b++) {
+                    var el = document.getElementById(boxIds[b]);
+                    if (el) {
+                        el.classList.remove('fajr-highlight', 'dhuhr-highlight', 'asr-highlight', 'maghrib-highlight', 'isha-highlight');
+                    }
+                }
+                if (currentPrayer) {
+                    var activeEl = document.getElementById(currentPrayer.id);
+                    if (activeEl) {
+                        activeEl.classList.add(currentPrayer.name.toLowerCase() + '-highlight');
+                    }
+                }
+
+                // 5. Rotate Hadith every 20 seconds
+                var hadithIdx = Math.floor(now.getTime() / 20000) % curatedHadiths.length;
+                var curH = curatedHadiths[hadithIdx];
+                var hElem = document.getElementById('hadith-english');
+                var sElem = document.getElementById('hadith-source');
+                if (hElem && (!hElem.textContent || hElem.textContent === 'Loading Hadith...' || hElem.textContent === curH.text)) {
+                    hElem.textContent = curH.text;
+                }
+                if (sElem && (!sElem.textContent || sElem.textContent === 'Loading Source...' || sElem.textContent === curH.source)) {
+                    sElem.textContent = curH.source;
+                }
+
+            } catch (err) {
+                console.warn("Kiosk tick warning:", err);
+            }
+        }
+
+        tickKiosk();
+        setInterval(tickKiosk, 1000);
+
+        // Expose helper to window so external script.js can update curTimings cleanly
+        window.__updateKioskTimings = function(newTimings) {
+            if (newTimings) {
+                curTimings = newTimings;
+                applyTimingsToUI(curTimings);
+                tickKiosk();
+            }
+        };
+
+        // --- Single Page Application (SPA) In-App Dynamic Settings Modal Controller ---
+        var modal = document.getElementById('settings-modal');
+        var openBtn = document.getElementById('open-settings-btn');
+        var closeBtn = document.getElementById('close-settings-btn');
+        var cancelBtn = document.getElementById('cancel-settings-btn');
+        var saveBtn = document.getElementById('save-settings-btn');
+        var saveStatus = document.getElementById('settings-save-status');
+
+        var currentSelectedAsr = 'hanafi';
+        var currentSelectedTheme = 'default';
+
+        function loadModalFieldsFromSettings() {
+            try {
+                var s = localStorage.getItem('settings');
+                var parsed = s ? JSON.parse(s) : {};
+                
+                var cityInput = document.getElementById('setting-city');
+                var stateInput = document.getElementById('setting-state');
+                var countryInput = document.getElementById('setting-country');
+                var calcSelect = document.getElementById('setting-calc-method');
+                var hijriSelect = document.getElementById('setting-hijri-adj');
+
+                if (cityInput) cityInput.value = parsed.city || 'Mumbai';
+                if (stateInput) stateInput.value = parsed.state || '';
+                if (countryInput) countryInput.value = parsed.country || 'India';
+                if (calcSelect) calcSelect.value = parsed.calcMethod || '2';
+                if (hijriSelect) hijriSelect.value = (typeof parsed.adjustment !== 'undefined') ? String(parsed.adjustment) : '0';
+
+                currentSelectedAsr = parsed.asrMethod || 'hanafi';
+                setAsrActive(currentSelectedAsr);
+
+                currentSelectedTheme = parsed.theme || 'default';
+                setThemeActive(currentSelectedTheme);
+
+            } catch (e) {}
+        }
+
+        function setAsrActive(method) {
+            var hanafiBtn = document.getElementById('btn-asr-hanafi');
+            var shafiBtn = document.getElementById('btn-asr-shafi');
+            if (hanafiBtn && shafiBtn) {
+                if (method === 'hanafi') {
+                    hanafiBtn.classList.add('active');
+                    shafiBtn.classList.remove('active');
+                } else {
+                    shafiBtn.classList.add('active');
+                    hanafiBtn.classList.remove('active');
+                }
+            }
+            currentSelectedAsr = method;
+        }
+
+        function setThemeActive(thm) {
+            var themeBtns = document.querySelectorAll('.theme-select-btn');
+            for (var i = 0; i < themeBtns.length; i++) {
+                if (themeBtns[i].getAttribute('data-theme') === thm) {
+                    themeBtns[i].classList.add('active');
+                } else {
+                    themeBtns[i].classList.remove('active');
+                }
+            }
+            currentSelectedTheme = thm;
+        }
+
+        if (openBtn) {
+            openBtn.onclick = function() {
+                loadModalFieldsFromSettings();
+                if (modal) modal.classList.add('open');
+            };
+        }
+
+        function closeModal() {
+            if (modal) modal.classList.remove('open');
+            if (saveStatus) saveStatus.style.display = 'none';
+        }
+
+        if (closeBtn) closeBtn.onclick = closeModal;
+        if (cancelBtn) cancelBtn.onclick = closeModal;
+        if (modal) {
+            modal.onclick = function(e) {
+                if (e.target === modal) closeModal();
+            };
+        }
+
+        // Tab Switching
+        var tabBtns = document.querySelectorAll('.settings-tab-btn');
+        for (var t = 0; t < tabBtns.length; t++) {
+            tabBtns[t].onclick = function() {
+                for (var j = 0; j < tabBtns.length; j++) tabBtns[j].classList.remove('active');
+                this.classList.add('active');
+                var targetId = this.getAttribute('data-tab');
+                var contents = document.querySelectorAll('.settings-tab-content');
+                for (var c = 0; c < contents.length; c++) {
+                    contents[c].classList.remove('active');
+                    if (contents[c].id === targetId) contents[c].classList.add('active');
+                }
+            };
+        }
+
+        // Asr Toggle
+        var hanafiBtn = document.getElementById('btn-asr-hanafi');
+        var shafiBtn = document.getElementById('btn-asr-shafi');
+        if (hanafiBtn) hanafiBtn.onclick = function() { setAsrActive('hanafi'); };
+        if (shafiBtn) shafiBtn.onclick = function() { setAsrActive('shafi'); };
+
+        // Theme Toggle
+        var themeBtns = document.querySelectorAll('.theme-select-btn');
+        for (var th = 0; th < themeBtns.length; th++) {
+            themeBtns[th].onclick = function() {
+                setThemeActive(this.getAttribute('data-theme'));
+            };
+        }
+
+        // Test audio buttons
+        var testHourly = document.getElementById('btn-test-hourly');
+        if (testHourly) {
+            testHourly.onclick = function() {
+                try {
+                    var a = new Audio('azan/Alhamd.mp3');
+                    a.play();
+                } catch (e) {}
+            };
+        }
+        var testMakruh = document.getElementById('btn-test-makruh');
+        if (testMakruh) {
+            testMakruh.onclick = function() {
+                try {
+                    var a = new Audio('azan/buzzer.mp3');
+                    a.play();
+                } catch (e) {}
+            };
+        }
+
+        // Save & Apply Settings Dynamically (Zero Reload, Zero State Loss)
+        if (saveBtn) {
+            saveBtn.onclick = function() {
+                var cityVal = (document.getElementById('setting-city') || {}).value || 'Mumbai';
+                var stateVal = (document.getElementById('setting-state') || {}).value || '';
+                var countryVal = (document.getElementById('setting-country') || {}).value || 'India';
+                var calcVal = (document.getElementById('setting-calc-method') || {}).value || '2';
+                var hijriVal = (document.getElementById('setting-hijri-adj') || {}).value || '0';
+
+                var currentSettings = {};
+                try {
+                    var existing = localStorage.getItem('settings');
+                    if (existing) currentSettings = JSON.parse(existing);
+                } catch (e) {}
+
+                currentSettings.city = cityVal.trim();
+                currentSettings.state = stateVal.trim();
+                currentSettings.country = countryVal.trim();
+                currentSettings.calcMethod = calcVal;
+                currentSettings.asrMethod = currentSelectedAsr;
+                currentSettings.adjustment = hijriVal;
+                currentSettings.theme = currentSelectedTheme;
+
+                localStorage.setItem('settings', JSON.stringify(currentSettings));
+
+                // 1. Update City on screen immediately
+                var cityEl = document.getElementById('current-city');
+                if (cityEl) cityEl.textContent = currentSettings.city;
+
+                // 2. Update Theme on screen immediately
+                document.body.classList.remove('theme-blue', 'theme-dark', 'theme-light');
+                if (currentSettings.theme && currentSettings.theme !== 'default') {
+                    document.body.classList.add('theme-' + currentSettings.theme);
+                }
+
+                // 3. Update Urdu Hijri date immediately
+                var islamElem = document.getElementById('islamic-date');
+                if (islamElem) {
+                    islamElem.textContent = getHijriUrduDate(currentSettings.adjustment);
+                }
+
+                // 4. If online, fetch fresh timings from Aladhan API for new city in background
+                if (navigator.onLine) {
+                    try {
+                        var schoolCode = currentSelectedAsr === 'hanafi' ? 1 : 0;
+                        var apiUrl = 'https://api.aladhan.com/v1/timingsByCity?city=' + encodeURIComponent(currentSettings.city) +
+                            '&country=' + encodeURIComponent(currentSettings.country) +
+                            '&state=' + encodeURIComponent(currentSettings.state) +
+                            '&method=' + currentSettings.calcMethod +
+                            '&school=' + schoolCode +
+                            '&adjustment=' + currentSettings.adjustment;
+                        
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', apiUrl, true);
+                        xhr.onreadystatechange = function() {
+                            if (xhr.readyState === 4 && xhr.status === 200) {
+                                try {
+                                    var res = JSON.parse(xhr.responseText);
+                                    if (res && res.data && res.data.timings) {
+                                        window.__updateKioskTimings(res.data.timings);
+                                        // Cache to localStorage
+                                        var nowD = new Date();
+                                        var dayK = nowD.getFullYear() + '-' + ((nowD.getMonth() + 1) < 10 ? '0' : '') + (nowD.getMonth() + 1) + '-' + (nowD.getDate() < 10 ? '0' : '') + nowD.getDate();
+                                        var cachedMap = {};
+                                        try {
+                                            var exist = localStorage.getItem('prayerTimes30Days');
+                                            if (exist) cachedMap = JSON.parse(exist);
+                                        } catch (e) {}
+                                        cachedMap[dayK] = {
+                                            timings: res.data.timings,
+                                            readableDate: res.data.date ? res.data.date.readable : '',
+                                            hijriDate: res.data.date && res.data.date.hijri ? (res.data.date.hijri.day + ' ' + res.data.date.hijri.month.en + ' ' + res.data.date.hijri.year) : ''
+                                        };
+                                        localStorage.setItem('prayerTimes30Days', JSON.stringify(cachedMap));
+                                    }
+                                } catch (e) {}
+                            }
+                        };
+                        xhr.send();
+                    } catch (e) {}
+                }
+
+                if (saveStatus) {
+                    saveStatus.style.display = 'inline-block';
+                }
+
+                setTimeout(function() {
+                    closeModal();
+                }, 600);
+            };
+        }
+    })();
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
