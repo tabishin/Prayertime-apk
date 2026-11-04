@@ -469,29 +469,59 @@
                             </div>
                         </div>
                         
-                        <div class="theme-grid grid grid-cols-2 sm:grid-cols-4 gap-4">
-                            <!-- Default Theme -->
-                            <div class="theme-card relative group" onclick="selectTheme('default')">
-                                <div class="theme-preview theme-default h-24 rounded-xl bg-gradient-to-br from-emerald-800 to-emerald-600 flex items-center justify-center p-3 relative shadow-inner">
-                                    <span class="text-sm font-bold text-white tracking-wide">Default (Green)</span>
+                        <div class="theme-grid grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            <!-- Theme 1: Default -->
+                            <div class="theme-card relative group cursor-pointer" onclick="selectTheme('default')">
+                                <div class="theme-preview theme-default h-20 rounded-xl bg-gradient-to-br from-emerald-800 to-emerald-600 flex items-center justify-center p-3 relative shadow-inner">
+                                    <span class="text-xs font-bold text-white tracking-wide">Default (Green)</span>
                                 </div>
                             </div>
-                            <!-- Blue Theme -->
-                            <div class="theme-card relative group" onclick="selectTheme('blue')">
-                                <div class="theme-preview theme-blue h-24 rounded-xl bg-gradient-to-br from-indigo-950 to-indigo-800 flex items-center justify-center p-3 relative shadow-inner">
-                                    <span class="text-sm font-bold text-white tracking-wide">Ocean Blue</span>
+                            <!-- Theme 2: Blue -->
+                            <div class="theme-card relative group cursor-pointer" onclick="selectTheme('blue')">
+                                <div class="theme-preview theme-blue h-20 rounded-xl bg-gradient-to-br from-indigo-950 to-indigo-800 flex items-center justify-center p-3 relative shadow-inner">
+                                    <span class="text-xs font-bold text-white tracking-wide">Ocean Blue</span>
                                 </div>
                             </div>
-                            <!-- Dark Theme -->
-                            <div class="theme-card relative group" onclick="selectTheme('dark')">
-                                <div class="theme-preview theme-dark h-24 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 flex items-center justify-center p-3 relative shadow-inner">
-                                    <span class="text-sm font-bold text-white tracking-wide">Cosmic Slate</span>
+                            <!-- Theme 3: Dark -->
+                            <div class="theme-card relative group cursor-pointer" onclick="selectTheme('dark')">
+                                <div class="theme-preview theme-dark h-20 rounded-xl bg-gradient-to-br from-slate-950 to-slate-800 flex items-center justify-center p-3 relative shadow-inner">
+                                    <span class="text-xs font-bold text-white tracking-wide">Cosmic Slate</span>
                                 </div>
                             </div>
-                            <!-- Light Theme -->
-                            <div class="theme-card relative group" onclick="selectTheme('light')">
-                                <div class="theme-preview theme-light h-24 rounded-xl bg-gradient-to-br from-slate-50 to-slate-200 flex items-center justify-center p-3 relative shadow-inner border border-slate-200">
-                                    <span class="text-sm font-bold text-slate-800 tracking-wide">Soft Alabaster</span>
+                            <!-- Theme 4: Light -->
+                            <div class="theme-card relative group cursor-pointer" onclick="selectTheme('light')">
+                                <div class="theme-preview theme-light h-20 rounded-xl bg-gradient-to-br from-slate-50 to-slate-200 flex items-center justify-center p-3 relative shadow-inner border border-slate-300">
+                                    <span class="text-xs font-bold text-slate-800 tracking-wide">Clean Light</span>
+                                </div>
+                            </div>
+                            <!-- Theme 5: Emerald & Gold -->
+                            <div class="theme-card relative group cursor-pointer" onclick="selectTheme('emerald-gold')">
+                                <div class="theme-preview theme-emerald-gold h-20 rounded-xl bg-gradient-to-br from-teal-950 to-emerald-900 flex items-center justify-center p-3 relative shadow-inner border border-amber-400/40">
+                                    <span class="text-xs font-bold text-amber-300 tracking-wide">Emerald Gold</span>
+                                </div>
+                            </div>
+                            <!-- Theme 6: Ruby -->
+                            <div class="theme-card relative group cursor-pointer" onclick="selectTheme('ruby')">
+                                <div class="theme-preview theme-ruby h-20 rounded-xl bg-gradient-to-br from-rose-950 to-red-900 flex items-center justify-center p-3 relative shadow-inner border border-rose-400/40">
+                                    <span class="text-xs font-bold text-rose-200 tracking-wide">Velvet Ruby</span>
+                                </div>
+                            </div>
+                            <!-- Theme 7: Amber -->
+                            <div class="theme-card relative group cursor-pointer" onclick="selectTheme('amber')">
+                                <div class="theme-preview theme-amber h-20 rounded-xl bg-gradient-to-br from-amber-950 to-amber-900 flex items-center justify-center p-3 relative shadow-inner border border-amber-500/40">
+                                    <span class="text-xs font-bold text-amber-300 tracking-wide">Desert Amber</span>
+                                </div>
+                            </div>
+                            <!-- Theme 8: Purple -->
+                            <div class="theme-card relative group cursor-pointer" onclick="selectTheme('purple')">
+                                <div class="theme-preview theme-purple h-20 rounded-xl bg-gradient-to-br from-purple-950 to-purple-900 flex items-center justify-center p-3 relative shadow-inner border border-purple-400/40">
+                                    <span class="text-xs font-bold text-purple-200 tracking-wide">Midnight Purple</span>
+                                </div>
+                            </div>
+                            <!-- Theme 9: High Contrast -->
+                            <div class="theme-card relative group cursor-pointer" onclick="selectTheme('highcontrast')">
+                                <div class="theme-preview theme-highcontrast h-20 rounded-xl bg-black flex items-center justify-center p-3 relative shadow-inner border-2 border-yellow-400">
+                                    <span class="text-xs font-bold text-yellow-300 tracking-wide">High Contrast</span>
                                 </div>
                             </div>
                         </div>
@@ -507,36 +537,63 @@
                             </div>
                         </div>
                         
-                        <div class="layout-grid grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        <div class="layout-grid grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
                             <!-- Default Layout -->
-                            <div class="layout-card p-1" onclick="selectLayout('default')">
-                                <div class="layout-preview layout-default h-20 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between p-3">
-                                    <div class="flex gap-1">
-                                        <div class="w-3 h-2 bg-slate-300 rounded"></div>
-                                        <div class="w-3 h-2 bg-slate-300 rounded"></div>
+                            <div class="layout-card p-1 cursor-pointer" onclick="selectLayout('default')">
+                                <div class="layout-preview layout-default h-20 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between p-2.5">
+                                    <div class="grid grid-cols-2 gap-1">
+                                        <div class="h-2 bg-slate-300 rounded"></div>
+                                        <div class="h-2 bg-slate-300 rounded"></div>
+                                        <div class="h-2 bg-slate-300 rounded"></div>
+                                        <div class="h-2 bg-slate-300 rounded"></div>
                                     </div>
-                                    <span class="text-xs font-bold text-slate-600 uppercase">Standard Grid</span>
+                                    <span class="text-[11px] font-bold text-slate-600 uppercase">Standard (2x3)</span>
                                 </div>
                             </div>
                             <!-- Compact Layout -->
-                            <div class="layout-card p-1" onclick="selectLayout('compact')">
-                                <div class="layout-preview layout-compact h-20 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between p-3">
+                            <div class="layout-card p-1 cursor-pointer" onclick="selectLayout('compact')">
+                                <div class="layout-preview layout-compact h-20 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between p-2.5">
                                     <div class="grid grid-cols-3 gap-1">
                                         <div class="h-2 bg-slate-300 rounded"></div>
                                         <div class="h-2 bg-slate-300 rounded"></div>
                                         <div class="h-2 bg-slate-300 rounded"></div>
                                     </div>
-                                    <span class="text-xs font-bold text-slate-600 uppercase">Compact View</span>
+                                    <span class="text-[11px] font-bold text-slate-600 uppercase">Compact (3x2)</span>
                                 </div>
                             </div>
                             <!-- Modern Layout -->
-                            <div class="layout-card p-1" onclick="selectLayout('modern')">
-                                <div class="layout-preview layout-modern h-20 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between p-3">
+                            <div class="layout-card p-1 cursor-pointer" onclick="selectLayout('modern')">
+                                <div class="layout-preview layout-modern h-20 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between p-2.5">
                                     <div class="flex flex-col gap-1">
                                         <div class="h-2 w-2/3 bg-slate-300 rounded"></div>
                                         <div class="h-2 w-full bg-slate-300 rounded"></div>
                                     </div>
-                                    <span class="text-xs font-bold text-slate-600 uppercase">Modern Flow</span>
+                                    <span class="text-[11px] font-bold text-slate-600 uppercase">Modern Flow</span>
+                                </div>
+                            </div>
+                            <!-- Horizontal Layout -->
+                            <div class="layout-card p-1 cursor-pointer" onclick="selectLayout('horizontal')">
+                                <div class="layout-preview layout-horizontal h-20 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between p-2.5">
+                                    <div class="grid grid-cols-6 gap-0.5">
+                                        <div class="h-2 bg-slate-300 rounded"></div>
+                                        <div class="h-2 bg-slate-300 rounded"></div>
+                                        <div class="h-2 bg-slate-300 rounded"></div>
+                                        <div class="h-2 bg-slate-300 rounded"></div>
+                                        <div class="h-2 bg-slate-300 rounded"></div>
+                                        <div class="h-2 bg-slate-300 rounded"></div>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-slate-600 uppercase">Horizontal (1x6)</span>
+                                </div>
+                            </div>
+                            <!-- Vertical Layout -->
+                            <div class="layout-card p-1 cursor-pointer" onclick="selectLayout('vertical')">
+                                <div class="layout-preview layout-vertical h-20 rounded-xl bg-slate-50 border border-slate-200 flex flex-col justify-between p-2.5">
+                                    <div class="flex flex-col gap-0.5">
+                                        <div class="h-1.5 w-full bg-slate-300 rounded"></div>
+                                        <div class="h-1.5 w-full bg-slate-300 rounded"></div>
+                                        <div class="h-1.5 w-full bg-slate-300 rounded"></div>
+                                    </div>
+                                    <span class="text-[11px] font-bold text-slate-600 uppercase">Vertical Totem</span>
                                 </div>
                             </div>
                         </div>

@@ -96,7 +96,7 @@ export default defineConfig(() => {
                 'Content-Type': 'application/json',
                 'Access-Control-Allow-Origin': '*'
               });
-              let mp3s = ['adhan1.mp3', 'adhan2.mp3', 'silent.mp3'];
+              let mp3s = ['fajr.mp3', 'dhuhr.mp3', 'asr.mp3', 'maghrib.mp3', 'isha.mp3', 'Alhamd.mp3', 'buzzer.mp3', 'silent.mp3'];
               try {
                 if (fs.existsSync('./azan')) {
                   const files = fs.readdirSync('./azan');
@@ -110,6 +110,45 @@ export default defineConfig(() => {
               }
               res.end(JSON.stringify(mp3s));
               return;
+            }
+
+            if (pathname.startsWith('/azan/') || pathname.startsWith('/public/azan/')) {
+              const cleanFileName = decodeURIComponent(pathname.replace(/^\/(public\/)?azan\//, ''));
+              let targetPath = path.resolve(__dirname, 'azan', cleanFileName);
+              if (!fs.existsSync(targetPath)) {
+                targetPath = path.resolve(__dirname, 'public', 'azan', cleanFileName);
+              }
+
+              if (fs.existsSync(targetPath) && fs.statSync(targetPath).isFile()) {
+                const stat = fs.statSync(targetPath);
+                const fileSize = stat.size;
+                const range = req.headers.range;
+
+                res.setHeader('Content-Type', 'audio/mpeg');
+                res.setHeader('Accept-Ranges', 'bytes');
+                res.setHeader('Access-Control-Allow-Origin', '*');
+
+                if (range) {
+                  const parts = range.replace(/bytes=/, "").split("-");
+                  const start = parseInt(parts[0], 10);
+                  const end = parts[1] ? parseInt(parts[1], 10) : fileSize - 1;
+                  const chunksize = (end - start) + 1;
+                  const file = fs.createReadStream(targetPath, { start, end });
+                  res.writeHead(206, {
+                    'Content-Range': `bytes ${start}-${end}/${fileSize}`,
+                    'Content-Length': chunksize,
+                    'Content-Type': 'audio/mpeg',
+                  });
+                  file.pipe(res);
+                } else {
+                  res.writeHead(200, {
+                    'Content-Length': fileSize,
+                    'Content-Type': 'audio/mpeg',
+                  });
+                  fs.createReadStream(targetPath).pipe(res);
+                }
+                return;
+              }
             }
 
             if (pathname === '/prayer_times_proxy.php') {

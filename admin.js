@@ -260,7 +260,8 @@ function updateThemeSelection() {
     });
 }
 function applyTheme(theme) {
-    document.body.classList.remove('theme-blue', 'theme-dark', 'theme-light');
+    var allThemes = ['default', 'blue', 'dark', 'light', 'emerald-gold', 'ruby', 'amber', 'purple', 'highcontrast'];
+    allThemes.forEach(function (t) { document.body.classList.remove('theme-' + t); });
     if (theme !== 'default')
         document.body.classList.add("theme-".concat(theme));
     localStorage.setItem('selectedTheme', theme);
@@ -272,7 +273,10 @@ function selectLayout(layout) {
 }
 function updateLayoutSelection() {
     document.querySelectorAll('.layout-card').forEach(function (card) {
-        var layout = card.querySelector('.layout-preview').classList[1].replace('layout-', '');
+        var preview = card.querySelector('.layout-preview');
+        if (!preview) return;
+        var layoutClass = Array.from(preview.classList).find(function(c) { return c.startsWith('layout-'); });
+        var layout = layoutClass ? layoutClass.replace('layout-', '') : 'default';
         card.classList.toggle('active', layout === settings.layout);
     });
 }
@@ -282,7 +286,7 @@ function applyLayout(layout) {
 function addReminder() {
     var reminder = {
         time: '00:00',
-        audio: azanFiles[0] ? "azan/".concat(azanFiles[0]) : 'azan/adhan1.mp3',
+        audio: azanFiles[0] ? "azan/".concat(azanFiles[0]) : 'azan/fajr.mp3',
         repeat: false
     };
     settings.reminders.push(reminder);

@@ -98,157 +98,309 @@
     </div>
 
     <!-- In-App Dynamic Settings Modal (Single Page Application, TV-ready, High-Contrast) -->
+    <!-- Complete In-App Admin Settings Modal (Pixel-Perfect match to image_c1abb5c6.png, Zero Navigation Required) -->
     <div id="settings-modal" class="settings-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="settings-title">
         <div class="settings-modal-card">
+            <!-- Green Top Bar matching image_c1abb5c6.png -->
             <div class="settings-modal-header">
-                <div class="settings-modal-title" id="settings-title">⚙️ Prayer Clock Settings</div>
-                <button type="button" class="settings-modal-close" id="close-settings-btn" aria-label="Close Settings">✕</button>
+                <div class="settings-modal-title" id="settings-title">Prayer Time Settings</div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <span class="settings-online-badge"><span class="settings-online-dot"></span> Online</span>
+                    <button type="button" class="settings-modal-close" id="close-settings-btn" title="Return to Clock Display">← Return to Clock</button>
+                </div>
             </div>
+
+            <!-- Tab Navigation Bar matching image_c1abb5c6.png -->
             <div class="settings-tabs">
-                <button type="button" class="settings-tab-btn active" data-tab="tab-location">📍 Location</button>
-                <button type="button" class="settings-tab-btn" data-tab="tab-calculation">🕌 Calculation</button>
-                <button type="button" class="settings-tab-btn" data-tab="tab-theme">🎨 Theme</button>
-                <button type="button" class="settings-tab-btn" data-tab="tab-audio">⏰ Azan & Audio</button>
+                <button type="button" class="settings-tab-btn active" data-tab="tab-general">⚙️ General</button>
+                <button type="button" class="settings-tab-btn" data-tab="tab-alarm">⏰ Alarm</button>
+                <button type="button" class="settings-tab-btn" data-tab="tab-theme-layout">🎨 Theme & Layout</button>
+                <button type="button" class="settings-tab-btn" data-tab="tab-audio">📢 Azan & Audio</button>
             </div>
+
             <div class="settings-modal-body">
-                <!-- Tab 1: Location -->
-                <div id="tab-location" class="settings-tab-content active">
-                    <div class="settings-form-group">
-                        <label class="settings-label" for="setting-city">City Name</label>
-                        <input type="text" id="setting-city" class="settings-input" placeholder="e.g. Mumbai, Karachi, London, New York" value="Mumbai">
+                <!-- ========================================== -->
+                <!-- TAB 1: GENERAL (Location & Calculations)  -->
+                <!-- ========================================== -->
+                <div id="tab-general" class="settings-tab-content active">
+                    <!-- Location Settings Card -->
+                    <div class="settings-card-box">
+                        <div class="settings-section-title">📍 Location Settings</div>
+                        <div class="settings-row">
+                            <div class="settings-form-group">
+                                <label class="settings-label" for="setting-city">City</label>
+                                <input type="text" id="setting-city" class="settings-input" placeholder="e.g. Mumbai" value="Mumbai">
+                            </div>
+                            <div class="settings-form-group">
+                                <label class="settings-label" for="setting-state">State (Optional)</label>
+                                <input type="text" id="setting-state" class="settings-input" placeholder="e.g. Maharashtra">
+                            </div>
+                            <div class="settings-form-group">
+                                <label class="settings-label" for="setting-country">Country</label>
+                                <input type="text" id="setting-country" class="settings-input" placeholder="e.g. India" value="India">
+                            </div>
+                        </div>
                     </div>
-                    <div class="settings-row">
+
+                    <!-- Prayer Calculation Rules Card -->
+                    <div class="settings-card-box">
+                        <div class="settings-section-title">🧮 Prayer Calculation Rules</div>
                         <div class="settings-form-group">
-                            <label class="settings-label" for="setting-state">State / Province (Optional)</label>
-                            <input type="text" id="setting-state" class="settings-input" placeholder="e.g. Maharashtra">
+                            <label class="settings-label" for="setting-calc-method">Calculation Method</label>
+                            <select id="setting-calc-method" class="settings-select">
+                                <option value="0">Jafari / Shia Ithna-Ashari</option>
+                                <option value="1">University of Islamic Sciences, Karachi</option>
+                                <option value="2" selected>Islamic Society of North America (ISNA)</option>
+                                <option value="3">Muslim World League (MWL)</option>
+                                <option value="4">Umm Al-Qura University, Makkah</option>
+                                <option value="5">Egyptian General Authority of Survey</option>
+                                <option value="7">Institute of Geophysics, University of Tehran</option>
+                                <option value="8">Gulf Region</option>
+                                <option value="9">Kuwait</option>
+                                <option value="10">Qatar</option>
+                                <option value="11">Majlis Ugama Islam Singapura, Singapore</option>
+                                <option value="12">Union Organization islamic de France</option>
+                                <option value="13">Diyanet İşleri Başkanlığı, Turkey</option>
+                                <option value="14">Spiritual Administration of Muslims of Russia</option>
+                                <option value="15">Moonsighting Committee Worldwide</option>
+                                <option value="17">Jabatan Kemajuan Islam Malaysia (JAKIM)</option>
+                                <option value="20">KEMENAG - Kementerian Agama Republik Indonesia</option>
+                            </select>
                         </div>
-                        <div class="settings-form-group">
-                            <label class="settings-label" for="setting-country">Country</label>
-                            <input type="text" id="setting-country" class="settings-input" placeholder="e.g. India" value="India">
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Tab 2: Calculation -->
-                <div id="tab-calculation" class="settings-tab-content">
-                    <div class="settings-form-group">
-                        <label class="settings-label" for="setting-calc-method">Calculation Method</label>
-                        <select id="setting-calc-method" class="settings-select">
-                            <option value="1">University of Islamic Sciences, Karachi</option>
-                            <option value="2" selected>Islamic Society of North America (ISNA)</option>
-                            <option value="3">Muslim World League (MWL)</option>
-                            <option value="4">Umm Al-Qura University, Makkah</option>
-                            <option value="5">Egyptian General Authority of Survey</option>
-                            <option value="7">Institute of Geophysics, University of Tehran</option>
-                            <option value="8">Gulf Region</option>
-                            <option value="9">Kuwait</option>
-                            <option value="10">Qatar</option>
-                            <option value="11">Majlis Ugama Islam Singapura, Singapore</option>
-                            <option value="12">Union Organization islamic de France</option>
-                            <option value="13">Diyanet İşleri Başkanlığı, Turkey</option>
-                            <option value="14">Spiritual Administration of Muslims of Russia</option>
-                        </select>
-                    </div>
+                        <div class="settings-row">
+                            <div class="settings-form-group">
+                                <label class="settings-label">Asr Jurisprudential School</label>
+                                <div class="asr-button-group">
+                                    <button type="button" id="btn-asr-hanafi" class="asr-toggle-btn active">Hanafi (Standard Subcontinent)</button>
+                                    <button type="button" id="btn-asr-shafi" class="asr-toggle-btn">Shafi (Standard)</button>
+                                </div>
+                            </div>
 
-                    <div class="settings-form-group">
-                        <label class="settings-label">Asr Jurisprudential School</label>
-                        <div class="asr-button-group">
-                            <button type="button" id="btn-asr-hanafi" class="asr-toggle-btn active">Hanafi (Standard Subcontinent)</button>
-                            <button type="button" id="btn-asr-shafi" class="asr-toggle-btn">Shafi / Maliki / Hanbali</button>
-                        </div>
-                    </div>
-
-                    <div class="settings-form-group">
-                        <label class="settings-label" for="setting-hijri-adj">Hijri / Urdu Date Adjustment (Moon Sighting)</label>
-                        <select id="setting-hijri-adj" class="settings-select">
-                            <option value="-2">-2 Days</option>
-                            <option value="-1">-1 Day</option>
-                            <option value="0" selected>0 Days (Astronomical Calculation)</option>
-                            <option value="1">+1 Day (Common India/Pakistan sighting)</option>
-                            <option value="2">+2 Days</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Tab 3: Theme -->
-                <div id="tab-theme" class="settings-tab-content">
-                    <div class="settings-form-group">
-                        <label class="settings-label">Select Color Theme</label>
-                        <div class="theme-button-grid">
-                            <button type="button" class="theme-select-btn active" data-theme="default">🌿 Classic Forest Green</button>
-                            <button type="button" class="theme-select-btn" data-theme="blue">🌌 Deep Navy Blue</button>
-                            <button type="button" class="theme-select-btn" data-theme="dark">⬛ Midnight Charcoal</button>
-                            <button type="button" class="theme-select-btn" data-theme="light">⚪ Clean Minimal Light</button>
+                            <div class="settings-form-group">
+                                <label class="settings-label" for="setting-hijri-adj">Hijri Date Adjustment (Moon Sighting)</label>
+                                <select id="setting-hijri-adj" class="settings-select">
+                                    <option value="-2">-2 Days</option>
+                                    <option value="-1">-1 Day</option>
+                                    <option value="0" selected>0 Days (Astronomical Calculation)</option>
+                                    <option value="1">+1 Day (Common India/Pakistan sighting)</option>
+                                    <option value="2">+2 Days</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Tab 4: Audio & Reminders -->
+                <!-- ========================================== -->
+                <!-- TAB 2: ALARM & REMINDERS                   -->
+                <!-- ========================================== -->
+                <div id="tab-alarm" class="settings-tab-content">
+                    <!-- Daily Custom Alarm Card -->
+                    <div class="settings-card-box">
+                        <div class="settings-section-title">🔔 Daily Custom Alarm</div>
+                        <div class="settings-row">
+                            <div class="settings-form-group">
+                                <label class="settings-label" for="setting-alarm-time">Alarm Trigger Time</label>
+                                <input type="time" id="setting-alarm-time" class="settings-input" value="00:00">
+                            </div>
+                            <div class="settings-form-group">
+                                <label class="settings-label" for="setting-alarm-audio">Alarm Audio Track</label>
+                                <select id="setting-alarm-audio" class="settings-select">
+                                    <option value="azan/fajr.mp3">fajr.mp3 (Default)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Custom Reminder Audio Alerts Card -->
+                    <div class="settings-card-box">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
+                            <div>
+                                <div class="settings-section-title" style="margin-bottom: 2px; padding-bottom: 0; border-bottom: none;">📢 Custom Audio Alerts & Reminders</div>
+                                <div style="font-size: 0.82rem; color: #64748b;">Play audio tracks or ruqya at specific times</div>
+                            </div>
+                            <button type="button" id="btn-add-reminder" class="btn-primary" style="padding: 7px 14px; font-size: 0.88rem;">➕ Add New Reminder</button>
+                        </div>
+                        <div id="reminders-container-modal">
+                            <!-- Dynamic reminder items injected here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================================== -->
+                <!-- TAB 3: THEME & LAYOUT (EXACT MATCH TO image_c1abb5c6.png)  -->
+                <!-- ========================================================== -->
+                <div id="tab-theme-layout" class="settings-tab-content">
+                    <!-- Theme Selection Section -->
+                    <div class="settings-card-box">
+                        <div class="settings-section-title">Theme Selection</div>
+                        <div class="admin-theme-grid">
+                            <!-- Theme 1: Default (Forest Green) -->
+                            <div class="theme-card-item active" data-theme="default">
+                                <div class="theme-preview-box preview-theme-default"></div>
+                                <div class="theme-card-label">Default</div>
+                            </div>
+                            <!-- Theme 2: Blue -->
+                            <div class="theme-card-item" data-theme="blue">
+                                <div class="theme-preview-box preview-theme-blue"></div>
+                                <div class="theme-card-label">Blue</div>
+                            </div>
+                            <!-- Theme 3: Dark -->
+                            <div class="theme-card-item" data-theme="dark">
+                                <div class="theme-preview-box preview-theme-dark"></div>
+                                <div class="theme-card-label">Dark</div>
+                            </div>
+                            <!-- Theme 4: Light (High Contrast Guaranteed Visible) -->
+                            <div class="theme-card-item" data-theme="light">
+                                <div class="theme-preview-box preview-theme-light"></div>
+                                <div class="theme-card-label">Light</div>
+                            </div>
+                            <!-- Theme 5: Emerald & Gold -->
+                            <div class="theme-card-item" data-theme="emerald-gold">
+                                <div class="theme-preview-box preview-theme-emerald-gold"></div>
+                                <div class="theme-card-label">Emerald Gold</div>
+                            </div>
+                            <!-- Theme 6: Ruby -->
+                            <div class="theme-card-item" data-theme="ruby">
+                                <div class="theme-preview-box preview-theme-ruby"></div>
+                                <div class="theme-card-label">Ruby</div>
+                            </div>
+                            <!-- Theme 7: Amber -->
+                            <div class="theme-card-item" data-theme="amber">
+                                <div class="theme-preview-box preview-theme-amber"></div>
+                                <div class="theme-card-label">Amber</div>
+                            </div>
+                            <!-- Theme 8: Purple -->
+                            <div class="theme-card-item" data-theme="purple">
+                                <div class="theme-preview-box preview-theme-purple"></div>
+                                <div class="theme-card-label">Purple</div>
+                            </div>
+                            <!-- Theme 9: High Contrast -->
+                            <div class="theme-card-item" data-theme="highcontrast">
+                                <div class="theme-preview-box preview-theme-highcontrast"></div>
+                                <div class="theme-card-label">High Contrast</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Layout Selection Section -->
+                    <div class="settings-card-box">
+                        <div class="settings-section-title">Layout Selection</div>
+                        <div class="admin-layout-grid">
+                            <!-- Layout 1: Default (2x3 Classic Wall Board) -->
+                            <div class="layout-card-item active" data-layout="default">
+                                <div class="layout-preview-box">
+                                    <div class="wireframe-default">
+                                        <div></div><div></div><div></div><div></div><div></div><div></div>
+                                    </div>
+                                </div>
+                                <div class="layout-card-label">Default</div>
+                            </div>
+                            <!-- Layout 2: Compact (3x2 Dense Board) -->
+                            <div class="layout-card-item" data-layout="compact">
+                                <div class="layout-preview-box">
+                                    <div class="wireframe-compact">
+                                        <div></div><div></div><div></div><div></div><div></div><div></div>
+                                    </div>
+                                </div>
+                                <div class="layout-card-label">Compact</div>
+                            </div>
+                            <!-- Layout 3: Modern (Hero Banner + Cards) -->
+                            <div class="layout-card-item" data-layout="modern">
+                                <div class="layout-preview-box">
+                                    <div class="wireframe-modern">
+                                        <div class="wf-top"></div>
+                                        <div class="wf-row"><div></div><div></div><div></div></div>
+                                    </div>
+                                </div>
+                                <div class="layout-card-label">Modern</div>
+                            </div>
+                            <!-- Layout 4: Horizontal Strip (1x6 Single Row) -->
+                            <div class="layout-card-item" data-layout="horizontal">
+                                <div class="layout-preview-box">
+                                    <div class="wireframe-horizontal">
+                                        <div></div><div></div><div></div><div></div><div></div><div></div>
+                                    </div>
+                                </div>
+                                <div class="layout-card-label">Horizontal</div>
+                            </div>
+                            <!-- Layout 5: Vertical Pillar (Portrait Totem) -->
+                            <div class="layout-card-item" data-layout="vertical">
+                                <div class="layout-preview-box">
+                                    <div class="wireframe-vertical">
+                                        <div></div><div></div><div></div><div></div><div></div><div></div>
+                                    </div>
+                                </div>
+                                <div class="layout-card-label">Vertical</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- TAB 4: AZAN & AUDIO CONTROLS               -->
+                <!-- ========================================== -->
                 <div id="tab-audio" class="settings-tab-content">
-                    <!-- Master Azan Switch -->
-                    <div class="audio-toggle-switch">
-                        <div>
-                            <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">📢 Automatic Azan Audio</div>
-                            <div style="font-size: 0.82rem; color: #a5d6a7;">Play Azan automatically at prayer time</div>
+                    <div class="settings-card-box">
+                        <div class="settings-section-title">📢 Automatic Azan Audio</div>
+                        
+                        <!-- Master Switch -->
+                        <div class="audio-toggle-switch-card">
+                            <div>
+                                <div style="font-weight: 800; font-size: 0.95rem; color: #1e293b;">Enable Automatic Azan</div>
+                                <div style="font-size: 0.82rem; color: #64748b;">Plays uploaded Azan MP3 track automatically when prayer countdown reaches zero</div>
+                            </div>
+                            <button type="button" id="btn-toggle-azan" class="btn-primary" style="padding: 8px 18px; font-size: 0.9rem;">🔊 Azan: ON</button>
                         </div>
-                        <button type="button" id="btn-toggle-azan" class="btn-primary" style="padding: 6px 14px; font-size: 0.88rem;">🔊 Azan: ON</button>
-                    </div>
 
-                    <!-- Volume Slider -->
-                    <div class="volume-slider-row">
-                        <span style="font-size: 0.9rem; font-weight: 600; color: #e0e0e0; min-width: 90px;">Volume: <span id="volume-label">100%</span></span>
-                        <input type="range" id="setting-azan-volume" class="volume-slider" min="0" max="100" value="100">
-                    </div>
+                        <!-- Volume Slider -->
+                        <div class="volume-slider-card">
+                            <span style="font-size: 0.88rem; font-weight: 800; color: #334155; min-width: 90px;">Volume: <span id="volume-label">100%</span></span>
+                            <input type="range" id="setting-azan-volume" class="volume-slider" min="0" max="100" value="100">
+                        </div>
 
-                    <!-- Audio Status & Quick Test -->
-                    <div class="settings-form-group">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <label class="settings-label" style="margin-bottom: 0;">🎧 Test Azan & Sound Tracks</label>
-                            <span id="audio-playback-status" class="audio-status-pill">● System Audio Ready</span>
+                        <!-- Direct Audio Test Buttons -->
+                        <div style="margin-top: 16px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <label class="settings-label" style="margin-bottom: 0;">🎧 Test Sound Tracks & Azan Audio</label>
+                                <span id="audio-playback-status" class="audio-status-pill">● Audio System Ready</span>
+                            </div>
+                            <div class="audio-grid-buttons-admin">
+                                <button type="button" class="audio-test-btn-admin" id="btn-play-fajr" data-track="azan/fajr.mp3" data-name="Fajr Azan">🕌 Fajr Azan</button>
+                                <button type="button" class="audio-test-btn-admin" id="btn-play-dhuhr" data-track="azan/dhuhr.mp3" data-name="Zohr Azan">🕌 Zohr Azan</button>
+                                <button type="button" class="audio-test-btn-admin" id="btn-play-asr" data-track="azan/asr.mp3" data-name="Asr Azan">🕌 Asr Azan</button>
+                                <button type="button" class="audio-test-btn-admin" id="btn-play-maghrib" data-track="azan/maghrib.mp3" data-name="Maghrib Azan">🕌 Maghrib Azan</button>
+                                <button type="button" class="audio-test-btn-admin" id="btn-play-isha" data-track="azan/isha.mp3" data-name="Isha Azan">🕌 Isha Azan</button>
+                                <button type="button" class="audio-test-btn-admin" id="btn-play-hourly" data-track="azan/Alhamd.mp3" data-name="Hourly Chime">🔔 Hourly Chime</button>
+                                <button type="button" class="audio-test-btn-admin" id="btn-play-makruh" data-track="azan/buzzer.mp3" data-name="Makruh Buzzer">⚠️ Makruh Buzzer</button>
+                                <button type="button" class="audio-test-btn-admin audio-stop-btn-admin" id="btn-stop-audio">⏹️ Stop Audio</button>
+                            </div>
                         </div>
-                        <div class="audio-grid-buttons">
-                            <button type="button" class="audio-test-btn" id="btn-play-fajr" data-track="azan/fajr.mp3" data-name="Fajr Azan">🕌 Fajr Azan</button>
-                            <button type="button" class="audio-test-btn" id="btn-play-dhuhr" data-track="azan/dhuhr.mp3" data-name="Zohr Azan">🕌 Zohr Azan</button>
-                            <button type="button" class="audio-test-btn" id="btn-play-asr" data-track="azan/asr.mp3" data-name="Asr Azan">🕌 Asr Azan</button>
-                            <button type="button" class="audio-test-btn" id="btn-play-maghrib" data-track="azan/maghrib.mp3" data-name="Maghrib Azan">🕌 Maghrib Azan</button>
-                            <button type="button" class="audio-test-btn" id="btn-play-isha" data-track="azan/isha.mp3" data-name="Isha Azan">🕌 Isha Azan</button>
-                            <button type="button" class="audio-test-btn" id="btn-play-hourly" data-track="azan/Alhamd.mp3" data-name="Hourly Chime">🔔 Hourly Chime</button>
-                            <button type="button" class="audio-test-btn" id="btn-play-makruh" data-track="azan/buzzer.mp3" data-name="Makruh Buzzer">⚠️ Makruh Buzzer</button>
-                            <button type="button" class="audio-test-btn audio-stop-btn" id="btn-stop-audio">⏹️ Stop Audio</button>
-                        </div>
-                    </div>
 
-                    <!-- Project Upload Location Documentation Box -->
-                    <div class="audio-guide-box">
-                        <div class="audio-guide-title">
-                            <span>📁</span> Where to Upload Custom MP3 Files in Project Folder:
+                        <!-- Directory Guide -->
+                        <div class="audio-guide-card-admin">
+                            <div style="font-weight: 800; color: #065f46; font-size: 0.9rem; margin-bottom: 6px;">
+                                📁 Project Upload Folder: <code>azan/</code>
+                            </div>
+                            <div style="font-size: 0.85rem; color: #334155; line-height: 1.5;">
+                                Upload custom audio directly to <code>azan/</code> in the project root:
+                                <ul style="margin: 6px 0 0 16px; padding: 0;">
+                                    <li><code>fajr.mp3</code>, <code>dhuhr.mp3</code>, <code>asr.mp3</code>, <code>maghrib.mp3</code>, <code>isha.mp3</code></li>
+                                    <li><code>Alhamd.mp3</code> (Hourly chime), <code>buzzer.mp3</code> (Makruh warning)</li>
+                                </ul>
+                            </div>
                         </div>
-                        <div style="font-size: 0.84rem; color: #e8f5e9; line-height: 1.45;">
-                            Place your audio files directly in the <code style="background: rgba(0,0,0,0.5); color: #81c784; padding: 2px 6px; border-radius: 4px; font-weight: bold;">azan/</code> folder in the project root:
-                        </div>
-                        <ul class="audio-guide-list">
-                            <li><code>azan/fajr.mp3</code> — Fajr prayer Azan</li>
-                            <li><code>azan/dhuhr.mp3</code> — Zohr prayer Azan</li>
-                            <li><code>azan/asr.mp3</code> — Asr prayer Azan</li>
-                            <li><code>azan/maghrib.mp3</code> — Maghrib prayer Azan</li>
-                            <li><code>azan/isha.mp3</code> — Isha prayer Azan</li>
-                            <li><code>azan/Alhamd.mp3</code> — Hourly Chime ("Alhamdulillah" / Chime bell)</li>
-                            <li><code>azan/buzzer.mp3</code> — Makruh Waqt prohibited prayer warning buzzer</li>
-                        </ul>
-                    </div>
-
-                    <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <a href="admin.html" style="color: #81c784; text-decoration: underline; font-size: 0.88rem;">Looking for advanced custom MP3 uploads and multi-reminders? Open Full Admin Page →</a>
                     </div>
                 </div>
             </div>
 
+            <!-- Sticky Bottom Save Bar matching image_c1abb5c6.png -->
             <div class="settings-modal-footer">
                 <span id="settings-save-status" class="settings-status-msg">✓ Settings saved & applied!</span>
-                <div style="display: flex; gap: 10px; margin-left: auto;">
-                    <button type="button" class="btn-secondary" id="cancel-settings-btn">Cancel</button>
-                    <button type="button" class="btn-primary" id="save-settings-btn">💾 Save & Apply Now</button>
-                </div>
+                <button type="button" class="btn-cancel-settings" id="cancel-settings-btn">Cancel</button>
+                <button type="button" class="btn-save-all-settings" id="save-settings-btn">
+                    <span>💾</span> Save All Settings
+                </button>
             </div>
         </div>
     </div>
@@ -408,7 +560,33 @@
             setElem('isha-qaza', calculateQaza(t.Isha));
         }
 
-        // Apply saved settings (city, theme, etc.) on startup
+        // Supported Themes & Layouts
+        var ALL_THEMES = ['default', 'blue', 'dark', 'light', 'emerald-gold', 'ruby', 'amber', 'purple', 'highcontrast'];
+        var ALL_LAYOUTS = ['default', 'compact', 'modern', 'horizontal', 'vertical'];
+
+        function applyThemeToDOM(thm) {
+            if (!thm) thm = 'default';
+            for (var i = 0; i < ALL_THEMES.length; i++) {
+                document.body.classList.remove('theme-' + ALL_THEMES[i]);
+            }
+            if (thm !== 'default') {
+                document.body.classList.add('theme-' + thm);
+            }
+        }
+
+        function applyLayoutToDOM(lay) {
+            if (!lay) lay = 'default';
+            var grid = document.getElementById('prayer-grid');
+            if (!grid) return;
+            for (var i = 0; i < ALL_LAYOUTS.length; i++) {
+                grid.classList.remove('layout-' + ALL_LAYOUTS[i]);
+            }
+            if (lay !== 'default') {
+                grid.classList.add('layout-' + lay);
+            }
+        }
+
+        // Apply saved settings (city, theme, layout, etc.) on startup
         try {
             var savedStr = localStorage.getItem('settings');
             if (savedStr) {
@@ -418,9 +596,11 @@
                         var cityEl = document.getElementById('current-city');
                         if (cityEl) cityEl.textContent = sObj.city;
                     }
-                    if (sObj.theme && sObj.theme !== 'default') {
-                        document.body.classList.remove('theme-blue', 'theme-dark', 'theme-light');
-                        document.body.classList.add('theme-' + sObj.theme);
+                    if (sObj.theme) {
+                        applyThemeToDOM(sObj.theme);
+                    }
+                    if (sObj.layout) {
+                        applyLayoutToDOM(sObj.layout);
                     }
                 }
             }
@@ -553,14 +733,71 @@
 
         var currentSelectedAsr = 'hanafi';
         var currentSelectedTheme = 'default';
+        var currentSelectedLayout = 'default';
         var currentAzanEnabled = true;
         var currentAzanVolume = 100;
+        var currentReminders = [];
+        var availableMp3Files = [
+            'fajr.mp3',
+            'dhuhr.mp3',
+            'asr.mp3',
+            'maghrib.mp3',
+            'isha.mp3',
+            'Alhamd.mp3',
+            'buzzer.mp3',
+            'Fajr Azan by Shaykh Ali Ahmed Mullah.mp3',
+            'Mufti Shahnawaz Ruqya.mp3'
+        ];
 
         // Shared Universal Kiosk Audio Player
         var kioskAudio = new Audio();
         kioskAudio.preload = 'auto';
         var currentActivePlayBtn = null;
-        var playedKioskAzans = { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
+
+        // Auto unlock audio on any user interaction (Kiosk & Web Preview)
+        function unlockKioskAudio() {
+            try {
+                if (typeof AudioContext !== 'undefined' || typeof webkitAudioContext !== 'undefined') {
+                    var AC = window.AudioContext || window.webkitAudioContext;
+                    if (!window.__globalAudioCtx) window.__globalAudioCtx = new AC();
+                    if (window.__globalAudioCtx.state === 'suspended') window.__globalAudioCtx.resume();
+                }
+            } catch (e) {}
+            try {
+                kioskAudio.muted = true;
+                kioskAudio.play().then(function() {
+                    kioskAudio.pause();
+                    kioskAudio.muted = false;
+                    kioskAudio.currentTime = 0;
+                }).catch(function() {});
+            } catch (e) {}
+            document.removeEventListener('click', unlockKioskAudio);
+            document.removeEventListener('touchstart', unlockKioskAudio);
+        }
+        document.addEventListener('click', unlockKioskAudio);
+        document.addEventListener('touchstart', unlockKioskAudio);
+
+        // Fallback Web Audio Synthesizer Chime
+        function playFallbackChime() {
+            try {
+                var AC = window.AudioContext || window.webkitAudioContext;
+                if (!AC) return;
+                var ctx = window.__globalAudioCtx || new AC();
+                window.__globalAudioCtx = ctx;
+                if (ctx.state === 'suspended') ctx.resume();
+                var osc = ctx.createOscillator();
+                var gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+                osc.frequency.setValueAtTime(880.00, ctx.currentTime + 0.15); // A5
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + 0.6);
+            } catch (e) {}
+        }
 
         function updateAudioPlaybackUI(statusText, isPlaying) {
             var statusPill = document.getElementById('audio-playback-status');
@@ -593,6 +830,9 @@
         function playKioskAudio(src, trackName, btnEl) {
             stopKioskAudio();
             try {
+                if (!src.startsWith('http') && !src.startsWith('/') && !src.startsWith('azan/')) {
+                    src = 'azan/' + src;
+                }
                 kioskAudio.src = src;
                 kioskAudio.volume = Math.max(0, Math.min(1, currentAzanVolume / 100));
                 
@@ -605,13 +845,15 @@
                 var playPromise = kioskAudio.play();
                 if (playPromise && typeof playPromise.catch === 'function') {
                     playPromise.catch(function(err) {
-                        console.warn("Kiosk audio play warning:", err);
-                        updateAudioPlaybackUI('⚠️ Autoplay blocked or file loading: ' + trackName, false);
+                        console.warn("Kiosk audio play blocked/error:", err);
+                        playFallbackChime();
+                        updateAudioPlaybackUI('⚠️ Autoplay blocked - tap screen to allow: ' + trackName, false);
                         if (btnEl) btnEl.classList.remove('playing');
                     });
                 }
             } catch (e) {
-                console.warn("Audio error:", e);
+                console.warn("Audio play exception:", e);
+                playFallbackChime();
             }
         }
 
@@ -628,7 +870,8 @@
                 currentActivePlayBtn.classList.remove('playing');
                 currentActivePlayBtn = null;
             }
-            updateAudioPlaybackUI('⚠️ Audio Error loading file', false);
+            playFallbackChime();
+            updateAudioPlaybackUI('⚠️ Error loading file (played chime alert)', false);
         };
 
         function updateAzanToggleUI() {
@@ -637,7 +880,7 @@
                 if (currentAzanEnabled) {
                     toggleBtn.textContent = '🔊 Azan: ON';
                     toggleBtn.className = 'btn-primary';
-                    toggleBtn.style.background = '#2e7d32';
+                    toggleBtn.style.background = '#15803d';
                 } else {
                     toggleBtn.textContent = '🔇 Azan: OFF';
                     toggleBtn.className = 'btn-secondary';
@@ -646,60 +889,147 @@
             }
         }
 
-        function loadModalFieldsFromSettings() {
-            try {
-                var s = localStorage.getItem('settings');
-                var parsed = s ? JSON.parse(s) : {};
-                
-                var cityInput = document.getElementById('setting-city');
-                var stateInput = document.getElementById('setting-state');
-                var countryInput = document.getElementById('setting-country');
-                var calcSelect = document.getElementById('setting-calc-method');
-                var hijriSelect = document.getElementById('setting-hijri-adj');
-                var volumeInput = document.getElementById('setting-azan-volume');
-                var volumeLabel = document.getElementById('volume-label');
-
-                if (cityInput) cityInput.value = parsed.city || 'Mumbai';
-                if (stateInput) stateInput.value = parsed.state || '';
-                if (countryInput) countryInput.value = parsed.country || 'India';
-                if (calcSelect) calcSelect.value = parsed.calcMethod || '2';
-                if (hijriSelect) hijriSelect.value = (typeof parsed.adjustment !== 'undefined') ? String(parsed.adjustment) : '0';
-
-                currentSelectedAsr = parsed.asrMethod || 'hanafi';
-                setAsrActive(currentSelectedAsr);
-
-                currentSelectedTheme = parsed.theme || 'default';
-                setThemeActive(currentSelectedTheme);
-
-                if (typeof parsed.azanAudioEnabled !== 'undefined') {
-                    currentAzanEnabled = Boolean(parsed.azanAudioEnabled);
-                } else {
-                    currentAzanEnabled = true;
+        // Fetch available MP3 files dynamically from /list_mp3.php
+        function fetchAvailableAudioTracks(callback) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/list_mp3.php', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4) {
+                    if (xhr.status === 200) {
+                        try {
+                            var list = JSON.parse(xhr.responseText);
+                            if (Array.isArray(list) && list.length > 0) {
+                                availableMp3Files = list;
+                            }
+                        } catch (e) {}
+                    }
+                    if (typeof callback === 'function') callback();
                 }
-                updateAzanToggleUI();
-
-                if (typeof parsed.azanVolume !== 'undefined') {
-                    currentAzanVolume = parseInt(parsed.azanVolume, 10);
-                } else {
-                    currentAzanVolume = 100;
-                }
-                if (volumeInput) volumeInput.value = currentAzanVolume;
-                if (volumeLabel) volumeLabel.textContent = currentAzanVolume + '%';
-
-            } catch (e) {}
+            };
+            xhr.onerror = function() {
+                if (typeof callback === 'function') callback();
+            };
+            xhr.send();
         }
 
-        // Initialize audio settings from storage on startup
-        try {
-            var initS = localStorage.getItem('settings');
-            if (initS) {
-                var initP = JSON.parse(initS);
-                if (initP) {
-                    if (typeof initP.azanAudioEnabled !== 'undefined') currentAzanEnabled = Boolean(initP.azanAudioEnabled);
-                    if (typeof initP.azanVolume !== 'undefined') currentAzanVolume = parseInt(initP.azanVolume, 10);
+        function populateAudioSelect(selectEl, selectedVal) {
+            if (!selectEl) return;
+            selectEl.innerHTML = '';
+            for (var i = 0; i < availableMp3Files.length; i++) {
+                var fileName = availableMp3Files[i];
+                var opt = document.createElement('option');
+                opt.value = 'azan/' + fileName;
+                opt.textContent = fileName;
+                if (selectedVal && (selectedVal === opt.value || selectedVal === fileName || selectedVal.indexOf(fileName) !== -1)) {
+                    opt.selected = true;
+                }
+                selectEl.appendChild(opt);
+            }
+        }
+
+        function renderRemindersUI() {
+            var container = document.getElementById('reminders-container-modal');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (!currentReminders || currentReminders.length === 0) {
+                container.innerHTML = '<div style="color: #94a3b8; font-size: 0.88rem; font-style: italic; padding: 8px 0;">No custom audio alerts set. Click "Add New Reminder" above to create one.</div>';
+                return;
+            }
+
+            for (var i = 0; i < currentReminders.length; i++) {
+                (function(idx) {
+                    var rem = currentReminders[idx] || {};
+                    var row = document.createElement('div');
+                    row.className = 'reminder-item-card-admin';
+                    row.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; flex-wrap: wrap;';
+
+                    var timeInput = document.createElement('input');
+                    timeInput.type = 'time';
+                    timeInput.className = 'settings-input';
+                    timeInput.style.cssText = 'width: 120px; font-weight: 700; padding: 6px 10px;';
+                    timeInput.value = rem.time || '12:00';
+                    timeInput.onchange = function() {
+                        if (currentReminders[idx]) currentReminders[idx].time = this.value;
+                    };
+
+                    var audioSelect = document.createElement('select');
+                    audioSelect.className = 'settings-select';
+                    audioSelect.style.cssText = 'flex: 1; min-width: 160px; padding: 6px 10px;';
+                    populateAudioSelect(audioSelect, rem.audio || 'azan/fajr.mp3');
+                    audioSelect.onchange = function() {
+                        if (currentReminders[idx]) currentReminders[idx].audio = this.value;
+                    };
+
+                    var repeatLabel = document.createElement('label');
+                    repeatLabel.style.cssText = 'display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; cursor: pointer;';
+                    var repeatCheck = document.createElement('input');
+                    repeatCheck.type = 'checkbox';
+                    repeatCheck.checked = Boolean(rem.repeat);
+                    repeatCheck.onchange = function() {
+                        if (currentReminders[idx]) currentReminders[idx].repeat = this.checked;
+                    };
+                    repeatLabel.appendChild(repeatCheck);
+                    repeatLabel.appendChild(document.createTextNode('Repeat Daily'));
+
+                    var delBtn = document.createElement('button');
+                    delBtn.type = 'button';
+                    delBtn.style.cssText = 'background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; cursor: pointer; font-weight: 700;';
+                    delBtn.textContent = '🗑️ Delete';
+                    delBtn.onclick = function() {
+                        currentReminders.splice(idx, 1);
+                        renderRemindersUI();
+                    };
+
+                    row.appendChild(timeInput);
+                    row.appendChild(audioSelect);
+                    row.appendChild(repeatLabel);
+                    row.appendChild(delBtn);
+                    container.appendChild(row);
+                })(i);
+            }
+        }
+
+        var addReminderBtn = document.getElementById('btn-add-reminder');
+        if (addReminderBtn) {
+            addReminderBtn.onclick = function() {
+                if (!Array.isArray(currentReminders)) currentReminders = [];
+                currentReminders.push({
+                    time: '12:00',
+                    audio: 'azan/' + (availableMp3Files[0] || 'fajr.mp3'),
+                    repeat: true
+                });
+                renderRemindersUI();
+            };
+        }
+
+        function setThemeActive(thm) {
+            if (!thm) thm = 'default';
+            currentSelectedTheme = thm;
+            var themeCards = document.querySelectorAll('.theme-card-item');
+            for (var i = 0; i < themeCards.length; i++) {
+                if (themeCards[i].getAttribute('data-theme') === thm) {
+                    themeCards[i].classList.add('active');
+                } else {
+                    themeCards[i].classList.remove('active');
                 }
             }
-        } catch (e) {}
+            applyThemeToDOM(thm);
+        }
+
+        function setLayoutActive(lay) {
+            if (!lay) lay = 'default';
+            currentSelectedLayout = lay;
+            var layoutCards = document.querySelectorAll('.layout-card-item');
+            for (var i = 0; i < layoutCards.length; i++) {
+                if (layoutCards[i].getAttribute('data-layout') === lay) {
+                    layoutCards[i].classList.add('active');
+                } else {
+                    layoutCards[i].classList.remove('active');
+                }
+            }
+            applyLayoutToDOM(lay);
+        }
 
         function setAsrActive(method) {
             var hanafiBtn = document.getElementById('btn-asr-hanafi');
@@ -716,21 +1046,73 @@
             currentSelectedAsr = method;
         }
 
-        function setThemeActive(thm) {
-            var themeBtns = document.querySelectorAll('.theme-select-btn');
-            for (var i = 0; i < themeBtns.length; i++) {
-                if (themeBtns[i].getAttribute('data-theme') === thm) {
-                    themeBtns[i].classList.add('active');
+        function loadModalFieldsFromSettings() {
+            try {
+                var s = localStorage.getItem('settings');
+                var parsed = s ? JSON.parse(s) : {};
+                
+                var cityInput = document.getElementById('setting-city');
+                var stateInput = document.getElementById('setting-state');
+                var countryInput = document.getElementById('setting-country');
+                var calcSelect = document.getElementById('setting-calc-method');
+                var hijriSelect = document.getElementById('setting-hijri-adj');
+                var volumeInput = document.getElementById('setting-azan-volume');
+                var volumeLabel = document.getElementById('volume-label');
+                var alarmTimeInput = document.getElementById('setting-alarm-time');
+                var alarmAudioSelect = document.getElementById('setting-alarm-audio');
+
+                if (cityInput) cityInput.value = parsed.city || 'Mumbai';
+                if (stateInput) stateInput.value = parsed.state || '';
+                if (countryInput) countryInput.value = parsed.country || 'India';
+                if (calcSelect) calcSelect.value = parsed.calcMethod || '2';
+                if (hijriSelect) hijriSelect.value = (typeof parsed.adjustment !== 'undefined') ? String(parsed.adjustment) : '0';
+
+                if (alarmTimeInput) alarmTimeInput.value = parsed.alarmTime || '00:00';
+                populateAudioSelect(alarmAudioSelect, parsed.alarmAudio || 'azan/fajr.mp3');
+
+                currentReminders = Array.isArray(parsed.reminders) ? parsed.reminders.slice() : [];
+                renderRemindersUI();
+
+                currentSelectedAsr = parsed.asrMethod || 'hanafi';
+                setAsrActive(currentSelectedAsr);
+
+                currentSelectedTheme = parsed.theme || 'default';
+                setThemeActive(currentSelectedTheme);
+
+                currentSelectedLayout = parsed.layout || 'default';
+                setLayoutActive(currentSelectedLayout);
+
+                if (typeof parsed.azanAudioEnabled !== 'undefined') {
+                    currentAzanEnabled = Boolean(parsed.azanAudioEnabled);
                 } else {
-                    themeBtns[i].classList.remove('active');
+                    currentAzanEnabled = true;
                 }
+                updateAzanToggleUI();
+
+                if (typeof parsed.azanVolume !== 'undefined') {
+                    currentAzanVolume = parseInt(parsed.azanVolume, 10);
+                } else {
+                    currentAzanVolume = 100;
+                }
+                if (volumeInput) volumeInput.value = currentAzanVolume;
+                if (volumeLabel) volumeLabel.textContent = currentAzanVolume + '%';
+
+            } catch (e) {
+                console.warn("Load modal fields warning:", e);
             }
-            currentSelectedTheme = thm;
         }
+
+        // Initialize audio tracks from list_mp3.php
+        fetchAvailableAudioTracks(function() {
+            var alarmAudioSelect = document.getElementById('setting-alarm-audio');
+            if (alarmAudioSelect) populateAudioSelect(alarmAudioSelect, 'azan/fajr.mp3');
+        });
 
         if (openBtn) {
             openBtn.onclick = function() {
-                loadModalFieldsFromSettings();
+                fetchAvailableAudioTracks(function() {
+                    loadModalFieldsFromSettings();
+                });
                 if (modal) modal.classList.add('open');
             };
         }
@@ -769,11 +1151,21 @@
         if (hanafiBtn) hanafiBtn.onclick = function() { setAsrActive('hanafi'); };
         if (shafiBtn) shafiBtn.onclick = function() { setAsrActive('shafi'); };
 
-        // Theme Toggle
-        var themeBtns = document.querySelectorAll('.theme-select-btn');
-        for (var th = 0; th < themeBtns.length; th++) {
-            themeBtns[th].onclick = function() {
-                setThemeActive(this.getAttribute('data-theme'));
+        // Theme Toggle Buttons & Cards
+        var themeCards = document.querySelectorAll('.theme-card-item');
+        for (var th = 0; th < themeCards.length; th++) {
+            themeCards[th].onclick = function() {
+                var chosen = this.getAttribute('data-theme');
+                setThemeActive(chosen);
+            };
+        }
+
+        // Layout Toggle Cards
+        var layoutCards = document.querySelectorAll('.layout-card-item');
+        for (var ly = 0; ly < layoutCards.length; ly++) {
+            layoutCards[ly].onclick = function() {
+                var chosen = this.getAttribute('data-layout');
+                setLayoutActive(chosen);
             };
         }
 
@@ -800,8 +1192,8 @@
             };
         }
 
-        // Hook up all audio test buttons
-        var audioButtons = document.querySelectorAll('.audio-test-btn');
+        // Audio test buttons
+        var audioButtons = document.querySelectorAll('.audio-test-btn-admin, .audio-test-btn');
         for (var ab = 0; ab < audioButtons.length; ab++) {
             (function(btn) {
                 btn.onclick = function() {
@@ -826,6 +1218,8 @@
                 var countryVal = (document.getElementById('setting-country') || {}).value || 'India';
                 var calcVal = (document.getElementById('setting-calc-method') || {}).value || '2';
                 var hijriVal = (document.getElementById('setting-hijri-adj') || {}).value || '0';
+                var alarmTimeVal = (document.getElementById('setting-alarm-time') || {}).value || '00:00';
+                var alarmAudioVal = (document.getElementById('setting-alarm-audio') || {}).value || 'azan/fajr.mp3';
 
                 var currentSettings = {};
                 try {
@@ -840,20 +1234,32 @@
                 currentSettings.asrMethod = currentSelectedAsr;
                 currentSettings.adjustment = hijriVal;
                 currentSettings.theme = currentSelectedTheme;
+                currentSettings.layout = currentSelectedLayout;
+                currentSettings.alarmTime = alarmTimeVal;
+                currentSettings.alarmAudio = alarmAudioVal;
+                currentSettings.reminders = currentReminders;
                 currentSettings.azanAudioEnabled = currentAzanEnabled;
                 currentSettings.azanVolume = currentAzanVolume;
 
                 localStorage.setItem('settings', JSON.stringify(currentSettings));
+                localStorage.setItem('selectedTheme', currentSelectedTheme);
+                localStorage.setItem('selectedLayout', currentSelectedLayout);
+
+                // Sync with server-side settings.json
+                try {
+                    var xhrPost = new XMLHttpRequest();
+                    xhrPost.open('POST', '/save_settings.php', true);
+                    xhrPost.setRequestHeader('Content-Type', 'application/json');
+                    xhrPost.send(JSON.stringify(currentSettings));
+                } catch (e) {}
 
                 // 1. Update City on screen immediately
                 var cityEl = document.getElementById('current-city');
                 if (cityEl) cityEl.textContent = currentSettings.city;
 
-                // 2. Update Theme on screen immediately
-                document.body.classList.remove('theme-blue', 'theme-dark', 'theme-light');
-                if (currentSettings.theme && currentSettings.theme !== 'default') {
-                    document.body.classList.add('theme-' + currentSettings.theme);
-                }
+                // 2. Update Theme & Layout on screen immediately
+                applyThemeToDOM(currentSettings.theme);
+                applyLayoutToDOM(currentSettings.layout);
 
                 // 3. Update Urdu Hijri date immediately
                 var islamElem = document.getElementById('islamic-date');

@@ -1,34 +1,208 @@
-/* Theme Variables */
-:root {
-    /* Default Theme (Rich Forest Green matching authentic wall clock display) */
+/* Theme Variables - 9 High-Contrast Themes with Guaranteed Font Visibility */
+:root, .theme-default {
     --theme-primary: #0a2f11;
     --theme-secondary: #13461c;
+    --theme-card-border: rgba(255, 255, 255, 0.08);
     --theme-text: #FFFFFF;
+    --theme-text-sub: #e0e0e0;
     --theme-accent: #2e7d32;
+    --theme-gold: #ffd54f;
+    --theme-topbar-bg: rgba(0, 0, 0, 0.45);
+    --theme-topbar-text: #FFFFFF;
 }
 
-/* Blue Theme */
+/* 1. Blue Theme (Royal Navy Blue) */
 .theme-blue {
-    --theme-primary: #0d1b3e;
+    --theme-primary: #0b192c;
     --theme-secondary: #172b59;
+    --theme-card-border: rgba(255, 255, 255, 0.1);
     --theme-text: #FFFFFF;
+    --theme-text-sub: #cbd5e1;
     --theme-accent: #1e88e5;
+    --theme-gold: #93c5fd;
+    --theme-topbar-bg: rgba(5, 12, 28, 0.65);
+    --theme-topbar-text: #FFFFFF;
 }
 
-/* Dark Theme */
+/* 2. Dark Theme (Midnight Charcoal OLED) */
 .theme-dark {
-    --theme-primary: #121212;
-    --theme-secondary: #1f1f1f;
+    --theme-primary: #090a0f;
+    --theme-secondary: #18181b;
+    --theme-card-border: rgba(255, 255, 255, 0.12);
     --theme-text: #FFFFFF;
-    --theme-accent: #388e3c;
+    --theme-text-sub: #a1a1aa;
+    --theme-accent: #10b981;
+    --theme-gold: #34d399;
+    --theme-topbar-bg: rgba(0, 0, 0, 0.7);
+    --theme-topbar-text: #FFFFFF;
 }
 
-/* Light Theme */
+/* 3. Light Theme (Clean Porcelain Light with Deep Dark High-Contrast Fonts) */
 .theme-light {
-    --theme-primary: #e8f5e9;
+    --theme-primary: #f1f5f9;
     --theme-secondary: #ffffff;
-    --theme-text: #1b5e20;
-    --theme-accent: #81c784;
+    --theme-card-border: #cbd5e1;
+    --theme-text: #0f172a;
+    --theme-text-sub: #334155;
+    --theme-accent: #059669;
+    --theme-gold: #d97706;
+    --theme-topbar-bg: #ffffff;
+    --theme-topbar-text: #0f172a;
+}
+.theme-light .top-bar {
+    background-color: #ffffff !important;
+    border-bottom: 2px solid #e2e8f0 !important;
+    color: #0f172a !important;
+}
+.theme-light .top-bar .current-time,
+.theme-light .top-bar .next-prayer,
+.theme-light .top-bar .date-info,
+.theme-light .top-bar #location {
+    color: #0f172a !important;
+}
+.theme-light .prayer-box,
+.theme-light .hadith-box {
+    background-color: #ffffff !important;
+    border: 1.5px solid #cbd5e1 !important;
+    color: #0f172a !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06) !important;
+}
+.theme-light .prayer-name {
+    color: #0f172a !important;
+}
+.theme-light .prayer-time {
+    color: #047857 !important;
+}
+.theme-light .prayer-details {
+    color: #334155 !important;
+}
+.theme-light .prayer-details div {
+    color: #475569 !important;
+}
+.theme-light .prayer-details span {
+    color: #0f172a !important;
+    font-weight: 700;
+}
+.theme-light .hadith-title {
+    color: #047857 !important;
+}
+.theme-light .hadith-content {
+    color: #1e293b !important;
+}
+.theme-light .hadith-source {
+    color: #64748b !important;
+}
+
+/* 4. Emerald & Gold (Imperial Mosque Architectural) */
+.theme-emerald-gold {
+    --theme-primary: #042f2e;
+    --theme-secondary: #064e3b;
+    --theme-card-border: rgba(245, 158, 11, 0.35);
+    --theme-text: #FFFFFF;
+    --theme-text-sub: #fde68a;
+    --theme-accent: #f59e0b;
+    --theme-gold: #fbbf24;
+    --theme-topbar-bg: rgba(2, 26, 25, 0.7);
+    --theme-topbar-text: #FFFFFF;
+}
+.theme-emerald-gold .prayer-name {
+    color: #fde68a !important;
+}
+.theme-emerald-gold .prayer-time {
+    color: #ffffff !important;
+}
+
+/* 5. Velvet Ruby (Imperial Burgundy Crimson) */
+.theme-ruby {
+    --theme-primary: #2d060e;
+    --theme-secondary: #4c0519;
+    --theme-card-border: rgba(253, 164, 175, 0.25);
+    --theme-text: #FFFFFF;
+    --theme-text-sub: #ffe4e6;
+    --theme-accent: #e11d48;
+    --theme-gold: #fda4af;
+    --theme-topbar-bg: rgba(25, 3, 7, 0.7);
+    --theme-topbar-text: #FFFFFF;
+}
+.theme-ruby .prayer-name {
+    color: #fda4af !important;
+}
+.theme-ruby .prayer-time {
+    color: #ffffff !important;
+}
+
+/* 6. Desert Amber (Moroccan Sandalwood & Amber) */
+.theme-amber {
+    --theme-primary: #1f130b;
+    --theme-secondary: #382013;
+    --theme-card-border: rgba(251, 191, 36, 0.3);
+    --theme-text: #FFFFFF;
+    --theme-text-sub: #fef3c7;
+    --theme-accent: #d97706;
+    --theme-gold: #fbbf24;
+    --theme-topbar-bg: rgba(18, 10, 5, 0.7);
+    --theme-topbar-text: #FFFFFF;
+}
+.theme-amber .prayer-name {
+    color: #fbbf24 !important;
+}
+.theme-amber .prayer-time {
+    color: #ffffff !important;
+}
+
+/* 7. Midnight Purple (Amethyst Night) */
+.theme-purple {
+    --theme-primary: #140b24;
+    --theme-secondary: #261245;
+    --theme-card-border: rgba(216, 180, 254, 0.25);
+    --theme-text: #FFFFFF;
+    --theme-text-sub: #f3e8ff;
+    --theme-accent: #9333ea;
+    --theme-gold: #d8b4fe;
+    --theme-topbar-bg: rgba(12, 6, 22, 0.7);
+    --theme-topbar-text: #FFFFFF;
+}
+.theme-purple .prayer-name {
+    color: #d8b4fe !important;
+}
+.theme-purple .prayer-time {
+    color: #ffffff !important;
+}
+
+/* 8. High-Contrast Signage (True Black & Neon Gold) */
+.theme-highcontrast {
+    --theme-primary: #000000;
+    --theme-secondary: #0d0d0d;
+    --theme-card-border: #facc15;
+    --theme-text: #ffff00;
+    --theme-text-sub: #ffffff;
+    --theme-accent: #facc15;
+    --theme-gold: #ffff00;
+    --theme-topbar-bg: #000000;
+    --theme-topbar-text: #ffffff;
+}
+.theme-highcontrast .top-bar {
+    border-bottom: 2px solid #facc15 !important;
+}
+.theme-highcontrast .prayer-box,
+.theme-highcontrast .hadith-box {
+    border: 2.5px solid #facc15 !important;
+    background-color: #0d0d0d !important;
+}
+.theme-highcontrast .prayer-name {
+    color: #ffffff !important;
+}
+.theme-highcontrast .prayer-time {
+    color: #ffff00 !important;
+}
+.theme-highcontrast .prayer-details {
+    color: #ffffff !important;
+}
+.theme-highcontrast .prayer-details div {
+    color: #fef08a !important;
+}
+.theme-highcontrast .prayer-details span {
+    color: #ffffff !important;
 }
 
 /* Apply Theme Variables */
@@ -371,6 +545,83 @@ html, body {
     font-weight: 700;
 }
 
+/* Layout 2: Compact 3x2 Grid Override */
+.prayer-grid.layout-compact {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    grid-template-rows: 1fr 1fr !important;
+    gap: clamp(6px, 1.2vmin, 14px) !important;
+}
+.prayer-grid.layout-compact .prayer-box,
+.prayer-grid.layout-compact .hadith-box {
+    width: 100% !important;
+    height: 100% !important;
+    margin-bottom: 0 !important;
+}
+
+/* Layout 4: Horizontal Panoramic Strip (1x6 Single Row) */
+.prayer-grid.layout-horizontal {
+    display: grid !important;
+    grid-template-columns: repeat(6, 1fr) !important;
+    grid-template-rows: 1fr !important;
+    gap: clamp(4px, 1vmin, 12px) !important;
+    height: calc(100% - 9vh) !important;
+}
+.prayer-grid.layout-horizontal .prayer-box,
+.prayer-grid.layout-horizontal .hadith-box {
+    width: 100% !important;
+    height: 100% !important;
+    margin-bottom: 0 !important;
+    padding: clamp(4px, 1vmin, 12px) !important;
+}
+.prayer-grid.layout-horizontal .prayer-name {
+    font-size: clamp(0.9rem, 2.8vmin, 2.2rem) !important;
+}
+.prayer-grid.layout-horizontal .prayer-time {
+    font-size: clamp(1.2rem, 4.2vmin, 3.4rem) !important;
+}
+.prayer-grid.layout-horizontal .prayer-details {
+    font-size: clamp(0.65rem, 1.8vmin, 1.3rem) !important;
+}
+
+/* Layout 5: Vertical Totem (Portrait 1-Column Stack) */
+.prayer-grid.layout-vertical {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(6, 1fr) !important;
+    gap: clamp(4px, 1vmin, 10px) !important;
+    height: calc(100% - 9vh) !important;
+}
+.prayer-grid.layout-vertical .prayer-box,
+.prayer-grid.layout-vertical .hadith-box {
+    width: 100% !important;
+    height: 100% !important;
+    margin-bottom: 0 !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: center !important;
+    padding: clamp(6px, 1.2vmin, 14px) clamp(16px, 3.5vmin, 40px) !important;
+}
+.prayer-grid.layout-vertical .prayer-name {
+    text-align: left !important;
+    width: auto !important;
+    margin-bottom: 0 !important;
+    font-size: clamp(1.1rem, 3.5vmin, 2.5rem) !important;
+}
+.prayer-grid.layout-vertical .prayer-time {
+    text-align: center !important;
+    width: auto !important;
+    margin: 0 !important;
+    font-size: clamp(1.6rem, 5.5vmin, 4.2rem) !important;
+}
+.prayer-grid.layout-vertical .prayer-details {
+    text-align: right !important;
+    align-items: flex-end !important;
+    width: auto !important;
+    margin-top: 0 !important;
+    font-size: clamp(0.75rem, 2vmin, 1.4rem) !important;
+}
+
 /* Hadith Box */
 .hadith-box {
     background-color: var(--theme-secondary);
@@ -676,66 +927,90 @@ html, body {
 }
 
 .settings-modal-card {
-    background: #0f2c14;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 14px;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 16px;
     width: 100%;
-    max-width: 780px;
-    max-height: 90vh;
+    max-width: 920px;
+    max-height: 92vh;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.75);
-    color: #FFFFFF;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    color: #1e293b;
     overflow: hidden;
 }
 
+/* Green Header matching image_c1abb5c6.png */
 .settings-modal-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 14px 20px;
-    background: rgba(0, 0, 0, 0.35);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    background: #15803d;
+    color: #ffffff;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
 
 .settings-modal-title {
-    font-size: 1.3rem;
-    font-weight: 700;
+    font-size: 1.35rem;
+    font-weight: 800;
     letter-spacing: -0.3px;
     display: flex;
     align-items: center;
     gap: 8px;
+    color: #ffffff;
+}
+
+.settings-online-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #bbf7d0;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 3px 10px;
+    border-radius: 20px;
+}
+
+.settings-online-dot {
+    width: 8px;
+    height: 8px;
+    background: #4ade80;
+    border-radius: 50%;
 }
 
 .settings-modal-close {
-    background: transparent;
+    background: rgba(255, 255, 255, 0.15);
     border: none;
-    color: #fff;
-    font-size: 1.5rem;
+    color: #ffffff;
+    font-size: 0.95rem;
     font-weight: 700;
     cursor: pointer;
-    padding: 4px 10px;
-    border-radius: 6px;
+    padding: 6px 14px;
+    border-radius: 8px;
     line-height: 1;
+    transition: background 0.2s;
 }
 
 .settings-modal-close:hover {
-    background: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.3);
 }
 
+/* Tabs matching image_c1abb5c6.png */
 .settings-tabs {
     display: flex;
-    background: rgba(0, 0, 0, 0.2);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background: #ffffff;
+    border-bottom: 2px solid #e2e8f0;
     overflow-x: auto;
 }
 
 .settings-tab-btn {
     flex: 1;
-    padding: 12px 14px;
+    padding: 14px 16px;
     background: transparent;
     border: none;
-    color: rgba(255, 255, 255, 0.7);
+    color: #64748b;
     font-size: 1rem;
     font-weight: 600;
     cursor: pointer;
@@ -743,18 +1018,29 @@ html, body {
     white-space: nowrap;
     text-align: center;
     transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.settings-tab-btn:hover {
+    color: #1e293b;
+    background: #f8fafc;
 }
 
 .settings-tab-btn.active {
-    color: #4caf50;
-    border-bottom-color: #4caf50;
-    background: rgba(76, 175, 80, 0.1);
+    color: #059669 !important;
+    border-bottom-color: #059669 !important;
+    background: #ecfdf5 !important;
+    font-weight: 700;
 }
 
 .settings-modal-body {
-    padding: 20px;
+    padding: 24px;
     overflow-y: auto;
     flex: 1;
+    background: #f8fafc;
 }
 
 .settings-tab-content {
@@ -763,6 +1049,33 @@ html, body {
 
 .settings-tab-content.active {
     display: block;
+    animation: fadeInTab 0.25s ease-out;
+}
+
+@keyframes fadeInTab {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.settings-card-box {
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.settings-section-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: #1e293b;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
 }
 
 .settings-form-group {
@@ -771,41 +1084,43 @@ html, body {
 
 .settings-label {
     display: block;
-    font-size: 0.95rem;
-    font-weight: 600;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
     margin-bottom: 6px;
-    color: #e0e0e0;
+    color: #64748b;
 }
 
 .settings-input, .settings-select {
     width: 100%;
-    padding: 10px 14px;
-    background: #081d0c;
-    border: 1px solid rgba(255, 255, 255, 0.25);
+    padding: 11px 14px;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
     border-radius: 8px;
-    color: #FFFFFF;
-    font-size: 1rem;
+    color: #1e293b;
+    font-size: 0.95rem;
+    font-weight: 600;
     box-sizing: border-box;
     outline: none;
+    transition: all 0.2s;
 }
 
 .settings-input:focus, .settings-select:focus {
-    border-color: #4caf50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.3);
-}
-
-.settings-select option {
-    background: #0f2c14;
-    color: #fff;
+    border-color: #059669;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15);
 }
 
 .settings-row {
     display: flex;
-    gap: 12px;
+    gap: 14px;
+    flex-wrap: wrap;
 }
 
 .settings-row > div {
     flex: 1;
+    min-width: 200px;
 }
 
 .asr-button-group {
@@ -815,150 +1130,321 @@ html, body {
 
 .asr-toggle-btn {
     flex: 1;
-    padding: 10px;
-    background: #081d0c;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 11px;
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
     border-radius: 8px;
-    color: #fff;
+    color: #334155;
     font-size: 0.95rem;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     text-align: center;
+    transition: all 0.2s;
 }
 
 .asr-toggle-btn.active {
-    background: #2e7d32;
-    border-color: #4caf50;
-    color: #fff;
-    box-shadow: 0 0 8px rgba(76, 175, 80, 0.4);
+    background: #059669;
+    border-color: #047857;
+    color: #ffffff;
+    box-shadow: 0 2px 6px rgba(5, 150, 105, 0.25);
 }
 
-.theme-button-grid {
+/* ==========================================================================
+   THEME SELECTION CARDS (EXACT MATCH TO image_c1abb5c6.png)
+   ========================================================================== */
+.admin-theme-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 14px;
 }
 
-.theme-select-btn {
-    padding: 12px;
-    border-radius: 8px;
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    background: rgba(0, 0, 0, 0.3);
-    color: #fff;
-    font-weight: 600;
+@media (min-width: 640px) {
+    .admin-theme-grid {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.theme-card-item {
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    overflow: hidden;
     cursor: pointer;
-    text-align: center;
+    transition: all 0.2s ease;
+    background: #ffffff;
+    position: relative;
 }
 
-.theme-select-btn.active {
-    border-color: #4caf50;
-    background: rgba(76, 175, 80, 0.2);
+.theme-card-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
 }
 
-.settings-modal-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 14px 20px;
-    background: rgba(0, 0, 0, 0.35);
-    border-top: 1px solid rgba(255, 255, 255, 0.12);
+.theme-card-item.active {
+    border: 2.5px solid #10b981 !important;
+    outline: 2px solid #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
 }
 
-.btn-primary {
-    background: #2e7d32;
-    color: #FFFFFF;
-    border: none;
-    border-radius: 8px;
-    padding: 10px 22px;
-    font-size: 1rem;
-    font-weight: 700;
-    cursor: pointer;
-    transition: background 0.2s;
-}
-
-.btn-primary:hover {
-    background: #388e3c;
-}
-
-.btn-secondary {
-    background: rgba(255, 255, 255, 0.12);
-    color: #FFFFFF;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 10px 18px;
-    font-size: 0.95rem;
-    cursor: pointer;
-}
-
-.btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.2);
-}
-
-.settings-status-msg {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: #81c784;
-    display: none;
-}
-
-/* Audio Modal Controls & Guide Box */
-.audio-guide-box {
-    background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(76, 175, 80, 0.35);
-    border-radius: 8px;
-    padding: 12px 14px;
-    margin-top: 14px;
-    margin-bottom: 14px;
-}
-
-.audio-guide-title {
-    font-size: 0.95rem;
-    font-weight: 700;
-    color: #a5d6a7;
-    margin-bottom: 6px;
+.theme-preview-box {
+    height: 72px;
+    width: 100%;
     display: flex;
     align-items: center;
-    gap: 6px;
+    justify-content: center;
 }
 
-.audio-guide-list {
-    margin: 6px 0 0 0;
-    padding-left: 20px;
+.theme-card-label {
+    background: #0f172a;
+    color: #ffffff;
     font-size: 0.85rem;
-    line-height: 1.6;
-    color: #c8e6c9;
+    font-weight: 700;
+    padding: 7px 10px;
+    text-align: center;
+    letter-spacing: 0.3px;
 }
 
-.audio-guide-list code {
-    background: rgba(0, 0, 0, 0.5);
-    color: #ffd54f;
-    padding: 1px 6px;
-    border-radius: 4px;
-    font-family: monospace;
-    font-weight: 600;
+.theme-card-item.active .theme-card-label {
+    background: #064e3b;
+    color: #a7f3d0;
 }
 
-.audio-grid-buttons {
+/* Individual Theme Previews */
+.preview-theme-default { background: #1b5e20; }
+.preview-theme-blue { background: #1e3a8a; }
+.preview-theme-dark { background: #18181b; }
+.preview-theme-light { background: #e2e8f0; border-bottom: 1px solid #cbd5e1; }
+.preview-theme-emerald-gold { background: linear-gradient(135deg, #064e3b, #d97706); }
+.preview-theme-ruby { background: #881337; }
+.preview-theme-amber { background: #78350f; }
+.preview-theme-purple { background: #4c1d95; }
+.preview-theme-highcontrast { background: #000000; border: 2px solid #facc15; }
+
+/* ==========================================================================
+   LAYOUT SELECTION CARDS (EXACT MATCH TO image_c1abb5c6.png)
+   ========================================================================== */
+.admin-layout-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 8px;
-    margin-top: 10px;
+    gap: 14px;
 }
 
-@media (min-width: 600px) {
-    .audio-grid-buttons {
+@media (min-width: 640px) {
+    .admin-layout-grid {
         grid-template-columns: repeat(3, 1fr);
     }
 }
 
-.audio-test-btn {
-    padding: 10px 8px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    border-radius: 8px;
-    color: #fff;
-    font-size: 0.88rem;
+.layout-card-item {
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: #ffffff;
+}
+
+.layout-card-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 14px rgba(0, 0, 0, 0.08);
+}
+
+.layout-card-item.active {
+    border: 2.5px solid #10b981 !important;
+    outline: 2px solid #10b981;
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.25) !important;
+}
+
+.layout-preview-box {
+    height: 72px;
+    width: 100%;
+    background: #f1f5f9;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.layout-card-label {
+    background: #334155;
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 7px 10px;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+.layout-card-item.active .layout-card-label {
+    background: #064e3b;
+    color: #a7f3d0;
+}
+
+/* Wireframe mini visual illustrations for each layout */
+.wireframe-default {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    width: 60%;
+    height: 50px;
+}
+.wireframe-default div {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.wireframe-compact {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    width: 75%;
+    height: 50px;
+}
+.wireframe-compact div {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.wireframe-modern {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 75%;
+    height: 50px;
+}
+.wireframe-modern .wf-top {
+    height: 18px;
+    background: #94a3b8;
+    border-radius: 4px;
+}
+.wireframe-modern .wf-row {
+    display: flex;
+    gap: 4px;
+    height: 28px;
+}
+.wireframe-modern .wf-row div {
+    flex: 1;
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.wireframe-horizontal {
+    display: flex;
+    gap: 4px;
+    width: 85%;
+    height: 38px;
+}
+.wireframe-horizontal div {
+    flex: 1;
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.wireframe-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    width: 45%;
+    height: 54px;
+}
+.wireframe-vertical div {
+    flex: 1;
+    background: #cbd5e1;
+    border-radius: 3px;
+}
+
+/* ==========================================================================
+   ALARM & REMINDERS TAB
+   ========================================================================== */
+.reminder-row-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.reminder-row-item input[type="time"] {
+    width: 140px;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+.reminder-row-item select {
+    flex: 1;
+    min-width: 180px;
+    padding: 8px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
     font-weight: 600;
+}
+
+.reminder-delete-btn {
+    background: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fca5a5;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.reminder-delete-btn:hover {
+    background: #ef4444;
+    color: #ffffff;
+}
+
+/* ==========================================================================
+   AZAN & AUDIO CONTROLS
+   ========================================================================== */
+.audio-toggle-switch-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 18px;
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    margin-bottom: 14px;
+}
+
+.volume-slider-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 18px;
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.audio-grid-buttons-admin {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 10px;
+}
+
+@media (min-width: 600px) {
+    .audio-grid-buttons-admin {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
+
+.audio-test-btn-admin {
+    padding: 10px 8px;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 8px;
+    color: #1e293b;
+    font-size: 0.88rem;
+    font-weight: 700;
     cursor: pointer;
     text-align: center;
     transition: all 0.2s;
@@ -968,75 +1454,104 @@ html, body {
     gap: 6px;
 }
 
-.audio-test-btn:hover {
-    background: rgba(76, 175, 80, 0.25);
-    border-color: #4caf50;
+.audio-test-btn-admin:hover {
+    background: #ecfdf5;
+    border-color: #059669;
+    color: #065f46;
 }
 
-.audio-test-btn.playing {
-    background: #e65100 !important;
-    border-color: #ff9800 !important;
-    color: #fff !important;
+.audio-test-btn-admin.playing {
+    background: #ea580c !important;
+    border-color: #c2410c !important;
+    color: #ffffff !important;
     animation: pulseAudio 1.5s infinite;
 }
 
-@keyframes pulseAudio {
-    0% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0.5); }
-    70% { box-shadow: 0 0 0 8px rgba(255, 152, 0, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(255, 152, 0, 0); }
+.audio-stop-btn-admin {
+    background: #fee2e2;
+    border-color: #fca5a5;
+    color: #b91c1c;
 }
 
-.audio-stop-btn {
-    background: rgba(244, 67, 54, 0.2);
-    border-color: rgba(244, 67, 54, 0.4);
-    color: #ff8a80;
+.audio-stop-btn-admin:hover {
+    background: #dc2626;
+    color: #ffffff;
 }
 
-.audio-stop-btn:hover {
-    background: #d32f2f;
-    color: #fff;
-}
-
-.audio-status-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    background: rgba(76, 175, 80, 0.2);
-    color: #81c784;
-    border: 1px solid rgba(76, 175, 80, 0.3);
-    margin-top: 6px;
-}
-
-.audio-toggle-switch {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+.audio-guide-card-admin {
+    background: #f1f5f9;
+    border-left: 4px solid #059669;
     border-radius: 8px;
-    margin-bottom: 12px;
+    padding: 14px 16px;
+    margin-top: 16px;
 }
 
-.volume-slider-row {
+.audio-guide-card-admin code {
+    background: #e2e8f0;
+    color: #065f46;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-family: monospace;
+}
+
+/* ==========================================================================
+   BOTTOM FOOTER SAVE BAR (MATCHING image_c1abb5c6.png)
+   ========================================================================== */
+.settings-modal-footer {
+    padding: 14px 20px;
+    background: #ffffff;
+    border-top: 1px solid #e2e8f0;
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 8px 14px;
-    background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 8px;
-    margin-bottom: 12px;
 }
 
-.volume-slider {
+.btn-save-all-settings {
     flex: 1;
-    accent-color: #4caf50;
-    height: 6px;
+    background: #15803d;
+    color: #ffffff;
+    font-size: 1.05rem;
+    font-weight: 800;
+    padding: 14px 24px;
+    border-radius: 10px;
+    border: none;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    box-shadow: 0 4px 10px rgba(21, 128, 61, 0.2);
+    transition: all 0.2s;
+}
+
+.btn-save-all-settings:hover {
+    background: #166534;
+    transform: translateY(-1px);
+}
+
+.btn-cancel-settings {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 0.95rem;
+    font-weight: 700;
+    padding: 14px 20px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel-settings:hover {
+    background: #e2e8f0;
+    color: #1e293b;
+}
+
+.settings-status-msg {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #059669;
+    display: none;
+    margin-right: auto;
 }
 

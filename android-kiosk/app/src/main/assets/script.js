@@ -335,20 +335,30 @@ function pollSettings() {
                         alarmAudio: newSettings.alarmAudio || '',
                         reminders: newSettings.reminders || [],
                         theme: newSettings.theme || 'default',
-                        layout: newSettings.layout || 'default'
+                        layout: newSettings.layout || 'default',
+                        azanAudioEnabled: typeof newSettings.azanAudioEnabled !== 'undefined' ? newSettings.azanAudioEnabled : true,
+                        azanVolume: typeof newSettings.azanVolume !== 'undefined' ? newSettings.azanVolume : 100
                     };
                     if (!(JSON.stringify(normalizedNew) !== JSON.stringify(settings))) return [3 /*break*/, 5];
                     settings = normalizedNew;
                     console.log("Settings updated from server via polling:", settings);
                     localStorage.setItem('settings', JSON.stringify(settings));
-                    document.body.classList.remove('theme-blue', 'theme-dark', 'theme-light');
+                    var allKnownThemes = ['default', 'blue', 'dark', 'light', 'emerald-gold', 'ruby', 'amber', 'purple', 'highcontrast'];
+                    for (var ti = 0; ti < allKnownThemes.length; ti++) {
+                        document.body.classList.remove('theme-' + allKnownThemes[ti]);
+                    }
                     if (settings.theme && settings.theme !== 'default') {
-                        document.body.classList.add("theme-".concat(settings.theme));
+                        document.body.classList.add('theme-' + settings.theme);
                     }
                     prayerGrid = document.querySelector('.prayer-grid');
                     if (prayerGrid) {
-                        prayerGrid.classList.remove('layout-compact', 'layout-modern');
-                        prayerGrid.classList.add('layout-default');
+                        var allKnownLayouts = ['default', 'compact', 'modern', 'horizontal', 'vertical'];
+                        for (var li = 0; li < allKnownLayouts.length; li++) {
+                            prayerGrid.classList.remove('layout-' + allKnownLayouts[li]);
+                        }
+                        if (settings.layout && settings.layout !== 'default') {
+                            prayerGrid.classList.add('layout-' + settings.layout);
+                        }
                     }
                     playedAzans = { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
                     playedAlarm = false;
@@ -1261,9 +1271,22 @@ function init() {
                 case 2:
                     settings = _a.sent();
                     if (settings) {
-                        document.body.classList.remove('theme-blue', 'theme-dark', 'theme-light');
+                        var allKnownThemes = ['default', 'blue', 'dark', 'light', 'emerald-gold', 'ruby', 'amber', 'purple', 'highcontrast'];
+                        for (var ti = 0; ti < allKnownThemes.length; ti++) {
+                            document.body.classList.remove('theme-' + allKnownThemes[ti]);
+                        }
                         if (settings.theme && settings.theme !== 'default') {
                             document.body.classList.add("theme-".concat(settings.theme));
+                        }
+                        var pGrid = document.querySelector('.prayer-grid');
+                        if (pGrid) {
+                            var allKnownLayouts = ['default', 'compact', 'modern', 'horizontal', 'vertical'];
+                            for (var li = 0; li < allKnownLayouts.length; li++) {
+                                pGrid.classList.remove('layout-' + allKnownLayouts[li]);
+                            }
+                            if (settings.layout && settings.layout !== 'default') {
+                                pGrid.classList.add("layout-".concat(settings.layout));
+                            }
                         }
                     }
                     return [3 /*break*/, 4];
