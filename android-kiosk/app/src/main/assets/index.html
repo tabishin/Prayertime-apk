@@ -185,18 +185,60 @@
 
                 <!-- Tab 4: Audio & Reminders -->
                 <div id="tab-audio" class="settings-tab-content">
+                    <!-- Master Azan Switch -->
+                    <div class="audio-toggle-switch">
+                        <div>
+                            <div style="font-weight: 700; color: #fff; font-size: 0.95rem;">📢 Automatic Azan Audio</div>
+                            <div style="font-size: 0.82rem; color: #a5d6a7;">Play Azan automatically at prayer time</div>
+                        </div>
+                        <button type="button" id="btn-toggle-azan" class="btn-primary" style="padding: 6px 14px; font-size: 0.88rem;">🔊 Azan: ON</button>
+                    </div>
+
+                    <!-- Volume Slider -->
+                    <div class="volume-slider-row">
+                        <span style="font-size: 0.9rem; font-weight: 600; color: #e0e0e0; min-width: 90px;">Volume: <span id="volume-label">100%</span></span>
+                        <input type="range" id="setting-azan-volume" class="volume-slider" min="0" max="100" value="100">
+                    </div>
+
+                    <!-- Audio Status & Quick Test -->
                     <div class="settings-form-group">
-                        <label class="settings-label">Azan & Alert Sounds</label>
-                        <p style="font-size: 0.9rem; color: #a5d6a7; margin-top: 0; line-height: 1.4;">
-                            Azan audio plays automatically at each prayer time on Android Kiosk. You can test buzzers below:
-                        </p>
-                        <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
-                            <button type="button" id="btn-test-hourly" class="btn-secondary">🔔 Test Hourly Chime</button>
-                            <button type="button" id="btn-test-makruh" class="btn-secondary">⚠️ Test Makruh Buzzer</button>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <label class="settings-label" style="margin-bottom: 0;">🎧 Test Azan & Sound Tracks</label>
+                            <span id="audio-playback-status" class="audio-status-pill">● System Audio Ready</span>
+                        </div>
+                        <div class="audio-grid-buttons">
+                            <button type="button" class="audio-test-btn" id="btn-play-fajr" data-track="azan/fajr.mp3" data-name="Fajr Azan">🕌 Fajr Azan</button>
+                            <button type="button" class="audio-test-btn" id="btn-play-dhuhr" data-track="azan/dhuhr.mp3" data-name="Zohr Azan">🕌 Zohr Azan</button>
+                            <button type="button" class="audio-test-btn" id="btn-play-asr" data-track="azan/asr.mp3" data-name="Asr Azan">🕌 Asr Azan</button>
+                            <button type="button" class="audio-test-btn" id="btn-play-maghrib" data-track="azan/maghrib.mp3" data-name="Maghrib Azan">🕌 Maghrib Azan</button>
+                            <button type="button" class="audio-test-btn" id="btn-play-isha" data-track="azan/isha.mp3" data-name="Isha Azan">🕌 Isha Azan</button>
+                            <button type="button" class="audio-test-btn" id="btn-play-hourly" data-track="azan/Alhamd.mp3" data-name="Hourly Chime">🔔 Hourly Chime</button>
+                            <button type="button" class="audio-test-btn" id="btn-play-makruh" data-track="azan/buzzer.mp3" data-name="Makruh Buzzer">⚠️ Makruh Buzzer</button>
+                            <button type="button" class="audio-test-btn audio-stop-btn" id="btn-stop-audio">⏹️ Stop Audio</button>
                         </div>
                     </div>
-                    <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-                        <a href="admin.html" style="color: #81c784; text-decoration: underline; font-size: 0.95rem;">Looking for advanced custom MP3 uploads and multi-reminders? Open Full Admin Page →</a>
+
+                    <!-- Project Upload Location Documentation Box -->
+                    <div class="audio-guide-box">
+                        <div class="audio-guide-title">
+                            <span>📁</span> Where to Upload Custom MP3 Files in Project Folder:
+                        </div>
+                        <div style="font-size: 0.84rem; color: #e8f5e9; line-height: 1.45;">
+                            Place your audio files directly in the <code style="background: rgba(0,0,0,0.5); color: #81c784; padding: 2px 6px; border-radius: 4px; font-weight: bold;">azan/</code> folder in the project root:
+                        </div>
+                        <ul class="audio-guide-list">
+                            <li><code>azan/fajr.mp3</code> — Fajr prayer Azan</li>
+                            <li><code>azan/dhuhr.mp3</code> — Zohr prayer Azan</li>
+                            <li><code>azan/asr.mp3</code> — Asr prayer Azan</li>
+                            <li><code>azan/maghrib.mp3</code> — Maghrib prayer Azan</li>
+                            <li><code>azan/isha.mp3</code> — Isha prayer Azan</li>
+                            <li><code>azan/Alhamd.mp3</code> — Hourly Chime ("Alhamdulillah" / Chime bell)</li>
+                            <li><code>azan/buzzer.mp3</code> — Makruh Waqt prohibited prayer warning buzzer</li>
+                        </ul>
+                    </div>
+
+                    <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">
+                        <a href="admin.html" style="color: #81c784; text-decoration: underline; font-size: 0.88rem;">Looking for advanced custom MP3 uploads and multi-reminders? Open Full Admin Page →</a>
                     </div>
                 </div>
             </div>
@@ -511,6 +553,98 @@
 
         var currentSelectedAsr = 'hanafi';
         var currentSelectedTheme = 'default';
+        var currentAzanEnabled = true;
+        var currentAzanVolume = 100;
+
+        // Shared Universal Kiosk Audio Player
+        var kioskAudio = new Audio();
+        kioskAudio.preload = 'auto';
+        var currentActivePlayBtn = null;
+        var playedKioskAzans = { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
+
+        function updateAudioPlaybackUI(statusText, isPlaying) {
+            var statusPill = document.getElementById('audio-playback-status');
+            if (statusPill) {
+                statusPill.textContent = statusText;
+                if (isPlaying) {
+                    statusPill.style.color = '#ffb74d';
+                    statusPill.style.borderColor = 'rgba(255, 183, 77, 0.5)';
+                    statusPill.style.background = 'rgba(255, 152, 0, 0.2)';
+                } else {
+                    statusPill.style.color = '#81c784';
+                    statusPill.style.borderColor = 'rgba(76, 175, 80, 0.3)';
+                    statusPill.style.background = 'rgba(76, 175, 80, 0.2)';
+                }
+            }
+        }
+
+        function stopKioskAudio() {
+            try {
+                kioskAudio.pause();
+                kioskAudio.currentTime = 0;
+            } catch (e) {}
+            if (currentActivePlayBtn) {
+                currentActivePlayBtn.classList.remove('playing');
+                currentActivePlayBtn = null;
+            }
+            updateAudioPlaybackUI('● Audio Idle / Stopped', false);
+        }
+
+        function playKioskAudio(src, trackName, btnEl) {
+            stopKioskAudio();
+            try {
+                kioskAudio.src = src;
+                kioskAudio.volume = Math.max(0, Math.min(1, currentAzanVolume / 100));
+                
+                if (btnEl) {
+                    btnEl.classList.add('playing');
+                    currentActivePlayBtn = btnEl;
+                }
+                updateAudioPlaybackUI('▶ Playing: ' + trackName, true);
+
+                var playPromise = kioskAudio.play();
+                if (playPromise && typeof playPromise.catch === 'function') {
+                    playPromise.catch(function(err) {
+                        console.warn("Kiosk audio play warning:", err);
+                        updateAudioPlaybackUI('⚠️ Autoplay blocked or file loading: ' + trackName, false);
+                        if (btnEl) btnEl.classList.remove('playing');
+                    });
+                }
+            } catch (e) {
+                console.warn("Audio error:", e);
+            }
+        }
+
+        kioskAudio.onended = function() {
+            if (currentActivePlayBtn) {
+                currentActivePlayBtn.classList.remove('playing');
+                currentActivePlayBtn = null;
+            }
+            updateAudioPlaybackUI('✓ Audio Track Finished', false);
+        };
+
+        kioskAudio.onerror = function() {
+            if (currentActivePlayBtn) {
+                currentActivePlayBtn.classList.remove('playing');
+                currentActivePlayBtn = null;
+            }
+            updateAudioPlaybackUI('⚠️ Audio Error loading file', false);
+        };
+
+        function updateAzanToggleUI() {
+            var toggleBtn = document.getElementById('btn-toggle-azan');
+            if (toggleBtn) {
+                if (currentAzanEnabled) {
+                    toggleBtn.textContent = '🔊 Azan: ON';
+                    toggleBtn.className = 'btn-primary';
+                    toggleBtn.style.background = '#2e7d32';
+                } else {
+                    toggleBtn.textContent = '🔇 Azan: OFF';
+                    toggleBtn.className = 'btn-secondary';
+                    toggleBtn.style.background = 'rgba(255, 255, 255, 0.15)';
+                }
+            }
+        }
 
         function loadModalFieldsFromSettings() {
             try {
@@ -522,6 +656,8 @@
                 var countryInput = document.getElementById('setting-country');
                 var calcSelect = document.getElementById('setting-calc-method');
                 var hijriSelect = document.getElementById('setting-hijri-adj');
+                var volumeInput = document.getElementById('setting-azan-volume');
+                var volumeLabel = document.getElementById('volume-label');
 
                 if (cityInput) cityInput.value = parsed.city || 'Mumbai';
                 if (stateInput) stateInput.value = parsed.state || '';
@@ -535,8 +671,35 @@
                 currentSelectedTheme = parsed.theme || 'default';
                 setThemeActive(currentSelectedTheme);
 
+                if (typeof parsed.azanAudioEnabled !== 'undefined') {
+                    currentAzanEnabled = Boolean(parsed.azanAudioEnabled);
+                } else {
+                    currentAzanEnabled = true;
+                }
+                updateAzanToggleUI();
+
+                if (typeof parsed.azanVolume !== 'undefined') {
+                    currentAzanVolume = parseInt(parsed.azanVolume, 10);
+                } else {
+                    currentAzanVolume = 100;
+                }
+                if (volumeInput) volumeInput.value = currentAzanVolume;
+                if (volumeLabel) volumeLabel.textContent = currentAzanVolume + '%';
+
             } catch (e) {}
         }
+
+        // Initialize audio settings from storage on startup
+        try {
+            var initS = localStorage.getItem('settings');
+            if (initS) {
+                var initP = JSON.parse(initS);
+                if (initP) {
+                    if (typeof initP.azanAudioEnabled !== 'undefined') currentAzanEnabled = Boolean(initP.azanAudioEnabled);
+                    if (typeof initP.azanVolume !== 'undefined') currentAzanVolume = parseInt(initP.azanVolume, 10);
+                }
+            }
+        } catch (e) {}
 
         function setAsrActive(method) {
             var hanafiBtn = document.getElementById('btn-asr-hanafi');
@@ -614,24 +777,45 @@
             };
         }
 
-        // Test audio buttons
-        var testHourly = document.getElementById('btn-test-hourly');
-        if (testHourly) {
-            testHourly.onclick = function() {
-                try {
-                    var a = new Audio('azan/Alhamd.mp3');
-                    a.play();
-                } catch (e) {}
+        // Azan Enable / Disable Master Toggle
+        var azanToggleBtn = document.getElementById('btn-toggle-azan');
+        if (azanToggleBtn) {
+            azanToggleBtn.onclick = function() {
+                currentAzanEnabled = !currentAzanEnabled;
+                updateAzanToggleUI();
+                if (!currentAzanEnabled) {
+                    stopKioskAudio();
+                }
             };
         }
-        var testMakruh = document.getElementById('btn-test-makruh');
-        if (testMakruh) {
-            testMakruh.onclick = function() {
-                try {
-                    var a = new Audio('azan/buzzer.mp3');
-                    a.play();
-                } catch (e) {}
+
+        // Volume Slider Input
+        var volumeInput = document.getElementById('setting-azan-volume');
+        var volumeLabel = document.getElementById('volume-label');
+        if (volumeInput) {
+            volumeInput.oninput = function() {
+                currentAzanVolume = parseInt(this.value, 10);
+                if (volumeLabel) volumeLabel.textContent = currentAzanVolume + '%';
+                if (kioskAudio) kioskAudio.volume = Math.max(0, Math.min(1, currentAzanVolume / 100));
             };
+        }
+
+        // Hook up all audio test buttons
+        var audioButtons = document.querySelectorAll('.audio-test-btn');
+        for (var ab = 0; ab < audioButtons.length; ab++) {
+            (function(btn) {
+                btn.onclick = function() {
+                    if (btn.id === 'btn-stop-audio') {
+                        stopKioskAudio();
+                        return;
+                    }
+                    var track = btn.getAttribute('data-track');
+                    var name = btn.getAttribute('data-name') || 'Audio';
+                    if (track) {
+                        playKioskAudio(track, name, btn);
+                    }
+                };
+            })(audioButtons[ab]);
         }
 
         // Save & Apply Settings Dynamically (Zero Reload, Zero State Loss)
@@ -656,6 +840,8 @@
                 currentSettings.asrMethod = currentSelectedAsr;
                 currentSettings.adjustment = hijriVal;
                 currentSettings.theme = currentSelectedTheme;
+                currentSettings.azanAudioEnabled = currentAzanEnabled;
+                currentSettings.azanVolume = currentAzanVolume;
 
                 localStorage.setItem('settings', JSON.stringify(currentSettings));
 

@@ -25,5 +25,10 @@ if [ -d "$ROOT_DIR/assets" ]; then
     cp -r "$ROOT_DIR/assets/"* "$ASSETS_DEST/assets/" 2>/dev/null || true
 fi
 
+if [ -d "$ROOT_DIR/azan" ]; then
+    mkdir -p "$ASSETS_DEST/azan"
+    cp -r "$ROOT_DIR/azan/"* "$ASSETS_DEST/azan/" 2>/dev/null || true
+fi
+
 echo "Assets sync complete! Total assets in $ASSETS_DEST:"
 ls -lh "$ASSETS_DEST"

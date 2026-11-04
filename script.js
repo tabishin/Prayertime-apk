@@ -990,19 +990,22 @@ function updateTimeAndNextPrayer(timings) {
             resetPlayedFlags();
             if (!userInteracted && !isKiosk)
                 showInteractionPopup();
+            window.__scriptJsHandlingAudio = true;
+            var currentVolume = (settings && typeof settings.azanVolume !== 'undefined') ? Math.max(0, Math.min(1, settings.azanVolume / 100)) : 1.0;
+            var isAzanEnabled = !settings || settings.azanAudioEnabled !== false;
+
             if (currentHour !== lastHour && currentMinute === 0 && currentSecond <= 6) {
-                console.log("[Hourly Buzzer Check] Triggered! hour=".concat(currentHour, ", minute=").concat(currentMinute, ", second=").concat(currentSecond, ", audioEnabled=").concat(audioEnabled, ", isMakruh=").concat(isMakruh));
-                if (audioEnabled && !isMakruh) {
+                console.log("[Hourly Buzzer Check] Triggered! hour=".concat(currentHour, ", isAzanEnabled=").concat(isAzanEnabled, ", isMakruh=").concat(isMakruh));
+                if (isAzanEnabled && !isMakruh) {
                     console.log("[Hourly Buzzer Check] Playing hourly buzzer from ".concat(azaanFiles.HourlyBuzzer, "..."));
+                    audioPlayer.volume = currentVolume;
                     audioPlayer.src = azaanFiles.HourlyBuzzer;
                     audioPlayer.play().then(function () {
                         console.log("[Hourly Buzzer Check] Hourly buzzer started successfully.");
+                        audioEnabled = true;
                     }).catch(function (error) {
                         console.error("[Hourly Buzzer Check] Error playing hourly buzzer:", error);
                     });
-                }
-                else {
-                    console.warn("[Hourly Buzzer Check] Audio not played. Reason: audioEnabled=".concat(audioEnabled, ", isMakruh=").concat(isMakruh));
                 }
                 lastHour = currentHour;
             }
@@ -1020,14 +1023,20 @@ function updateTimeAndNextPrayer(timings) {
                     return "continue";
                 var diff = currentSeconds - prayerSeconds;
                 if (diff >= 0 && diff <= timeWindow && !playedAzans[prayer.name]) {
-                    if (audioEnabled && !isMakruh) {
+                    if (isAzanEnabled && !isMakruh) {
+                        audioPlayer.volume = currentVolume;
                         audioPlayer.src = prayer.audio;
                         audioPlayer.play().then(function () {
                             playedAzans[prayer.name] = true;
-                        }).catch(function (error) { return console.error("Error playing Azan for ".concat(prayer.name, ":"), error); });
+                            audioEnabled = true;
+                            userInteracted = true;
+                            console.log("Azan played successfully for " + prayer.name);
+                        }).catch(function (error) {
+                            console.error("Error playing Azan for ".concat(prayer.name, ":"), error);
+                        });
                     }
-                    else if (!userInteracted && !isMakruh) {
-                        console.log("Azan for ".concat(prayer.name, " skipped due to no user interaction."));
+                    else if (!isAzanEnabled) {
+                        console.log("Azan for " + prayer.name + " muted (Azan disabled in settings).");
                     }
                 }
             };
