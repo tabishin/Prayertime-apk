@@ -109,9 +109,11 @@ function tickLiveClock() {
         console.warn("Live clock tick error:", e);
     }
 }
-// Start live clock immediately
-tickLiveClock();
-setInterval(tickLiveClock, 1000);
+// Start live clock immediately if kiosk engine is not already running
+if (!window.__kioskEngineActive) {
+    tickLiveClock();
+    setInterval(tickLiveClock, 1000);
+}
 var azaanFiles = {
     Fajr: 'azan/fajr.mp3',
     Dhuhr: 'azan/dhuhr.mp3',
@@ -704,11 +706,17 @@ function fetchDayPrayerTimes(date) {
                     }
                     timings = data.data.timings;
                     readableDate = data.data.date.readable;
-                    hijriDate = "".concat(data.data.date.hijri.day, " ").concat(data.data.date.hijri.month.en, " ").concat(data.data.date.hijri.year);
+                    hijriDate = "".concat(data.data.date.hijri.day, " ").concat(data.data.date.hijri.month.en, " ").concat(data.data.date.hijri.year, " AH");
                     prayerTimes30Days[date] = { timings: timings, readableDate: readableDate, hijriDate: hijriDate, holidays: data.data.date.hijri.holidays || [] };
                     localStorage.setItem('prayerTimes30Days', JSON.stringify(prayerTimes30Days));
+                    if (window.__refreshKioskHolidays) {
+                        window.__refreshKioskHolidays();
+                    }
                     toggleOfflineIndicator(false);
                     console.log("Fetched timings:", timings);
+                    if (window.__updateKioskTimings) {
+                        window.__updateKioskTimings(timings);
+                    }
                     updatePrayerUI(timings, readableDate, hijriDate);
                     return [2 /*return*/, timings];
                 case 9:
@@ -958,6 +966,9 @@ function showPlayPrompt(reminderIndex, audio) {
     }
 }
 function updateTimeAndNextPrayer(timings) {
+    if (window.__kioskEngineActive) {
+        return;
+    }
     return __awaiter(this, void 0, void 0, function () {
         var now, currentTime, timeDisplay, gregorianElement, monthNames, islamicElement, todayDate, nextPrayerElement_1, currentSeconds, currentHour, currentMinute, currentSecond, imsakSeconds, sunriseSeconds, dhuhrSeconds, asrSeconds, sunsetSeconds, isMakruh, makruhEndSeconds, prayers, timeWindow, _loop_2, _i, prayers_1, prayer, alarmTime, alarmAudio, alarmSeconds, alarmDiff, reminders, currentPrayer, mostRecentPrayerSeconds, nextPrayer, nextPrayerSeconds, nextPrayerDate, _a, prayers_2, prayer, prayerSeconds, nextPrayerElement, remainingSeconds, remainingTime, reminderData, reminderAudio, timeElapsed, remainingSeconds, remainingTime, remainingSeconds, remainingTime, prayerBoxes, highlightClasses, currentBoxId, currentBox;
         return __generator(this, function (_b) {
@@ -1293,9 +1304,11 @@ function init() {
                     currentTimings = initialTimings;
                     updateTimeAndNextPrayer(currentTimings);
                     // 2. Start high-frequency update interval for next prayer countdown and clock
-                    setInterval(function () {
-                        updateTimeAndNextPrayer(currentTimings || fallbackTimings);
-                    }, 1000);
+                    if (!window.__kioskEngineActive) {
+                        setInterval(function () {
+                            updateTimeAndNextPrayer(currentTimings || fallbackTimings);
+                        }, 1000);
+                    }
                     // 3. Audio kiosk unlock
                     if (isKiosk) {
                         popup = document.getElementById('interaction-popup');
@@ -1343,7 +1356,11 @@ function init() {
                     liveTimings = _a.sent();
                     if (liveTimings) {
                         currentTimings = liveTimings;
-                        updateTimeAndNextPrayer(currentTimings);
+                        if (window.__updateKioskTimings) {
+                            window.__updateKioskTimings(currentTimings);
+                        } else {
+                            updateTimeAndNextPrayer(currentTimings);
+                        }
                     }
                     return [3 /*break*/, 7];
                 case 6:

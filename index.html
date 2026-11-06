@@ -413,6 +413,20 @@
     <!-- Pure ES5 Universal Kiosk Engine (Runs 100% reliably on Android 4.4 - 14, Smart TVs, WebViews) -->
     <script>
     (function() {
+        window.__kioskEngineActive = true;
+        if (!String.prototype.padStart) {
+            String.prototype.padStart = function(targetLength, padString) {
+                targetLength = targetLength >> 0;
+                padString = String(typeof padString !== 'undefined' ? padString : ' ');
+                if (this.length >= targetLength) return String(this);
+                targetLength = targetLength - this.length;
+                if (targetLength > padString.length) {
+                    padString += padString.repeat(targetLength / padString.length);
+                }
+                return padString.slice(0, targetLength) + String(this);
+            };
+        }
+
         var defaultTimings = {
             Fajr: "05:28",
             Sunrise: "06:44",
@@ -943,9 +957,11 @@
                 var nextElem = document.getElementById('next-prayer');
                 if (nextElem && !nextElem.classList.contains('play-prompt')) {
                     if (isMakruh) {
-                        nextElem.innerHTML = '<span class="makruh-badge">⚠️ Makruh (' + makruhType + ') ends in ' + secondsToHHMM(makruhEndRemaining) + '</span>';
+                        var makruhHtml = '<span class="makruh-badge">⚠️ Makruh (' + makruhType + ') ends in ' + secondsToHHMM(makruhEndRemaining) + '</span>';
+                        if (nextElem.innerHTML !== makruhHtml) nextElem.innerHTML = makruhHtml;
                     } else {
-                        nextElem.textContent = 'Next Prayer: ' + nextPrayer.name + ' in ' + secondsToHHMM(nextDiff);
+                        var nextText = 'Next Prayer: ' + nextPrayer.name + ' in ' + secondsToHHMM(nextDiff);
+                        if (nextElem.textContent !== nextText) nextElem.textContent = nextText;
                     }
                 }
 
@@ -968,16 +984,27 @@
                     }
                 }
 
-                // 6. Rotate Hadith every 20 seconds
-                var hadithIdx = Math.floor(now.getTime() / 20000) % curatedHadiths.length;
-                var curH = curatedHadiths[hadithIdx];
+                // 6. Smooth Hadith & Holiday Rotation (20s Hadith, 10s Upcoming Holiday if any)
+                var titleEl = document.getElementById('hadith-title');
                 var hElem = document.getElementById('hadith-english');
                 var sElem = document.getElementById('hadith-source');
-                if (hElem && (!hElem.textContent || hElem.textContent === 'Loading Hadith...' || hElem.textContent === curH.text)) {
-                    hElem.textContent = curH.text;
-                }
-                if (sElem && (!sElem.textContent || sElem.textContent === 'Loading Source...' || sElem.textContent === curH.source)) {
-                    sElem.textContent = curH.source;
+                var hBox = document.getElementById('hadith-box');
+
+                var cycleSec = Math.floor(now.getTime() / 1000) % 30; // 30-second cycle
+                if (cycleSec >= 20 && upcomingHolidays.length > 0) {
+                    var holIdx = Math.floor(now.getTime() / 30000) % upcomingHolidays.length;
+                    var holText = upcomingHolidays[holIdx];
+                    if (hBox && !hBox.classList.contains('holiday-active')) hBox.classList.add('holiday-active');
+                    if (titleEl && titleEl.textContent !== 'HOLIDAY') titleEl.textContent = 'HOLIDAY';
+                    if (hElem && hElem.textContent !== holText) hElem.textContent = holText;
+                    if (sElem && sElem.textContent !== 'Upcoming Islamic Occasion') sElem.textContent = 'Upcoming Islamic Occasion';
+                } else {
+                    if (hBox && hBox.classList.contains('holiday-active')) hBox.classList.remove('holiday-active');
+                    if (titleEl && titleEl.textContent !== 'HADITH') titleEl.textContent = 'HADITH';
+                    var hadithIdx = Math.floor(now.getTime() / 20000) % curatedHadiths.length;
+                    var curH = curatedHadiths[hadithIdx];
+                    if (hElem && hElem.textContent !== curH.text) hElem.textContent = curH.text;
+                    if (sElem && sElem.textContent !== curH.source) sElem.textContent = curH.source;
                 }
 
             } catch (err) {
@@ -985,15 +1012,39 @@
             }
         }
 
+        // Upcoming Holidays compilation (loaded from cached 30-day prayer data)
+        function extractUpcomingHolidays() {
+            try {
+                var cached = localStorage.getItem('prayerTimes30Days');
+                if (!cached) return [];
+                var map = JSON.parse(cached);
+                var holidays = [];
+                for (var k in map) {
+                    if (map.hasOwnProperty(k) && map[k] && map[k].holidays && map[k].holidays.length > 0) {
+                        for (var h = 0; h < map[k].holidays.length; h++) {
+                            holidays.push(map[k].holidays[h] + (map[k].readableDate ? ' on ' + map[k].readableDate : ''));
+                        }
+                    }
+                }
+                return holidays;
+            } catch (e) { return []; }
+        }
+        var upcomingHolidays = extractUpcomingHolidays();
+        window.__refreshKioskHolidays = function() {
+            upcomingHolidays = extractUpcomingHolidays();
+        };
+
         tickKiosk();
         setInterval(tickKiosk, 1000);
         window.__kioskAudioEngineActive = true;
+        window.__kioskEngineActive = true;
 
         // Expose helper to window so external script.js can update curTimings cleanly
         window.__updateKioskTimings = function(newTimings) {
             if (newTimings) {
                 curTimings = newTimings;
                 applyTimingsToUI(curTimings);
+                upcomingHolidays = extractUpcomingHolidays();
                 tickKiosk();
             }
         };
