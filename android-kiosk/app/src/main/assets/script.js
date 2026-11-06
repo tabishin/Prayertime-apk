@@ -1,3 +1,15 @@
+if (!String.prototype.padStart) {
+    String.prototype.padStart = function(targetLength, padString) {
+        targetLength = targetLength >> 0;
+        padString = String(typeof padString !== 'undefined' ? padString : ' ');
+        if (this.length >= targetLength) return String(this);
+        targetLength = targetLength - this.length;
+        if (targetLength > padString.length) {
+            padString += padString.repeat(targetLength / padString.length);
+        }
+        return padString.slice(0, targetLength) + String(this);
+    };
+}
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -1041,44 +1053,54 @@ function updateTimeAndNextPrayer(timings) {
                 }
             }
 
-            if (currentHour !== lastHour && currentMinute === 0 && currentSecond <= 6) {
-                console.log("[Hourly Buzzer Check] Triggered! hour=".concat(currentHour, ", isAzanEnabled=").concat(isAzanEnabled, ", isMakruh=").concat(isMakruh));
-                if (isAzanEnabled && !isMakruh) {
-                    console.log("[Hourly Buzzer Check] Playing hourly buzzer from ".concat(azaanFiles.HourlyBuzzer, "..."));
-                    playKioskAudioTrack(azaanFiles.HourlyBuzzer, currentVolume);
-                    audioEnabled = true;
-                }
-                lastHour = currentHour;
-            }
-            prayers = [
-                { name: 'Fajr', time: timings.Fajr, audio: azaanFiles.Fajr },
-                { name: 'Dhuhr', time: timings.Dhuhr, audio: azaanFiles.Dhuhr },
-                { name: 'Asr', time: timings.Asr, audio: azaanFiles.Asr },
-                { name: 'Maghrib', time: timings.Maghrib, audio: azaanFiles.Maghrib },
-                { name: 'Isha', time: timings.Isha, audio: azaanFiles.Isha },
-            ];
-            timeWindow = 60;
-            _loop_2 = function (prayer) {
-                var prayerSeconds = timeToSeconds(prayer.time);
-                if (prayerSeconds === -1)
-                    return "continue";
-                var diff = currentSeconds - prayerSeconds;
-                if (diff >= 0 && diff <= timeWindow && !playedAzans[prayer.name]) {
+            if (!window.__kioskAudioEngineActive) {
+                if (currentHour !== lastHour && currentMinute === 0 && currentSecond <= 6) {
+                    console.log("[Hourly Buzzer Check] Triggered! hour=".concat(currentHour, ", isAzanEnabled=").concat(isAzanEnabled, ", isMakruh=").concat(isMakruh));
                     if (isAzanEnabled && !isMakruh) {
-                        playKioskAudioTrack(prayer.audio, currentVolume);
-                        playedAzans[prayer.name] = true;
+                        console.log("[Hourly Buzzer Check] Playing hourly buzzer from ".concat(azaanFiles.HourlyBuzzer, "..."));
+                        playKioskAudioTrack(azaanFiles.HourlyBuzzer, currentVolume);
                         audioEnabled = true;
-                        userInteracted = true;
-                        console.log("Azan played successfully for " + prayer.name);
                     }
-                    else if (!isAzanEnabled) {
-                        console.log("Azan for " + prayer.name + " muted (Azan disabled in settings).");
-                    }
+                    lastHour = currentHour;
                 }
-            };
-            for (_i = 0, prayers_1 = prayers; _i < prayers_1.length; _i++) {
-                prayer = prayers_1[_i];
-                _loop_2(prayer);
+                prayers = [
+                    { name: 'Fajr', time: timings.Fajr, audio: azaanFiles.Fajr },
+                    { name: 'Dhuhr', time: timings.Dhuhr, audio: azaanFiles.Dhuhr },
+                    { name: 'Asr', time: timings.Asr, audio: azaanFiles.Asr },
+                    { name: 'Maghrib', time: timings.Maghrib, audio: azaanFiles.Maghrib },
+                    { name: 'Isha', time: timings.Isha, audio: azaanFiles.Isha },
+                ];
+                timeWindow = 60;
+                _loop_2 = function (prayer) {
+                    var prayerSeconds = timeToSeconds(prayer.time);
+                    if (prayerSeconds === -1)
+                        return "continue";
+                    var diff = currentSeconds - prayerSeconds;
+                    if (diff >= 0 && diff <= timeWindow && !playedAzans[prayer.name]) {
+                        if (isAzanEnabled && !isMakruh) {
+                            playKioskAudioTrack(prayer.audio, currentVolume);
+                            playedAzans[prayer.name] = true;
+                            audioEnabled = true;
+                            userInteracted = true;
+                            console.log("Azan played successfully for " + prayer.name);
+                        }
+                        else if (!isAzanEnabled) {
+                            console.log("Azan for " + prayer.name + " muted (Azan disabled in settings).");
+                        }
+                    }
+                };
+                for (_i = 0, prayers_1 = prayers; _i < prayers_1.length; _i++) {
+                    prayer = prayers_1[_i];
+                    _loop_2(prayer);
+                }
+            } else {
+                prayers = [
+                    { name: 'Fajr', time: timings.Fajr, audio: azaanFiles.Fajr },
+                    { name: 'Dhuhr', time: timings.Dhuhr, audio: azaanFiles.Dhuhr },
+                    { name: 'Asr', time: timings.Asr, audio: azaanFiles.Asr },
+                    { name: 'Maghrib', time: timings.Maghrib, audio: azaanFiles.Maghrib },
+                    { name: 'Isha', time: timings.Isha, audio: azaanFiles.Isha },
+                ];
             }
             alarmTime = (settings && settings.alarmTime) ? settings.alarmTime : '00:00';
             alarmAudio = (settings && settings.alarmAudio) ? settings.alarmAudio : '';
@@ -1147,11 +1169,9 @@ function updateTimeAndNextPrayer(timings) {
                 nextPrayerDate = getTodayDate(1); // Tomorrow
             }
             if (isMakruh && !lastMakruhState && !playedMakruhBuzzer) {
-                if (audioEnabled) {
-                    audioPlayer.src = azaanFiles.MakruhBuzzer;
-                    audioPlayer.play().then(function () {
-                        playedMakruhBuzzer = true;
-                    }).catch(function (error) { return console.error("Error playing Makruh buzzer:", error); });
+                if (!window.__kioskAudioEngineActive && audioEnabled) {
+                    playKioskAudioTrack(azaanFiles.MakruhBuzzer, currentVolume);
+                    playedMakruhBuzzer = true;
                 }
             }
             else if (!isMakruh && lastMakruhState) {

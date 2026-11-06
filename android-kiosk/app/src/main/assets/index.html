@@ -38,7 +38,7 @@
             <div class="next-prayer" id="next-prayer">Next Prayer: Calculating...</div>
             <div class="date-info">
                 <span id="gregorian-date"></span> | 
-                <span id="islamic-date" style="font-family: inherit, 'Noto Naskh Arabic', 'Segoe UI', Tahoma, sans-serif;"></span>
+                <span id="islamic-date" style="font-family: inherit; font-weight: 600;"></span>
             </div>
             <div id="location">Location: <span id="current-city">Mumbai</span> <button id="open-settings-btn" class="settings-btn" type="button" title="Open Settings" aria-label="Settings">⚙️</button></div>
         </div>
@@ -472,8 +472,8 @@
             return (h < 10 ? '0' : '') + h + ':' + (m < 10 ? '0' : '') + m + ' ' + ampm;
         }
 
-        // Offline Astronomical Hijri / Urdu Date Calculator
-        function getHijriUrduDate(adjustment) {
+        // Offline Astronomical Hijri English Date Calculator (English text & fonts)
+        function getHijriEnglishDate(adjustment) {
             var adj = 0;
             try {
                 if (typeof adjustment !== 'undefined' && adjustment !== null) {
@@ -506,14 +506,15 @@
             var im = Math.floor((z + 28.5001) / 29.5);
             if (im === 13) im = 12;
             var id = Math.floor(z - Math.floor(29.5001 * im - 29));
-            var islamicMonthsUrdu = [
-                "محرم الحرام", "صفر المظفر", "ربیع الاول", "ربیع الثانی",
-                "جمادی الاول", "جمادی الثانی", "رجب المرجب", "شعبان المعظم",
-                "رمضان المبارک", "شوال المکرم", "ذی القعدہ", "ذی الحجہ"
+            var islamicMonthsEnglish = [
+                "Muharram", "Safar", "Rabi' al-Awwal", "Rabi' al-Thani",
+                "Jumada al-Ula", "Jumada al-Thani", "Rajab", "Sha'ban",
+                "Ramadan", "Shawwal", "Dhu al-Qi'dah", "Dhu al-Hijjah"
             ];
             var idx = Math.max(0, Math.min(11, im - 1));
-            return id + " " + islamicMonthsUrdu[idx] + " " + iy + " ھ";
+            return id + " " + islamicMonthsEnglish[idx] + " " + iy + " AH";
         }
+        var getHijriUrduDate = getHijriEnglishDate;
 
         var curatedHadiths = [
             {
@@ -591,173 +592,15 @@
             }
         }
 
-        // Apply saved settings (city, theme, layout, etc.) on startup
-        try {
-            var savedStr = localStorage.getItem('settings');
-            if (savedStr) {
-                var sObj = JSON.parse(savedStr);
-                if (sObj) {
-                    if (sObj.city) {
-                        var cityEl = document.getElementById('current-city');
-                        if (cityEl) cityEl.textContent = sObj.city;
-                    }
-                    if (sObj.theme) {
-                        applyThemeToDOM(sObj.theme);
-                    }
-                    if (sObj.layout) {
-                        applyLayoutToDOM(sObj.layout);
-                    }
-                }
-            }
-        } catch (e) {}
-
-        // Check if cached timings exist in localStorage
-        try {
-            var nowD = new Date();
-            var dayK = nowD.getFullYear() + '-' + ((nowD.getMonth() + 1) < 10 ? '0' : '') + (nowD.getMonth() + 1) + '-' + (nowD.getDate() < 10 ? '0' : '') + nowD.getDate();
-            var cached30 = localStorage.getItem('prayerTimes30Days');
-            if (cached30) {
-                var p30 = JSON.parse(cached30);
-                if (p30 && p30[dayK] && p30[dayK].timings) {
-                    curTimings = p30[dayK].timings;
-                }
-            }
-        } catch (e) {}
-
-        applyTimingsToUI(curTimings);
-
-        function tickKiosk() {
-            try {
-                var now = new Date();
-
-                // 1. Live Time (12-hour AM/PM)
-                var timeElem = document.getElementById('current-time');
-                if (timeElem) {
-                    timeElem.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
-                }
-
-                // 2. Gregorian Date
-                var gregElem = document.getElementById('gregorian-date');
-                if (gregElem) {
-                    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-                    gregElem.textContent = now.getDate() + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
-                }
-
-                // 3. Urdu Islamic Date (Always populated)
-                var islamElem = document.getElementById('islamic-date');
-                if (islamElem) {
-                    islamElem.textContent = getHijriUrduDate();
-                }
-
-                // 4. Next Prayer Countdown & Box Highlighting
-                var currentSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
-                var prayers = [
-                    { name: 'Fajr', sec: timeToSeconds(curTimings.Fajr), id: 'fajr-box' },
-                    { name: 'Dhuhr', sec: timeToSeconds(curTimings.Dhuhr), id: 'dhuhr-box' },
-                    { name: 'Asr', sec: timeToSeconds(curTimings.Asr), id: 'asr-box' },
-                    { name: 'Maghrib', sec: timeToSeconds(curTimings.Maghrib), id: 'maghrib-box' },
-                    { name: 'Isha', sec: timeToSeconds(curTimings.Isha), id: 'isha-box' }
-                ];
-
-                var currentPrayer = prayers[prayers.length - 1]; // default Isha
-                var nextPrayer = null;
-
-                for (var i = 0; i < prayers.length; i++) {
-                    if (currentSec >= prayers[i].sec) {
-                        currentPrayer = prayers[i];
-                    }
-                    if (prayers[i].sec > currentSec && !nextPrayer) {
-                        nextPrayer = prayers[i];
-                    }
-                }
-
-                var nextDiff = 0;
-                if (nextPrayer) {
-                    nextDiff = nextPrayer.sec - currentSec;
-                } else {
-                    nextPrayer = prayers[0]; // Fajr tomorrow
-                    nextDiff = (prayers[0].sec + 86400) - currentSec;
-                }
-
-                var nextElem = document.getElementById('next-prayer');
-                if (nextElem && !nextElem.classList.contains('play-prompt')) {
-                    nextElem.textContent = 'Next Prayer: ' + nextPrayer.name + ' in ' + secondsToHHMM(nextDiff);
-                }
-
-                // Highlight current active prayer box
-                var boxIds = ['fajr-box', 'dhuhr-box', 'asr-box', 'maghrib-box', 'isha-box'];
-                for (var b = 0; b < boxIds.length; b++) {
-                    var el = document.getElementById(boxIds[b]);
-                    if (el) {
-                        el.classList.remove('fajr-highlight', 'dhuhr-highlight', 'asr-highlight', 'maghrib-highlight', 'isha-highlight');
-                    }
-                }
-                if (currentPrayer) {
-                    var activeEl = document.getElementById(currentPrayer.id);
-                    if (activeEl) {
-                        activeEl.classList.add(currentPrayer.name.toLowerCase() + '-highlight');
-                    }
-                }
-
-                // 5. Rotate Hadith every 20 seconds
-                var hadithIdx = Math.floor(now.getTime() / 20000) % curatedHadiths.length;
-                var curH = curatedHadiths[hadithIdx];
-                var hElem = document.getElementById('hadith-english');
-                var sElem = document.getElementById('hadith-source');
-                if (hElem && (!hElem.textContent || hElem.textContent === 'Loading Hadith...' || hElem.textContent === curH.text)) {
-                    hElem.textContent = curH.text;
-                }
-                if (sElem && (!sElem.textContent || sElem.textContent === 'Loading Source...' || sElem.textContent === curH.source)) {
-                    sElem.textContent = curH.source;
-                }
-
-            } catch (err) {
-                console.warn("Kiosk tick warning:", err);
-            }
-        }
-
-        tickKiosk();
-        setInterval(tickKiosk, 1000);
-
-        // Expose helper to window so external script.js can update curTimings cleanly
-        window.__updateKioskTimings = function(newTimings) {
-            if (newTimings) {
-                curTimings = newTimings;
-                applyTimingsToUI(curTimings);
-                tickKiosk();
-            }
-        };
-
-        // --- Single Page Application (SPA) In-App Dynamic Settings Modal Controller ---
-        var modal = document.getElementById('settings-modal');
-        var openBtn = document.getElementById('open-settings-btn');
-        var closeBtn = document.getElementById('close-settings-btn');
-        var cancelBtn = document.getElementById('cancel-settings-btn');
-        var saveBtn = document.getElementById('save-settings-btn');
-        var saveStatus = document.getElementById('settings-save-status');
-
-        var currentSelectedAsr = 'hanafi';
-        var currentSelectedTheme = 'default';
-        var currentSelectedLayout = 'default';
-        var currentAzanEnabled = true;
-        var currentAzanVolume = 100;
-        var currentReminders = [];
-        var availableMp3Files = [
-            'fajr.mp3',
-            'dhuhr.mp3',
-            'asr.mp3',
-            'maghrib.mp3',
-            'isha.mp3',
-            'Alhamd.mp3',
-            'buzzer.mp3',
-            'Fajr Azan by Shaykh Ali Ahmed Mullah.mp3',
-            'Mufti Shahnawaz Ruqya.mp3'
-        ];
-
-        // Shared Universal Kiosk Audio Player
+        // Shared Universal Kiosk Audio Player & Audio State
         var kioskAudio = new Audio();
         kioskAudio.preload = 'auto';
         var currentActivePlayBtn = null;
+        var currentAzanEnabled = true;
+        var currentAzanVolume = 100;
+        var playedAzansToday = { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
+        var lastMakruhState = false;
+        var lastChimeHour = -1;
 
         // Auto unlock audio on any user interaction (Kiosk & Web Preview)
         function unlockKioskAudio() {
@@ -858,7 +701,7 @@
                         window.AndroidAudio.setVolume(vol);
                     }
                     window.AndroidAudio.playAudio(cleanPath);
-                    console.log("[Audio Modal] Played via native AndroidAudio bridge:", cleanPath);
+                    console.log("[Audio] Played via native AndroidAudio bridge:", cleanPath);
                     return;
                 } catch (e) {
                     console.warn("Native bridge play error:", e);
@@ -914,6 +757,272 @@
             playFallbackChime();
             updateAudioPlaybackUI('⚠️ Error loading file (played chime alert)', false);
         };
+
+        // Apply saved settings (city, theme, layout, audio, etc.) on startup
+        try {
+            var savedStr = localStorage.getItem('settings');
+            if (savedStr) {
+                var sObj = JSON.parse(savedStr);
+                if (sObj) {
+                    if (sObj.city) {
+                        var cityEl = document.getElementById('current-city');
+                        if (cityEl) cityEl.textContent = sObj.city;
+                    }
+                    if (sObj.theme) {
+                        applyThemeToDOM(sObj.theme);
+                    }
+                    if (sObj.layout) {
+                        applyLayoutToDOM(sObj.layout);
+                    }
+                    if (typeof sObj.azanAudioEnabled !== 'undefined') {
+                        currentAzanEnabled = (sObj.azanAudioEnabled !== false);
+                    }
+                    if (typeof sObj.azanVolume !== 'undefined') {
+                        currentAzanVolume = parseInt(sObj.azanVolume, 10);
+                    }
+                }
+            }
+        } catch (e) {}
+
+        // Check if cached timings exist in localStorage
+        try {
+            var nowD = new Date();
+            var dayK = nowD.getFullYear() + '-' + ((nowD.getMonth() + 1) < 10 ? '0' : '') + (nowD.getMonth() + 1) + '-' + (nowD.getDate() < 10 ? '0' : '') + nowD.getDate();
+            var cached30 = localStorage.getItem('prayerTimes30Days');
+            if (cached30) {
+                var p30 = JSON.parse(cached30);
+                if (p30 && p30[dayK] && p30[dayK].timings) {
+                    curTimings = p30[dayK].timings;
+                }
+            }
+        } catch (e) {}
+
+        applyTimingsToUI(curTimings);
+
+        // Core Audio & Prayer Manager
+        function checkAudioAndPrayers(now, currentSec, isMakruh) {
+            // 1. Midnight Reset (00:00:00 - 00:00:02)
+            if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() <= 2) {
+                playedAzansToday = { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
+                lastMakruhState = false;
+            }
+
+            // 2. Makruh State Transition Warning Buzzer
+            if (isMakruh && !lastMakruhState) {
+                console.log("[Audio Engine] Entered Makruh period! Playing warning buzzer (azan/buzzer.mp3)...");
+                playKioskAudio('azan/buzzer.mp3', 'Makruh Warning Buzzer');
+            }
+            lastMakruhState = isMakruh;
+
+            // 3. Hourly Chime (Alhamd.mp3 at top of the hour)
+            var curHour = now.getHours();
+            if (curHour !== lastChimeHour && now.getMinutes() === 0 && now.getSeconds() <= 2) {
+                lastChimeHour = curHour;
+                if (!isMakruh && currentAzanEnabled !== false) {
+                    console.log("[Audio Engine] Top of hour " + curHour + ":00! Playing chime (azan/Alhamd.mp3)...");
+                    playKioskAudio('azan/Alhamd.mp3', 'Hourly Chime');
+                }
+            }
+
+            // 4. Automatic Prayer Azan Trigger
+            var prayerAudioMap = [
+                { name: 'Fajr', time: curTimings.Fajr, track: 'azan/fajr.mp3' },
+                { name: 'Dhuhr', time: curTimings.Dhuhr, track: 'azan/dhuhr.mp3' },
+                { name: 'Asr', time: curTimings.Asr, track: 'azan/asr.mp3' },
+                { name: 'Maghrib', time: curTimings.Maghrib, track: 'azan/maghrib.mp3' },
+                { name: 'Isha', time: curTimings.Isha, track: 'azan/isha.mp3' }
+            ];
+
+            for (var p = 0; p < prayerAudioMap.length; p++) {
+                var pObj = prayerAudioMap[p];
+                var pSec = timeToSeconds(pObj.time);
+                if (pSec !== -1) {
+                    // Pre-arm flag if we are earlier than prayer
+                    if (currentSec < pSec - 60) {
+                        playedAzansToday[pObj.name] = false;
+                    }
+                    var diff = currentSec - pSec;
+                    if (diff >= 0 && diff < 60 && !playedAzansToday[pObj.name]) {
+                        playedAzansToday[pObj.name] = true;
+                        if (currentAzanEnabled !== false) {
+                            console.log("[Audio Engine] Namaz time entered for " + pObj.name + "! Playing Azan: " + pObj.track);
+                            playKioskAudio(pObj.track, pObj.name + ' Azan');
+                        } else {
+                            console.log("[Audio Engine] Namaz time entered for " + pObj.name + " (Muted in settings).");
+                        }
+                    }
+                }
+            }
+        }
+
+        function tickKiosk() {
+            try {
+                var now = new Date();
+
+                // 1. Live Time (12-hour AM/PM)
+                var timeElem = document.getElementById('current-time');
+                if (timeElem) {
+                    timeElem.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                }
+
+                // 2. Gregorian Date (English characters)
+                var gregElem = document.getElementById('gregorian-date');
+                if (gregElem) {
+                    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+                    var gDay = now.getDate();
+                    gregElem.textContent = (gDay < 10 ? '0' : '') + gDay + ' ' + months[now.getMonth()] + ' ' + now.getFullYear();
+                }
+
+                // 3. Hijri Date (English characters & fonts)
+                var islamElem = document.getElementById('islamic-date');
+                if (islamElem) {
+                    islamElem.textContent = getHijriEnglishDate();
+                }
+
+                var currentSec = now.getHours() * 3600 + now.getMinutes() * 60 + now.getSeconds();
+
+                // 4. Makruh Times calculation
+                var sunriseSec = timeToSeconds(curTimings.Sunrise);
+                var dhuhrSec = timeToSeconds(curTimings.Dhuhr);
+                var maghribSec = timeToSeconds(curTimings.Maghrib);
+                var isMakruh = false;
+                var makruhEndRemaining = 0;
+                var makruhType = '';
+
+                // Sunrise Makruh: from Sunrise until Sunrise + 15 min (900s)
+                if (sunriseSec !== -1 && currentSec >= sunriseSec && currentSec < (sunriseSec + 900)) {
+                    isMakruh = true;
+                    makruhEndRemaining = (sunriseSec + 900) - currentSec;
+                    makruhType = 'Sunrise';
+                }
+                // Zawal / Nisf an-Nahar Makruh: strictly ends at Dhuhr (never overlaps Dhuhr Azan)
+                else if (dhuhrSec !== -1 && currentSec >= (dhuhrSec - 600) && currentSec < dhuhrSec) {
+                    isMakruh = true;
+                    makruhEndRemaining = dhuhrSec - currentSec;
+                    makruhType = 'Zawal';
+                }
+                // Pre-Sunset / Ghuroob Makruh: strictly ends at Maghrib (never overlaps Maghrib Azan)
+                else if (maghribSec !== -1 && currentSec >= (maghribSec - 1200) && currentSec < maghribSec) {
+                    isMakruh = true;
+                    makruhEndRemaining = maghribSec - currentSec;
+                    makruhType = 'Pre-Sunset';
+                }
+
+                // Check and trigger prayer azan, Makruh buzzer, and hourly chime
+                checkAudioAndPrayers(now, currentSec, isMakruh);
+
+                // 5. Next Prayer Countdown & Box Highlighting
+                var prayers = [
+                    { name: 'Fajr', sec: timeToSeconds(curTimings.Fajr), id: 'fajr-box' },
+                    { name: 'Dhuhr', sec: timeToSeconds(curTimings.Dhuhr), id: 'dhuhr-box' },
+                    { name: 'Asr', sec: timeToSeconds(curTimings.Asr), id: 'asr-box' },
+                    { name: 'Maghrib', sec: timeToSeconds(curTimings.Maghrib), id: 'maghrib-box' },
+                    { name: 'Isha', sec: timeToSeconds(curTimings.Isha), id: 'isha-box' }
+                ];
+
+                var currentPrayer = prayers[prayers.length - 1]; // default Isha
+                var nextPrayer = null;
+
+                for (var i = 0; i < prayers.length; i++) {
+                    if (currentSec >= prayers[i].sec) {
+                        currentPrayer = prayers[i];
+                    }
+                    if (prayers[i].sec > currentSec && !nextPrayer) {
+                        nextPrayer = prayers[i];
+                    }
+                }
+
+                var nextDiff = 0;
+                if (nextPrayer) {
+                    nextDiff = nextPrayer.sec - currentSec;
+                } else {
+                    nextPrayer = prayers[0]; // Fajr tomorrow
+                    nextDiff = (prayers[0].sec + 86400) - currentSec;
+                }
+
+                var nextElem = document.getElementById('next-prayer');
+                if (nextElem && !nextElem.classList.contains('play-prompt')) {
+                    if (isMakruh) {
+                        nextElem.innerHTML = '<span class="makruh-badge">⚠️ Makruh (' + makruhType + ') ends in ' + secondsToHHMM(makruhEndRemaining) + '</span>';
+                    } else {
+                        nextElem.textContent = 'Next Prayer: ' + nextPrayer.name + ' in ' + secondsToHHMM(nextDiff);
+                    }
+                }
+
+                // Highlight active prayer box or Makruh
+                var boxIds = ['fajr-box', 'dhuhr-box', 'asr-box', 'maghrib-box', 'isha-box'];
+                for (var b = 0; b < boxIds.length; b++) {
+                    var el = document.getElementById(boxIds[b]);
+                    if (el) {
+                        el.classList.remove('fajr-highlight', 'dhuhr-highlight', 'asr-highlight', 'maghrib-highlight', 'isha-highlight', 'makruh-highlight');
+                    }
+                }
+                if (currentPrayer) {
+                    var activeEl = document.getElementById(currentPrayer.id);
+                    if (activeEl) {
+                        if (isMakruh) {
+                            activeEl.classList.add('makruh-highlight');
+                        } else {
+                            activeEl.classList.add(currentPrayer.name.toLowerCase() + '-highlight');
+                        }
+                    }
+                }
+
+                // 6. Rotate Hadith every 20 seconds
+                var hadithIdx = Math.floor(now.getTime() / 20000) % curatedHadiths.length;
+                var curH = curatedHadiths[hadithIdx];
+                var hElem = document.getElementById('hadith-english');
+                var sElem = document.getElementById('hadith-source');
+                if (hElem && (!hElem.textContent || hElem.textContent === 'Loading Hadith...' || hElem.textContent === curH.text)) {
+                    hElem.textContent = curH.text;
+                }
+                if (sElem && (!sElem.textContent || sElem.textContent === 'Loading Source...' || sElem.textContent === curH.source)) {
+                    sElem.textContent = curH.source;
+                }
+
+            } catch (err) {
+                console.warn("Kiosk tick warning:", err);
+            }
+        }
+
+        tickKiosk();
+        setInterval(tickKiosk, 1000);
+        window.__kioskAudioEngineActive = true;
+
+        // Expose helper to window so external script.js can update curTimings cleanly
+        window.__updateKioskTimings = function(newTimings) {
+            if (newTimings) {
+                curTimings = newTimings;
+                applyTimingsToUI(curTimings);
+                tickKiosk();
+            }
+        };
+
+        // --- Single Page Application (SPA) In-App Dynamic Settings Modal Controller ---
+        var modal = document.getElementById('settings-modal');
+        var openBtn = document.getElementById('open-settings-btn');
+        var closeBtn = document.getElementById('close-settings-btn');
+        var cancelBtn = document.getElementById('cancel-settings-btn');
+        var saveBtn = document.getElementById('save-settings-btn');
+        var saveStatus = document.getElementById('settings-save-status');
+
+        var currentSelectedAsr = 'hanafi';
+        var currentSelectedTheme = 'default';
+        var currentSelectedLayout = 'default';
+        var currentAzanEnabled = true;
+        var currentAzanVolume = 100;
+        var currentReminders = [];
+        var availableMp3Files = [
+            'fajr.mp3',
+            'dhuhr.mp3',
+            'asr.mp3',
+            'maghrib.mp3',
+            'isha.mp3',
+            'Alhamd.mp3',
+            'buzzer.mp3',
+            'Fajr Azan by Shaykh Ali Ahmed Mullah.mp3',
+            'Mufti Shahnawaz Ruqya.mp3'
+        ];
 
         function updateAzanToggleUI() {
             var toggleBtn = document.getElementById('btn-toggle-azan');
@@ -1310,10 +1419,10 @@
                 applyThemeToDOM(currentSettings.theme);
                 applyLayoutToDOM(currentSettings.layout);
 
-                // 3. Update Urdu Hijri date immediately
+                // 3. Update English Hijri date immediately
                 var islamElem = document.getElementById('islamic-date');
                 if (islamElem) {
-                    islamElem.textContent = getHijriUrduDate(currentSettings.adjustment);
+                    islamElem.textContent = getHijriEnglishDate(currentSettings.adjustment);
                 }
 
                 // 4. If online, fetch fresh timings from Aladhan API for new city in background

@@ -313,6 +313,19 @@ html, body {
     animation: blink 2s infinite;
 }
 
+.makruh-badge {
+    display: inline-block;
+    background-color: #dc2626;
+    color: #ffffff !important;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: clamp(0.75rem, 1.8vh, 1.1rem);
+    letter-spacing: 0.5px;
+    animation: blink 2s infinite;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
 @keyframes blink {
     50% {
         opacity: 0;
