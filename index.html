@@ -334,6 +334,11 @@
                                 <div class="layout-card-label">Vertical</div>
                             </div>
                         </div>
+                        <div style="display: flex; justify-content: center; margin-top: 14px;">
+                            <button type="button" onclick="var b=document.querySelector('.settings-modal-body');if(b)b.scrollTop=0;" style="background: #f1f5f9; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 18px; font-size: 0.88rem; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                                <span>↑</span> Back to Top / Tabs
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -817,6 +822,11 @@
 
         function stopKioskAudio() {
             try {
+                if (window.AndroidAudio && typeof window.AndroidAudio.stopAudio === 'function') {
+                    window.AndroidAudio.stopAudio();
+                }
+            } catch (e) {}
+            try {
                 kioskAudio.pause();
                 kioskAudio.currentTime = 0;
             } catch (e) {}
@@ -829,30 +839,61 @@
 
         function playKioskAudio(src, trackName, btnEl) {
             stopKioskAudio();
-            try {
-                if (!src.startsWith('http') && !src.startsWith('/') && !src.startsWith('azan/')) {
-                    src = 'azan/' + src;
-                }
-                kioskAudio.src = src;
-                kioskAudio.volume = Math.max(0, Math.min(1, currentAzanVolume / 100));
-                
-                if (btnEl) {
-                    btnEl.classList.add('playing');
-                    currentActivePlayBtn = btnEl;
-                }
-                updateAudioPlaybackUI('▶ Playing: ' + trackName, true);
+            var cleanPath = src || '';
+            if (!cleanPath.startsWith('http') && !cleanPath.startsWith('/') && !cleanPath.startsWith('azan/')) {
+                cleanPath = 'azan/' + cleanPath;
+            }
+            var vol = Math.max(0, Math.min(1, currentAzanVolume / 100));
 
+            if (btnEl) {
+                btnEl.classList.add('playing');
+                currentActivePlayBtn = btnEl;
+            }
+            updateAudioPlaybackUI('▶ Playing: ' + trackName, true);
+
+            // Tier 1: Native Android Hardware Bridge
+            if (window.AndroidAudio && typeof window.AndroidAudio.playAudio === 'function') {
+                try {
+                    if (typeof window.AndroidAudio.setVolume === 'function') {
+                        window.AndroidAudio.setVolume(vol);
+                    }
+                    window.AndroidAudio.playAudio(cleanPath);
+                    console.log("[Audio Modal] Played via native AndroidAudio bridge:", cleanPath);
+                    return;
+                } catch (e) {
+                    console.warn("Native bridge play error:", e);
+                }
+            }
+
+            // Tier 2: HTML5 Audio with Blob URL and Web Audio API fallback
+            try {
+                kioskAudio.src = cleanPath;
+                kioskAudio.volume = vol;
                 var playPromise = kioskAudio.play();
                 if (playPromise && typeof playPromise.catch === 'function') {
                     playPromise.catch(function(err) {
-                        console.warn("Kiosk audio play blocked/error:", err);
-                        playFallbackChime();
-                        updateAudioPlaybackUI('⚠️ Autoplay blocked - tap screen to allow: ' + trackName, false);
-                        if (btnEl) btnEl.classList.remove('playing');
+                        console.warn("Direct HTML5 audio play failed, trying Blob fetch:", err);
+                        fetch(cleanPath)
+                            .then(function(res) {
+                                if (!res.ok) throw new Error("Fetch error: " + res.status);
+                                return res.blob();
+                            })
+                            .then(function(blob) {
+                                var blobUrl = URL.createObjectURL(blob);
+                                kioskAudio.src = blobUrl;
+                                kioskAudio.volume = vol;
+                                return kioskAudio.play();
+                            })
+                            .catch(function(fetchErr) {
+                                console.warn("Blob audio also failed:", fetchErr);
+                                playFallbackChime();
+                                updateAudioPlaybackUI('⚠️ Audio blocked - tap anywhere to enable: ' + trackName, false);
+                                if (btnEl) btnEl.classList.remove('playing');
+                            });
                     });
                 }
             } catch (e) {
-                console.warn("Audio play exception:", e);
+                console.warn("Audio exception:", e);
                 playFallbackChime();
             }
         }
@@ -1114,12 +1155,15 @@
                     loadModalFieldsFromSettings();
                 });
                 if (modal) modal.classList.add('open');
+                var bodyEl = document.querySelector('.settings-modal-body');
+                if (bodyEl) bodyEl.scrollTop = 0;
             };
         }
 
         function closeModal() {
             if (modal) modal.classList.remove('open');
             if (saveStatus) saveStatus.style.display = 'none';
+            stopKioskAudio();
         }
 
         if (closeBtn) closeBtn.onclick = closeModal;
@@ -1142,6 +1186,8 @@
                     contents[c].classList.remove('active');
                     if (contents[c].id === targetId) contents[c].classList.add('active');
                 }
+                var bodyEl = document.querySelector('.settings-modal-body');
+                if (bodyEl) bodyEl.scrollTop = 0;
             };
         }
 
@@ -1189,6 +1235,9 @@
                 currentAzanVolume = parseInt(this.value, 10);
                 if (volumeLabel) volumeLabel.textContent = currentAzanVolume + '%';
                 if (kioskAudio) kioskAudio.volume = Math.max(0, Math.min(1, currentAzanVolume / 100));
+                if (window.AndroidAudio && typeof window.AndroidAudio.setVolume === 'function') {
+                    window.AndroidAudio.setVolume(currentAzanVolume / 100);
+                }
             };
         }
 

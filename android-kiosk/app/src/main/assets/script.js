@@ -1004,18 +1004,49 @@ function updateTimeAndNextPrayer(timings) {
             var currentVolume = (settings && typeof settings.azanVolume !== 'undefined') ? Math.max(0, Math.min(1, settings.azanVolume / 100)) : 1.0;
             var isAzanEnabled = !settings || settings.azanAudioEnabled !== false;
 
+            function playKioskAudioTrack(audioSrc, vol) {
+                var clean = audioSrc || '';
+                if (!clean.startsWith('http') && !clean.startsWith('/') && !clean.startsWith('azan/')) {
+                    clean = 'azan/' + clean;
+                }
+                var v = typeof vol === 'number' ? Math.max(0, Math.min(1, vol)) : 1.0;
+                if (window.AndroidAudio && typeof window.AndroidAudio.playAudio === 'function') {
+                    try {
+                        if (typeof window.AndroidAudio.setVolume === 'function') {
+                            window.AndroidAudio.setVolume(v);
+                        }
+                        window.AndroidAudio.playAudio(clean);
+                        console.log("[Audio] Played via native AndroidAudio:", clean);
+                        return;
+                    } catch (e) {
+                        console.warn("[Audio] Native bridge failed, using HTML5:", e);
+                    }
+                }
+                try {
+                    audioPlayer.volume = v;
+                    audioPlayer.src = clean;
+                    audioPlayer.play().catch(function(err) {
+                        console.warn("[Audio] Direct play failed, trying Blob:", err);
+                        fetch(clean)
+                            .then(function(res) { return res.blob(); })
+                            .then(function(b) {
+                                audioPlayer.src = URL.createObjectURL(b);
+                                audioPlayer.volume = v;
+                                audioPlayer.play().catch(function(e) { console.error("Blob play failed:", e); });
+                            })
+                            .catch(function(fe) { console.error("Audio fetch error:", fe); });
+                    });
+                } catch (e) {
+                    console.error("Audio exception:", e);
+                }
+            }
+
             if (currentHour !== lastHour && currentMinute === 0 && currentSecond <= 6) {
                 console.log("[Hourly Buzzer Check] Triggered! hour=".concat(currentHour, ", isAzanEnabled=").concat(isAzanEnabled, ", isMakruh=").concat(isMakruh));
                 if (isAzanEnabled && !isMakruh) {
                     console.log("[Hourly Buzzer Check] Playing hourly buzzer from ".concat(azaanFiles.HourlyBuzzer, "..."));
-                    audioPlayer.volume = currentVolume;
-                    audioPlayer.src = azaanFiles.HourlyBuzzer;
-                    audioPlayer.play().then(function () {
-                        console.log("[Hourly Buzzer Check] Hourly buzzer started successfully.");
-                        audioEnabled = true;
-                    }).catch(function (error) {
-                        console.error("[Hourly Buzzer Check] Error playing hourly buzzer:", error);
-                    });
+                    playKioskAudioTrack(azaanFiles.HourlyBuzzer, currentVolume);
+                    audioEnabled = true;
                 }
                 lastHour = currentHour;
             }
@@ -1034,16 +1065,11 @@ function updateTimeAndNextPrayer(timings) {
                 var diff = currentSeconds - prayerSeconds;
                 if (diff >= 0 && diff <= timeWindow && !playedAzans[prayer.name]) {
                     if (isAzanEnabled && !isMakruh) {
-                        audioPlayer.volume = currentVolume;
-                        audioPlayer.src = prayer.audio;
-                        audioPlayer.play().then(function () {
-                            playedAzans[prayer.name] = true;
-                            audioEnabled = true;
-                            userInteracted = true;
-                            console.log("Azan played successfully for " + prayer.name);
-                        }).catch(function (error) {
-                            console.error("Error playing Azan for ".concat(prayer.name, ":"), error);
-                        });
+                        playKioskAudioTrack(prayer.audio, currentVolume);
+                        playedAzans[prayer.name] = true;
+                        audioEnabled = true;
+                        userInteracted = true;
+                        console.log("Azan played successfully for " + prayer.name);
                     }
                     else if (!isAzanEnabled) {
                         console.log("Azan for " + prayer.name + " muted (Azan disabled in settings).");
@@ -1061,10 +1087,8 @@ function updateTimeAndNextPrayer(timings) {
                 alarmDiff = currentSeconds - alarmSeconds;
                 if (alarmDiff >= 0 && alarmDiff <= timeWindow && !playedAlarm && alarmAudio) {
                     if (audioEnabled && !isMakruh) {
-                        audioPlayer.src = alarmAudio;
-                        audioPlayer.play().then(function () {
-                            playedAlarm = true;
-                        }).catch(function (error) { return console.error("Error playing Alarm:", error); });
+                        playKioskAudioTrack(alarmAudio, currentVolume);
+                        playedAlarm = true;
                     }
                 }
             }
@@ -1083,12 +1107,10 @@ function updateTimeAndNextPrayer(timings) {
                 var diff = currentSeconds - reminderSeconds;
                 if (diff >= 0 && diff <= timeWindow && (!playedReminders[index] || repeat) && audio) {
                     if (audioEnabled && !isMakruh) {
-                        audioPlayer.src = audio;
-                        audioPlayer.play().then(function () {
-                            currentlyPlayingReminder = index;
-                            if (!repeat)
-                                playedReminders[index] = true;
-                        }).catch(function (error) { return console.error("Error playing Reminder ".concat(index, ":"), error); });
+                        playKioskAudioTrack(audio, currentVolume);
+                        currentlyPlayingReminder = index;
+                        if (!repeat)
+                            playedReminders[index] = true;
                     }
                     else if (!userInteracted && !isMakruh) {
                         showPlayPrompt(index, audio);

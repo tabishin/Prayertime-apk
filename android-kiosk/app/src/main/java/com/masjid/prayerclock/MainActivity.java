@@ -18,6 +18,10 @@ import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.content.res.AssetFileDescriptor;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.webkit.JavascriptInterface;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebViewAssetLoader;
@@ -27,6 +31,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "PrayerClock";
     private WebView webView;
     private WebViewAssetLoader assetLoader;
+    private KioskAudioBridge audioBridge;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -86,6 +91,10 @@ public class MainActivity extends AppCompatActivity {
 
         // Cache mode for reliable offline kiosk operation
         settings.setCacheMode(WebSettings.LOAD_DEFAULT);
+
+        // Native Hardware Audio Bridge (Plays directly from APK assets, zero webview restrictions)
+        audioBridge = new KioskAudioBridge();
+        webView.addJavascriptInterface(audioBridge, "AndroidAudio");
 
         // Configure WebViewAssetLoader
         assetLoader = new WebViewAssetLoader.Builder()
@@ -183,6 +192,92 @@ public class MainActivity extends AppCompatActivity {
         // In Kiosk mode, do not exit on accidental back press
         if (webView != null && webView.canGoBack()) {
             webView.goBack();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (audioBridge != null) {
+            audioBridge.stopAudio();
+        }
+    }
+
+    public class KioskAudioBridge {
+        private MediaPlayer mediaPlayer;
+        private float currentVolume = 1.0f;
+
+        @JavascriptInterface
+        public void playAudio(final String rawPath) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        stopAudioInternal();
+
+                        String clean = rawPath != null ? rawPath.trim() : "";
+                        if (clean.startsWith("http")) {
+                            int idx = clean.indexOf("azan/");
+                            if (idx != -1) clean = clean.substring(idx);
+                        }
+                        clean = clean.replace("https://appassets.androidplatform.net/assets/", "")
+                                     .replace("file:///android_asset/", "")
+                                     .replaceAll("^/+", "");
+                        if (!clean.startsWith("azan/")) {
+                            clean = "azan/" + clean;
+                        }
+
+                        Log.d(TAG, "Opening asset for native playback: " + clean);
+                        AssetFileDescriptor afd = getAssets().openFd(clean);
+                        mediaPlayer = new MediaPlayer();
+                        mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                        mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                        afd.close();
+                        mediaPlayer.setVolume(currentVolume, currentVolume);
+                        mediaPlayer.prepare();
+                        mediaPlayer.start();
+                        Log.d(TAG, "Native MediaPlayer playing: " + clean);
+                    } catch (Exception e) {
+                        Log.e(TAG, "Error in native playAudio for " + rawPath, e);
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void stopAudio() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    stopAudioInternal();
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void setVolume(final float vol) {
+            currentVolume = Math.max(0.0f, Math.min(1.0f, vol));
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (mediaPlayer != null) {
+                        try {
+                            mediaPlayer.setVolume(currentVolume, currentVolume);
+                        } catch (Exception ignored) {}
+                    }
+                }
+            });
+        }
+
+        private void stopAudioInternal() {
+            if (mediaPlayer != null) {
+                try {
+                    if (mediaPlayer.isPlaying()) mediaPlayer.stop();
+                    mediaPlayer.reset();
+                    mediaPlayer.release();
+                } catch (Exception ignored) {}
+                mediaPlayer = null;
+            }
         }
     }
 }
