@@ -92,14 +92,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        if (localServer != null) {
-            localServer.stopServer();
-        }
-    }
-
     private void configureWebView() {
         if (webView == null) return;
 
@@ -236,6 +228,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        if (localServer != null) {
+            localServer.stopServer();
+        }
         if (audioBridge != null) {
             audioBridge.stopAudio();
         }
