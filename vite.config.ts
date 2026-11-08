@@ -2,6 +2,7 @@ import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
@@ -15,6 +16,32 @@ export default defineConfig(() => {
           server.middlewares.use((req, res, next) => {
             const url = new URL(req.url || '', `http://${req.headers.host}`);
             const pathname = url.pathname;
+
+            if (pathname === '/get_network_info.php' || pathname === '/get_network_info') {
+              res.setHeader('Access-Control-Allow-Origin', '*');
+              res.setHeader('Content-Type', 'application/json');
+              const interfaces = os.networkInterfaces();
+              let lanIp = 'localhost';
+              for (const name of Object.keys(interfaces)) {
+                for (const iface of interfaces[name] || []) {
+                  if (iface.family === 'IPv4' && !iface.internal) {
+                    lanIp = iface.address;
+                    break;
+                  }
+                }
+                if (lanIp !== 'localhost') break;
+              }
+              const port = (server.config.server && server.config.server.port) ? server.config.server.port : 3000;
+              const host = req.headers.host || `${lanIp}:${port}`;
+              res.writeHead(200);
+              res.end(JSON.stringify({
+                lanIp: lanIp,
+                port: port,
+                adminUrl: `http://${lanIp}:${port}/admin.html`,
+                hostUrl: `http://${host}/admin.html`
+              }));
+              return;
+            }
 
             if (pathname === '/save_settings.php') {
               res.setHeader('Access-Control-Allow-Origin', '*');

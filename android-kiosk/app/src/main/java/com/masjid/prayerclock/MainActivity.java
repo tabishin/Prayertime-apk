@@ -29,7 +29,20 @@ import android.content.Intent;
 import android.util.Base64;
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.FileInputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.NetworkInterface;
+import java.net.InetAddress;
+import java.net.Inet4Address;
+import java.util.Collections;
+import java.util.List;
 import java.util.Calendar;
+import org.json.JSONObject;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebViewAssetLoader;
@@ -40,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     private WebView webView;
     private WebViewAssetLoader assetLoader;
     private KioskAudioBridge audioBridge;
+    private LocalSettingsServer localServer;
 
     @SuppressLint("SetJavaScriptEnabled")
     @Override
@@ -61,12 +75,28 @@ public class MainActivity extends AppCompatActivity {
 
             configureWebView();
 
+            // Start Local Wi-Fi Settings Server on port 8080 so phones on same Wi-Fi can configure
+            try {
+                localServer = new LocalSettingsServer(8080);
+                localServer.start();
+            } catch (Exception e) {
+                Log.w(TAG, "Could not start local settings server: " + e.getMessage());
+            }
+
             // Load via WebViewAssetLoader using secure appassets origin
             // This guarantees full compatibility on Android 10/11/12+ (like Redmi K20 Pro)
             // avoiding file:/// CORS and null origin restrictions
             webView.loadUrl("https://appassets.androidplatform.net/assets/index.html");
         } catch (Exception e) {
             Log.e(TAG, "Error initializing MainActivity", e);
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (localServer != null) {
+            localServer.stopServer();
         }
     }
 
@@ -385,6 +415,17 @@ public class MainActivity extends AppCompatActivity {
             }
         }
 
+        @JavascriptInterface
+        public String getLocalIpAddress() {
+            return getDeviceIpAddress();
+        }
+
+        @JavascriptInterface
+        public String getAdminUrl() {
+            String ip = getDeviceIpAddress();
+            return "http://" + ip + ":8080/admin.html";
+        }
+
         private void stopAudioInternal() {
             if (mediaPlayer != null) {
                 try {
@@ -394,6 +435,192 @@ public class MainActivity extends AppCompatActivity {
                 } catch (Exception ignored) {}
                 mediaPlayer = null;
             }
+        }
+    }
+
+    public static String getDeviceIpAddress() {
+        try {
+            List<NetworkInterface> interfaces = Collections.list(NetworkInterface.getNetworkInterfaces());
+            for (NetworkInterface intf : interfaces) {
+                List<InetAddress> addrs = Collections.list(intf.getInetAddresses());
+                for (InetAddress addr : addrs) {
+                    if (!addr.isLoopbackAddress() && addr instanceof Inet4Address) {
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception ignored) {}
+        return "127.0.0.1";
+    }
+
+    public class LocalSettingsServer {
+        private ServerSocket serverSocket;
+        private boolean isRunning = false;
+        private final int port;
+        private Thread serverThread;
+
+        public LocalSettingsServer(int port) {
+            this.port = port;
+        }
+
+        public void start() {
+            serverThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        serverSocket = new ServerSocket(port);
+                        isRunning = true;
+                        Log.i(TAG, "Local Wi-Fi Admin Server running on port " + port);
+                        while (isRunning) {
+                            try {
+                                Socket client = serverSocket.accept();
+                                handleClient(client);
+                            } catch (Exception e) {
+                                if (!isRunning) break;
+                            }
+                        }
+                    } catch (Exception e) {
+                        Log.w(TAG, "Could not start local HTTP server on port " + port + ": " + e.getMessage());
+                    }
+                }
+            });
+            serverThread.start();
+        }
+
+        public void stopServer() {
+            isRunning = false;
+            try {
+                if (serverSocket != null) serverSocket.close();
+            } catch (Exception ignored) {}
+        }
+
+        private void handleClient(final Socket client) {
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        InputStream in = client.getInputStream();
+                        OutputStream out = client.getOutputStream();
+                        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
+
+                        String line = reader.readLine();
+                        if (line == null) {
+                            client.close();
+                            return;
+                        }
+
+                        String[] parts = line.split(" ");
+                        if (parts.length < 2) {
+                            client.close();
+                            return;
+                        }
+
+                        String method = parts[0];
+                        String path = parts[1];
+                        if (path.contains("?")) path = path.split("\\?")[0];
+
+                        int contentLength = 0;
+                        while ((line = reader.readLine()) != null && !line.isEmpty()) {
+                            if (line.toLowerCase().startsWith("content-length:")) {
+                                contentLength = Integer.parseInt(line.substring(15).trim());
+                            }
+                        }
+
+                        if ("OPTIONS".equalsIgnoreCase(method)) {
+                            sendResponse(out, 200, "text/plain", "OK");
+                            client.close();
+                            return;
+                        }
+
+                        if ("/save_settings.php".equals(path)) {
+                            if ("POST".equalsIgnoreCase(method) && contentLength > 0) {
+                                char[] bodyChars = new char[contentLength];
+                                int read = 0;
+                                while (read < contentLength) {
+                                    int r = reader.read(bodyChars, read, contentLength - read);
+                                    if (r == -1) break;
+                                    read += r;
+                                }
+                                final String bodyStr = new String(bodyChars);
+                                File settingsFile = new File(getFilesDir(), "settings.json");
+                                FileOutputStream fos = new FileOutputStream(settingsFile);
+                                fos.write(bodyStr.getBytes("UTF-8"));
+                                fos.flush();
+                                fos.close();
+
+                                // Notify WebView to reload/update instantly
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (webView != null) {
+                                            webView.evaluateJavascript("if (typeof applyRemoteSettings === 'function') { applyRemoteSettings(" + bodyStr + "); } else { localStorage.setItem('settings', " + JSONObject.quote(bodyStr) + "); }", null);
+                                        }
+                                    }
+                                });
+
+                                sendResponse(out, 200, "application/json", "{\"status\":\"success\"}");
+                            } else {
+                                File settingsFile = new File(getFilesDir(), "settings.json");
+                                String content = "{}";
+                                if (settingsFile.exists()) {
+                                    FileInputStream fis = new FileInputStream(settingsFile);
+                                    byte[] data = new byte[(int) settingsFile.length()];
+                                    fis.read(data);
+                                    fis.close();
+                                    content = new String(data, "UTF-8");
+                                }
+                                sendResponse(out, 200, "application/json", content);
+                            }
+                            client.close();
+                            return;
+                        }
+
+                        // Serve static assets (admin.html, admin.js, styles.css, etc.)
+                        String assetPath = path.startsWith("/") ? path.substring(1) : path;
+                        if (assetPath.isEmpty() || assetPath.equals("admin")) assetPath = "admin.html";
+
+                        try {
+                            InputStream assetIn = getAssets().open(assetPath);
+                            byte[] assetBytes = new byte[assetIn.available()];
+                            assetIn.read(assetBytes);
+                            assetIn.close();
+
+                            String mime = "text/plain";
+                            if (assetPath.endsWith(".html")) mime = "text/html; charset=UTF-8";
+                            else if (assetPath.endsWith(".css")) mime = "text/css; charset=UTF-8";
+                            else if (assetPath.endsWith(".js")) mime = "application/javascript; charset=UTF-8";
+                            else if (assetPath.endsWith(".json")) mime = "application/json; charset=UTF-8";
+
+                            sendByteResponse(out, 200, mime, assetBytes);
+                        } catch (Exception e) {
+                            sendResponse(out, 404, "text/plain", "Not Found");
+                        }
+                        client.close();
+                    } catch (Exception ignored) {}
+                }
+            }).start();
+        }
+
+        private void sendResponse(OutputStream out, int code, String mime, String content) {
+            try {
+                byte[] bytes = content.getBytes("UTF-8");
+                sendByteResponse(out, code, mime, bytes);
+            } catch (Exception ignored) {}
+        }
+
+        private void sendByteResponse(OutputStream out, int code, String mime, byte[] bytes) {
+            try {
+                String header = "HTTP/1.1 " + code + " OK\r\n" +
+                        "Content-Type: " + mime + "\r\n" +
+                        "Content-Length: " + bytes.length + "\r\n" +
+                        "Access-Control-Allow-Origin: *\r\n" +
+                        "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
+                        "Access-Control-Allow-Headers: Content-Type\r\n" +
+                        "Connection: close\r\n\r\n";
+                out.write(header.getBytes("UTF-8"));
+                out.write(bytes);
+                out.flush();
+            } catch (Exception ignored) {}
         }
     }
 }

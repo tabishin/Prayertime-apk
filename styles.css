@@ -292,13 +292,24 @@ html, body {
 }
 
 .date-info {
-    font-size: 1.1rem;
-    font-size: 2.2vh;
-    font-size: clamp(0.85rem, 2.2vh, 1.4rem);
+    font-size: 2.2rem;
+    font-size: 4.8vh;
+    font-size: clamp(1.4rem, 4.8vh, 3.2rem);
+    font-weight: 800;
+    letter-spacing: -0.5px;
     display: flex;
     align-items: center;
     gap: 0.8vw;
     opacity: 0.95;
+    white-space: nowrap;
+}
+
+.date-info span,
+.date-info #gregorian-date,
+.date-info #islamic-date {
+    font-size: inherit;
+    font-weight: 800;
+    letter-spacing: inherit;
 }
 
 #location {
@@ -796,11 +807,12 @@ html, body {
         gap: 1.5vw;
     }
 
-    .current-time {
+    .current-time, .date-info {
         font-size: clamp(1.2rem, 3.8vw, 2.2rem);
+        font-weight: 800;
     }
 
-    .next-prayer, .date-info, #location {
+    .next-prayer, #location {
         font-size: clamp(0.7rem, 2vw, 1rem);
     }
 
@@ -824,11 +836,12 @@ html, body {
         gap: 12px;
     }
 
-    .current-time {
+    .current-time, .date-info {
         font-size: clamp(1.1rem, 7vh, 1.7rem);
+        font-weight: 800;
     }
 
-    .next-prayer, .date-info, #location {
+    .next-prayer, #location {
         font-size: clamp(0.75rem, 4vh, 0.95rem);
     }
 
@@ -886,8 +899,9 @@ html, body {
         gap: clamp(10px, 1.8vmin, 24px);
         padding: clamp(12px, 1.8vmin, 28px);
     }
-    .current-time {
+    .current-time, .date-info {
         font-size: clamp(2rem, 4.8vh, 4rem);
+        font-weight: 800;
     }
     .layout-default .prayer-name {
         font-size: clamp(1.6rem, 4.2vmin, 3.2rem);

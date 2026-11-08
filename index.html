@@ -38,7 +38,7 @@
             <div class="next-prayer" id="next-prayer">Next Prayer: Calculating...</div>
             <div class="date-info">
                 <span id="gregorian-date"></span> | 
-                <span id="islamic-date" style="font-family: inherit; font-weight: 600;"></span>
+                <span id="islamic-date"></span>
             </div>
             <div id="location">Location: <span id="current-city">Mumbai</span> <button id="open-settings-btn" class="settings-btn" type="button" title="Open Settings" aria-label="Settings">⚙️</button></div>
         </div>
@@ -416,34 +416,57 @@
                 <!-- ========================================== -->
                 <div id="tab-remote" class="settings-tab-content">
                     <div class="settings-card-box">
-                        <div class="settings-section-title">🌐 Remote Local Network Administration</div>
+                        <div class="settings-section-title" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                            <span>📶 Same Wi-Fi Network Remote Administration</span>
+                            <span style="font-size: 0.78rem; font-weight: 700; background: #e0f2fe; color: #0284c7; padding: 3px 10px; border-radius: 999px;">Local Network Only</span>
+                        </div>
                         <div style="font-size: 0.88rem; color: #475569; margin-bottom: 16px; line-height: 1.5;">
-                            Configure this Prayer Clock display from your smartphone, tablet, or laptop on the same local network / Wi-Fi without needing to touch this screen.
+                            Control and update this Prayer Clock display from your smartphone, tablet, or PC on the <strong>same Wi-Fi network</strong> without needing to touch this screen.
                         </div>
 
-                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 16px; margin-bottom: 16px;">
                             <div style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 18px;">
-                                <div style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Remote Web URL</div>
-                                <div id="display-remote-url" style="font-family: monospace; font-size: 1.05rem; font-weight: 700; color: #047857; word-break: break-all; margin-bottom: 12px;">
+                                <div style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Wi-Fi Admin Web URL</div>
+                                <div id="display-remote-url" style="font-family: monospace; font-size: 1.1rem; font-weight: 800; color: #047857; word-break: break-all; margin-bottom: 12px; background: #ffffff; padding: 8px 12px; border-radius: 8px; border: 1px solid #e2e8f0;">
                                     http://.../admin.html
                                 </div>
-                                <a id="btn-open-remote-admin" href="admin.html" target="_blank" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 0.88rem; text-decoration: none;">
-                                    <span>↗</span> Open Remote Admin Page
-                                </a>
+                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                    <button type="button" id="btn-copy-remote-url" onclick="window.copyRemoteUrlToClipboard()" class="btn-primary" style="padding: 8px 14px; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 6px;">
+                                        📋 Copy Wi-Fi URL
+                                    </button>
+                                    <a id="btn-open-remote-admin" href="admin.html" target="_blank" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; font-size: 0.85rem; text-decoration: none; background: #0284c7; border-color: #0284c7;">
+                                        <span>↗</span> Open Remote Admin
+                                    </a>
+                                </div>
                             </div>
 
                             <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 18px;">
                                 <div style="font-size: 0.78rem; font-weight: 800; color: #166534; text-transform: uppercase; margin-bottom: 6px;">Security PIN Authentication</div>
                                 <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 6px;">
-                                    Admin PIN: <span id="current-pin-badge" style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-family: monospace;">1234</span>
+                                    Admin PIN: <span id="current-pin-badge" style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 1.1rem; font-weight: 800;">1234</span>
                                 </div>
                                 <div style="font-size: 0.82rem; color: #475569; margin-bottom: 10px;">
-                                    Prevents unauthorized changes from other devices on the network.
+                                    Prevents unauthorized access from others on your Wi-Fi.
                                 </div>
                                 <div class="settings-form-group" style="margin-bottom: 0;">
-                                    <label class="settings-label" for="setting-admin-pin" style="margin-bottom: 4px;">Update Admin PIN</label>
+                                    <label class="settings-label" for="setting-admin-pin" style="margin-bottom: 4px;">Change Admin PIN</label>
                                     <input type="text" id="setting-admin-pin" class="settings-input" style="width: 140px; font-weight: 800; letter-spacing: 2px; text-align: center;" value="1234" maxlength="8">
                                 </div>
+                            </div>
+                        </div>
+
+                        <!-- 3-Step Quick Setup Guide for Phones -->
+                        <div style="background: #fffbeb; border: 1px solid #fef3c7; border-radius: 10px; padding: 14px 18px; display: flex; gap: 16px; align-items: center; flex-wrap: wrap;">
+                            <div style="font-size: 1.8rem;">📱</div>
+                            <div style="flex: 1; font-size: 0.85rem; color: #78350f; line-height: 1.5;">
+                                <strong>How to use from your Phone:</strong><br>
+                                1. Ensure phone is connected to the <strong>same Wi-Fi router</strong>.<br>
+                                2. Open Chrome or Safari and type the Wi-Fi URL above.<br>
+                                3. Enter PIN (<strong>1234</strong>) to adjust city, themes, layouts, alarms & tones live without touching this screen!
+                            </div>
+                            <div style="text-align: center; background: #ffffff; padding: 6px; border-radius: 8px; border: 1px solid #fed7aa;">
+                                <img id="remote-qr-code-img" src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=http://localhost:3000/admin.html" alt="Scan QR to open Admin" style="width: 100px; height: 100px; display: block; border-radius: 4px;" onerror="this.style.display='none'">
+                                <div style="font-size: 0.68rem; color: #9a3412; font-weight: 700; margin-top: 3px;">Scan with Phone</div>
                             </div>
                         </div>
                     </div>
@@ -866,18 +889,32 @@
         var firedAlarmsMap = {};
         var lastSyncedAlarmsHash = '';
 
+        var alarmDismissTimer = null;
+
         function showAlarmBannerNotification(title, timeStr) {
             var banner = document.getElementById('alarm-alert-banner');
             var titleEl = document.getElementById('alarm-banner-title');
             var subEl = document.getElementById('alarm-banner-subtitle');
             if (banner) {
                 if (titleEl) titleEl.textContent = '⏰ ALARM: ' + (title || 'Reminder').toUpperCase();
-                if (subEl) subEl.textContent = 'Scheduled Alert at ' + (timeStr || '') + ' - Tap to Dismiss';
+                if (subEl) subEl.textContent = 'Scheduled Alert at ' + (timeStr || '') + ' - Auto-dismisses in 10s';
                 banner.style.display = 'flex';
+
+                // Automatically cancel and hide the popup after 10 seconds
+                if (alarmDismissTimer) {
+                    clearTimeout(alarmDismissTimer);
+                }
+                alarmDismissTimer = setTimeout(function() {
+                    window.__dismissActiveAlarm();
+                }, 10000);
             }
         }
 
         window.__dismissActiveAlarm = function() {
+            if (alarmDismissTimer) {
+                clearTimeout(alarmDismissTimer);
+                alarmDismissTimer = null;
+            }
             stopKioskAudio();
             var banner = document.getElementById('alarm-alert-banner');
             if (banner) banner.style.display = 'none';
@@ -1719,9 +1756,48 @@
 
                 var remoteUrlEl = document.getElementById('display-remote-url');
                 var remoteBtn = document.getElementById('btn-open-remote-admin');
-                var adminUrl = window.location.origin + '/admin.html';
-                if (remoteUrlEl) remoteUrlEl.textContent = adminUrl;
-                if (remoteBtn) remoteBtn.href = adminUrl;
+                var qrImg = document.getElementById('remote-qr-code-img');
+
+                function applyRemoteUrlToUI(url) {
+                    if (remoteUrlEl) remoteUrlEl.textContent = url;
+                    if (remoteBtn) remoteBtn.href = url;
+                    if (qrImg) {
+                        qrImg.src = 'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + encodeURIComponent(url);
+                    }
+                }
+
+                // 1. Android Native Wi-Fi URL (port 8080)
+                var resolvedUrl = '';
+                if (window.AndroidAudio && typeof window.AndroidAudio.getAdminUrl === 'function') {
+                    try {
+                        resolvedUrl = window.AndroidAudio.getAdminUrl();
+                    } catch(e) {}
+                }
+
+                if (resolvedUrl) {
+                    applyRemoteUrlToUI(resolvedUrl);
+                } else {
+                    // Default fallback
+                    var fallbackUrl = (window.location.origin || 'http://localhost:3000') + '/admin.html';
+                    applyRemoteUrlToUI(fallbackUrl);
+
+                    // 2. Query /get_network_info.php to get real LAN IP on Wi-Fi network
+                    try {
+                        var netXhr = new XMLHttpRequest();
+                        netXhr.open('GET', '/get_network_info.php?_t=' + Date.now(), true);
+                        netXhr.onreadystatechange = function() {
+                            if (netXhr.readyState === 4 && netXhr.status === 200) {
+                                try {
+                                    var netInfo = JSON.parse(netXhr.responseText);
+                                    if (netInfo && netInfo.adminUrl) {
+                                        applyRemoteUrlToUI(netInfo.adminUrl);
+                                    }
+                                } catch(e) {}
+                            }
+                        };
+                        netXhr.send();
+                    } catch(e) {}
+                }
 
             } catch (e) {
                 console.warn("Load modal fields warning:", e);
@@ -1749,6 +1825,42 @@
             if (modal) modal.classList.remove('open');
             if (saveStatus) saveStatus.style.display = 'none';
             stopKioskAudio();
+        }
+
+        window.copyRemoteUrlToClipboard = function() {
+            var urlEl = document.getElementById('display-remote-url');
+            var btn = document.getElementById('btn-copy-remote-url');
+            if (!urlEl) return;
+            var text = urlEl.textContent.trim();
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(function() {
+                    if (btn) {
+                        var orig = btn.innerHTML;
+                        btn.innerHTML = '✓ Copied to Clipboard!';
+                        setTimeout(function() { btn.innerHTML = orig; }, 2500);
+                    }
+                }).catch(function() { fallbackCopy(text, btn); });
+            } else {
+                fallbackCopy(text, btn);
+            }
+        };
+
+        function fallbackCopy(text, btn) {
+            var ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+                document.execCommand('copy');
+                if (btn) {
+                    var orig = btn.innerHTML;
+                    btn.innerHTML = '✓ Copied to Clipboard!';
+                    setTimeout(function() { btn.innerHTML = orig; }, 2500);
+                }
+            } catch(e) {}
+            document.body.removeChild(ta);
         }
 
         if (closeBtn) closeBtn.onclick = closeModal;
