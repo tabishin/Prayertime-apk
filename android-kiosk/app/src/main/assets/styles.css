@@ -1,13 +1,13 @@
 /* Theme Variables - 9 High-Contrast Themes with Guaranteed Font Visibility */
 :root, .theme-default {
-    --theme-primary: #0a2f11;
-    --theme-secondary: #13461c;
+    --theme-primary: #041c0a;
+    --theme-secondary: #0c3817;
     --theme-card-border: rgba(255, 255, 255, 0.08);
     --theme-text: #FFFFFF;
-    --theme-text-sub: #e0e0e0;
-    --theme-accent: #2e7d32;
+    --theme-text-sub: #e2e8f0;
+    --theme-accent: #1e7032;
     --theme-gold: #ffd54f;
-    --theme-topbar-bg: rgba(0, 0, 0, 0.45);
+    --theme-topbar-bg: #000000;
     --theme-topbar-text: #FFFFFF;
 }
 
@@ -213,15 +213,18 @@
 html, body {
     margin: 0;
     padding: 0;
-    width: 100%;
-    min-height: 100%;
-    height: 100%;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
     background-color: var(--theme-primary);
     color: var(--theme-text);
     overflow: hidden;
     transition: background-color 0.3s ease, color 0.3s ease;
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .play-prompt {
@@ -247,11 +250,12 @@ html, body {
 }
 
 .clock-container {
-    width: 100%;
-    height: 100%;
+    width: 100vw;
+    height: 100vh;
+    max-height: 100vh;
     display: flex;
     flex-direction: column;
-    background-color: inherit;
+    background-color: var(--theme-primary);
     overflow: hidden;
 }
 
@@ -261,57 +265,75 @@ html, body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: clamp(4px, 0.8vh, 10px) clamp(8px, 1.8vw, 24px);
-    background-color: rgba(0, 0, 0, 0.45);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    min-height: 44px;
-    height: clamp(50px, 9vh, 88px);
+    padding: 0 clamp(10px, 1.8vw, 28px);
+    background-color: var(--theme-topbar-bg, #000000);
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.1);
+    height: clamp(52px, 8.5vh, 85px);
+    flex: 0 0 clamp(52px, 8.5vh, 85px);
     flex-shrink: 0;
-    gap: 1.2vw;
+    gap: 1.5vw;
+    box-sizing: border-box;
+    white-space: nowrap;
+    overflow: hidden;
 }
 
 .top-bar > div {
     white-space: nowrap;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
 }
 
 .current-time {
-    font-size: clamp(1.8rem, 5.2vh, 4.2rem);
-    font-weight: 800;
+    font-size: clamp(1.8rem, min(4.4vh, 3.4vw), 3.8rem);
+    font-weight: 900;
     letter-spacing: -0.5px;
     line-height: 1;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+    color: var(--theme-topbar-text, #ffffff);
 }
 
 .next-prayer {
-    font-size: clamp(0.95rem, 2.4vh, 1.6rem);
+    font-size: clamp(0.9rem, min(2.2vh, 1.4vw), 1.5rem);
     font-weight: 600;
     line-height: 1.1;
+    opacity: 0.95;
+    white-space: nowrap;
+    color: var(--theme-topbar-text, #ffffff);
 }
 
 .date-info {
-    font-size: clamp(1.4rem, 4.4vh, 3.4rem);
-    font-weight: 800;
+    font-size: clamp(1.4rem, min(3.8vh, 2.8vw), 3.2rem);
+    font-weight: 900;
     letter-spacing: -0.5px;
     display: flex;
     align-items: center;
-    gap: 0.8vw;
-    opacity: 0.95;
+    gap: 0.6vw;
+    opacity: 0.98;
     white-space: nowrap;
     line-height: 1;
+    color: var(--theme-topbar-text, #ffffff);
 }
 
 .date-info span,
 .date-info #gregorian-date,
 .date-info #islamic-date {
     font-size: inherit;
-    font-weight: 800;
+    font-weight: 900;
     letter-spacing: inherit;
+    color: inherit;
 }
 
 #location {
-    font-size: clamp(0.95rem, 2.4vh, 1.6rem);
+    font-size: clamp(0.9rem, min(2.1vh, 1.35vw), 1.45rem);
+    font-weight: 600;
     opacity: 0.95;
     line-height: 1.1;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--theme-topbar-text, #ffffff);
 }
 
 .makruh-warning {
@@ -338,73 +360,41 @@ html, body {
     }
 }
 
-/* Prayer Grid (Rock-solid 2x3 Grid with Flexbox fallback for Android TV/Signage boxes) */
+/* Prayer Grid (2x3 Grid filling 100% of remaining screen with zero overflow) */
 .prayer-grid {
     box-sizing: border-box;
     width: 100%;
-    height: auto;
     flex: 1 1 0;
+    height: calc(100vh - clamp(52px, 8.5vh, 85px));
     min-height: 0;
-    padding: clamp(6px, 1.4vmin, 18px);
+    padding: clamp(6px, 1.2vmin, 16px);
     overflow: hidden;
 
-    /* Primary: Flexbox 2-column layout (Rock-solid on Android 4.4, 5, 6, 7, 8+) */
-    display: -webkit-flex;
-    display: flex;
-    -webkit-flex-wrap: wrap;
-    flex-wrap: wrap;
-    -webkit-justify-content: space-between;
-    justify-content: space-between;
-    -webkit-align-content: stretch;
-    align-content: stretch;
-
-    /* Progressive enhancement: Modern CSS Grid */
     display: grid;
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr 1fr;
-    gap: clamp(6px, 1.5vmin, 18px);
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+    gap: clamp(6px, 1.2vmin, 16px);
 }
 
 /* Prayer Box Styles (Universal Card Sizing) */
 .prayer-box, .hadith-box {
     box-sizing: border-box;
     background-color: var(--theme-secondary);
-    border-radius: 10px;
-    border-radius: clamp(6px, 1vmin, 14px);
+    border-radius: clamp(8px, 1.2vmin, 16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-    padding: 10px;
-    padding: clamp(6px, 1.2vmin, 16px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+    padding: clamp(6px, 1.0vh, 16px) clamp(10px, 1.8vw, 24px);
     overflow: hidden;
-    transition: background-color 0.3s ease, transform 0.2s ease;
     position: relative;
+    width: 100% !important;
+    height: 100% !important;
     min-height: 0;
 
-    /* Flexbox 2-column dimensions (guarantees exactly 2 columns per row in flexbox) */
-    width: 48.8%;
-    width: calc(50% - 8px);
-    height: 31%;
-    height: calc((100% - 24px) / 3);
-    margin-bottom: 8px;
-
-    display: -webkit-flex;
     display: flex;
-    -webkit-flex-direction: column;
     flex-direction: column;
-    -webkit-justify-content: center;
     justify-content: center;
-    -webkit-align-items: center;
     align-items: center;
     text-align: center;
-}
-
-/* When CSS Grid with template columns is supported, fill cells cleanly */
-@supports (display: grid) and (grid-template-columns: 1fr 1fr) {
-    .prayer-box, .hadith-box {
-        width: 100% !important;
-        height: 100% !important;
-        margin-bottom: 0 !important;
-    }
 }
 
 /* Layout 1: Default Layout */
@@ -415,47 +405,58 @@ html, body {
 
 .layout-default .prayer-name,
 .prayer-name {
-    font-size: clamp(1.1rem, 4.4vmin, 3.2rem);
-    font-weight: 800;
+    font-size: clamp(1.3rem, min(4.0vh, 2.6vw), 3.0rem);
+    font-weight: 900;
     text-transform: uppercase;
-    margin-bottom: 0.2vmin;
+    margin: 0 0 clamp(2px, 0.4vh, 6px) 0;
     text-align: center;
     width: 100%;
     line-height: 1.1;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+    color: var(--theme-text);
 }
 
 .layout-default .prayer-time,
 .prayer-time {
-    font-size: clamp(1.8rem, 7.5vmin, 5.5rem);
+    font-size: clamp(2.8rem, min(10.8vh, 6.8vw), 7.2rem);
     font-weight: 900;
-    margin: 0.2vmin 0;
+    margin: clamp(2px, 0.4vh, 6px) 0;
     text-align: center;
     width: 100%;
-    line-height: 1.05;
+    line-height: 1.0;
+    letter-spacing: -0.5px;
+    color: var(--theme-text);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
 }
 
 .layout-default .prayer-details,
 .prayer-details {
-    font-size: clamp(0.75rem, 2.4vmin, 1.8rem);
+    font-size: clamp(0.95rem, min(2.6vh, 1.65vw), 1.85rem);
     text-align: center;
     width: 100%;
-    display: -webkit-flex;
     display: flex;
-    -webkit-flex-direction: column;
     flex-direction: column;
-    -webkit-align-items: center;
     align-items: center;
-    margin-top: 0.3vmin;
-    line-height: 1.25;
-    opacity: 0.95;
+    margin-top: clamp(2px, 0.4vh, 6px);
+    line-height: 1.3;
+    font-weight: 700;
+    color: var(--theme-text-sub);
+    letter-spacing: 0.3px;
+    opacity: 0.98;
 }
 
 .layout-default .prayer-details div,
 .prayer-details div {
-    margin: 0.1vmin 0;
+    margin: 0.15vh 0;
     width: 100%;
     text-align: center;
+    white-space: nowrap;
+}
+
+.prayer-details span {
+    font-weight: 800;
+    color: var(--theme-text);
 }
 
 /* Layout 2: Compact Layout (Sleeker spacing, identical centered card structure) */
@@ -465,44 +466,50 @@ html, body {
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: clamp(6px, 1.2vmin, 14px);
+    padding: clamp(6px, 1.0vh, 14px) clamp(8px, 1.4vw, 18px);
 }
 
 .layout-compact .prayer-name {
-    font-size: clamp(1.1rem, 3.8vmin, 2.6rem);
-    font-weight: 800;
+    font-size: clamp(1.2rem, min(3.5vh, 2.2vw), 2.8rem);
+    font-weight: 900;
     text-transform: uppercase;
     text-align: center;
     width: 100%;
     line-height: 1.1;
+    margin: 0 0 clamp(2px, 0.3vh, 5px) 0;
 }
 
 .layout-compact .prayer-time {
-    font-size: clamp(1.6rem, 5.5vmin, 4.2rem);
+    font-size: clamp(2.4rem, min(8.5vh, 5.5vw), 5.8rem);
     font-weight: 900;
     text-align: center;
     width: 100%;
-    line-height: 1.05;
+    line-height: 1.0;
+    margin: clamp(2px, 0.3vh, 5px) 0;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
 }
 
 .layout-compact .prayer-details {
-    font-size: clamp(0.72rem, 2vmin, 1.4rem);
+    font-size: clamp(0.88rem, min(2.3vh, 1.4vw), 1.6rem);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     width: 100%;
-    line-height: 1.2;
+    line-height: 1.25;
+    font-weight: 700;
 }
 
 .layout-compact .prayer-details div {
-    margin: 0.1vmin 0;
+    margin: 0.1vh 0;
     text-align: center;
     width: 100%;
+    white-space: nowrap;
 }
 
 .layout-compact .prayer-details span {
-    font-weight: 700;
+    font-weight: 800;
 }
 
 /* Layout 3: Modern Layout (Gradient highlights, identical centered card structure) */
@@ -512,47 +519,53 @@ html, body {
     justify-content: center;
     align-items: center;
     text-align: center;
-    padding: clamp(8px, 1.5vmin, 18px);
+    padding: clamp(8px, 1.2vh, 18px) clamp(10px, 1.8vw, 24px);
     background: linear-gradient(135deg, var(--theme-secondary), var(--theme-accent));
     border-radius: clamp(8px, 1.4vmin, 18px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
 }
 
 .layout-modern .prayer-name {
-    font-size: clamp(1.2rem, 4vmin, 3rem);
-    font-weight: 800;
+    font-size: clamp(1.3rem, min(4.0vh, 2.6vw), 3.0rem);
+    font-weight: 900;
     text-transform: uppercase;
     text-align: center;
     width: 100%;
     line-height: 1.1;
+    margin: 0 0 clamp(2px, 0.4vh, 6px) 0;
 }
 
 .layout-modern .prayer-time {
-    font-size: clamp(1.8rem, 6.2vmin, 4.8rem);
+    font-size: clamp(2.8rem, min(10.8vh, 6.8vw), 7.2rem);
     font-weight: 900;
     text-align: center;
     width: 100%;
-    line-height: 1.05;
+    line-height: 1.0;
+    margin: clamp(2px, 0.4vh, 6px) 0;
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
 }
 
 .layout-modern .prayer-details {
-    font-size: clamp(0.75rem, 2.2vmin, 1.5rem);
+    font-size: clamp(0.95rem, min(2.6vh, 1.65vw), 1.85rem);
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
     width: 100%;
-    line-height: 1.25;
+    line-height: 1.3;
+    font-weight: 700;
 }
 
 .layout-modern .prayer-details div {
-    margin: 0.15vmin 0;
+    margin: 0.15vh 0;
     text-align: center;
     width: 100%;
+    white-space: nowrap;
 }
 
 .layout-modern .prayer-details span {
-    font-weight: 700;
+    font-weight: 800;
 }
 
 /* Layout 2: Compact 3x2 Grid Override */
@@ -665,32 +678,32 @@ html, body {
 }
 
 .hadith-title {
-    font-size: 1.4rem;
-    font-size: 2.8vmin;
-    font-size: clamp(0.9rem, 2.8vmin, 2rem);
-    font-weight: 800;
+    font-size: clamp(1.3rem, min(3.8vh, 2.6vw), 3.0rem);
+    font-weight: 900;
     text-transform: uppercase;
-    margin-bottom: 0.4vmin;
-    letter-spacing: 0.5px;
+    margin-bottom: clamp(4px, 0.8vh, 12px);
+    letter-spacing: 0.8px;
+    line-height: 1.1;
+    color: var(--theme-text);
 }
 
 .hadith-content {
-    font-size: 1.1rem;
-    font-size: 2.2vmin;
-    font-size: clamp(0.8rem, 2.2vmin, 1.45rem);
-    margin: 0.3vmin 0;
+    font-size: clamp(0.95rem, min(2.5vh, 1.7vw), 1.75rem);
+    font-weight: 600;
+    margin: 0;
     line-height: 1.35;
-    max-height: 100%;
-    overflow-y: auto;
+    max-width: 95%;
+    text-align: center;
+    color: var(--theme-text);
 }
 
 .hadith-source {
-    font-size: 0.85rem;
-    font-size: 1.8vmin;
-    font-size: clamp(0.7rem, 1.8vmin, 1.15rem);
+    font-size: clamp(0.82rem, min(2.0vh, 1.3vw), 1.35rem);
+    font-weight: 500;
     font-style: italic;
-    opacity: 0.85;
-    margin-top: 0.3vmin;
+    opacity: 0.9;
+    margin-top: clamp(4px, 0.8vh, 10px);
+    color: var(--theme-text-sub);
 }
 
 /* Holiday Active Style: High-contrast Dark Crimson Background with White & Gold Text */
@@ -713,68 +726,74 @@ html, body {
 /* Prayer Active Highlights */
 .fajr-highlight {
     background-color: var(--theme-accent) !important;
-    color: var(--theme-text) !important;
+    color: #FFFFFF !important;
 }
-
 .fajr-highlight .prayer-name,
 .fajr-highlight .prayer-time,
-.fajr-highlight .prayer-details {
-    color: var(--theme-text) !important;
+.fajr-highlight .prayer-details,
+.fajr-highlight .prayer-details div,
+.fajr-highlight .prayer-details span {
+    color: #FFFFFF !important;
 }
 
 .dhuhr-highlight {
-    background-color: #ea5548 !important;
-    color: #000000 !important;
+    background-color: #244b7a !important;
+    color: #FFFFFF !important;
 }
-
 .dhuhr-highlight .prayer-name,
 .dhuhr-highlight .prayer-time,
-.dhuhr-highlight .prayer-details {
-    color: #000000 !important;
+.dhuhr-highlight .prayer-details,
+.dhuhr-highlight .prayer-details div,
+.dhuhr-highlight .prayer-details span {
+    color: #FFFFFF !important;
 }
 
 .asr-highlight {
-    background-color: #fb913b !important;
-    color: #000000 !important;
+    background-color: #315c7a !important;
+    color: #FFFFFF !important;
 }
-
 .asr-highlight .prayer-name,
 .asr-highlight .prayer-time,
-.asr-highlight .prayer-details {
-    color: #000000 !important;
+.asr-highlight .prayer-details,
+.asr-highlight .prayer-details div,
+.asr-highlight .prayer-details span {
+    color: #FFFFFF !important;
 }
 
 .maghrib-highlight {
-    background-color: #bf6c7f !important;
-    color: #000000 !important;
+    background-color: #4a3e56 !important;
+    color: #FFFFFF !important;
 }
-
 .maghrib-highlight .prayer-name,
 .maghrib-highlight .prayer-time,
-.maghrib-highlight .prayer-details {
-    color: #000000 !important;
+.maghrib-highlight .prayer-details,
+.maghrib-highlight .prayer-details div,
+.maghrib-highlight .prayer-details span {
+    color: #FFFFFF !important;
 }
 
 .isha-highlight {
     background-color: #434660 !important;
     color: #FFFFFF !important;
 }
-
 .isha-highlight .prayer-name,
 .isha-highlight .prayer-time,
-.isha-highlight .prayer-details {
+.isha-highlight .prayer-details,
+.isha-highlight .prayer-details div,
+.isha-highlight .prayer-details span {
     color: #FFFFFF !important;
 }
 
 /* Makruh Waqt Highlight */
 .makruh-highlight {
-    background-color: #d32f2f !important;
+    background-color: #991b1b !important;
     color: #FFFFFF !important;
 }
-
 .makruh-highlight .prayer-name,
 .makruh-highlight .prayer-time,
-.makruh-highlight .prayer-details {
+.makruh-highlight .prayer-details,
+.makruh-highlight .prayer-details div,
+.makruh-highlight .prayer-details span {
     color: #FFFFFF !important;
 }
 
@@ -789,17 +808,22 @@ html, body {
 /* Proportional scaling for smaller screens while strictly preserving the authentic webview 2x3 grid board */
 @media screen and (max-width: 820px) {
     .top-bar {
-        padding: 0.5vh 2vw;
-        gap: 1.5vw;
+        padding: 0 clamp(8px, 1.5vw, 16px);
+        gap: 1.2vw;
     }
 
-    .current-time, .date-info {
-        font-size: clamp(1.2rem, 3.8vw, 2.2rem);
-        font-weight: 800;
+    .current-time {
+        font-size: clamp(1.3rem, min(4.2vh, 3.8vw), 2.4rem);
+        font-weight: 900;
+    }
+
+    .date-info {
+        font-size: clamp(1.1rem, min(3.5vh, 3.2vw), 2.0rem);
+        font-weight: 900;
     }
 
     .next-prayer, #location {
-        font-size: clamp(0.7rem, 2vw, 1rem);
+        font-size: clamp(0.72rem, min(2.0vh, 1.8vw), 1.05rem);
     }
 
     .prayer-grid {
@@ -881,24 +905,39 @@ html, body {
     }
 }
 
-/* 3. Dual Monitor & Variable Screen Resolution Fixes (Screen 1 vs Screen 2 resolution adaptation) */
-@media screen and (min-width: 1440px) and (min-height: 800px) {
+/* 3. Large Screens & Wall TV Displays (1080p, 2K, 4K Smart TVs & Monitors) */
+@media screen and (min-width: 1200px) and (min-height: 700px) {
     .prayer-grid {
-        gap: clamp(10px, 1.8vmin, 24px);
-        padding: clamp(12px, 1.8vmin, 28px);
+        gap: clamp(8px, 1.4vmin, 20px);
+        padding: clamp(8px, 1.4vmin, 22px);
     }
-    .current-time, .date-info {
-        font-size: clamp(2.4rem, 5.5vh, 4.8rem);
-        font-weight: 800;
+    .current-time {
+        font-size: clamp(2.2rem, min(4.8vh, 3.8vw), 4.4rem);
+        font-weight: 900;
+    }
+    .date-info {
+        font-size: clamp(1.8rem, min(4.2vh, 3.2vw), 3.6rem);
+        font-weight: 900;
     }
     .layout-default .prayer-name {
-        font-size: clamp(1.8rem, 4.6vmin, 3.6rem);
+        font-size: clamp(1.5rem, min(4.2vh, 2.8vw), 3.4rem);
+        font-weight: 900;
     }
     .layout-default .prayer-time {
-        font-size: clamp(2.8rem, 7.8vmin, 6.2rem);
+        font-size: clamp(3.2rem, min(11.5vh, 7.2vw), 7.6rem);
+        font-weight: 900;
     }
     .layout-default .prayer-details {
-        font-size: clamp(1.1rem, 2.6vmin, 2.2rem);
+        font-size: clamp(1.05rem, min(2.7vh, 1.7vw), 2.0rem);
+        font-weight: 700;
+    }
+    .hadith-title {
+        font-size: clamp(1.5rem, min(4.0vh, 2.8vw), 3.4rem);
+        font-weight: 900;
+    }
+    .hadith-content {
+        font-size: clamp(1.05rem, min(2.6vh, 1.8vw), 1.85rem);
+        font-weight: 600;
     }
 }
 

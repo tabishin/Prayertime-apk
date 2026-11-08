@@ -1160,10 +1160,16 @@
             try {
                 var now = new Date();
 
-                // 1. Live Time (12-hour AM/PM)
+                // 1. Live Time (12-hour AM/PM with leading zero, matching reference image)
                 var timeElem = document.getElementById('current-time');
                 if (timeElem) {
-                    timeElem.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+                    var curH = now.getHours();
+                    var curM = now.getMinutes();
+                    var curS = now.getSeconds();
+                    var curAmpm = curH >= 12 ? 'pm' : 'am';
+                    curH = curH % 12;
+                    if (curH === 0) curH = 12;
+                    timeElem.textContent = (curH < 10 ? '0' : '') + curH + ':' + (curM < 10 ? '0' : '') + curM + ':' + (curS < 10 ? '0' : '') + curS + ' ' + curAmpm;
                 }
 
                 // 2. Gregorian Date (English characters)
