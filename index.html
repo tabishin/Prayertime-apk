@@ -666,6 +666,17 @@
             if (thm !== 'default') {
                 document.body.classList.add('theme-' + thm);
             }
+            // Update active state in settings modal if open
+            try {
+                var themeOptions = document.querySelectorAll('.theme-option');
+                for (var j = 0; j < themeOptions.length; j++) {
+                    if (themeOptions[j].getAttribute('data-theme') === thm) {
+                        themeOptions[j].classList.add('selected');
+                    } else {
+                        themeOptions[j].classList.remove('selected');
+                    }
+                }
+            } catch (e) {}
         }
 
         function applyLayoutToDOM(lay) {
@@ -676,7 +687,80 @@
                 grid.classList.remove('layout-' + ALL_LAYOUTS[i]);
             }
             grid.classList.add('layout-' + lay);
+            // Update active state in settings modal if open
+            try {
+                var layoutOptions = document.querySelectorAll('.layout-option');
+                for (var k = 0; k < layoutOptions.length; k++) {
+                    if (layoutOptions[k].getAttribute('data-layout') === lay) {
+                        layoutOptions[k].classList.add('selected');
+                    } else {
+                        layoutOptions[k].classList.remove('selected');
+                    }
+                }
+            } catch (e) {}
         }
+
+        // Live Apply Remote Settings from Wi-Fi Phone/Companion App
+        function applyRemoteSettings(remoteObj) {
+            if (!remoteObj || typeof remoteObj !== 'object') return;
+            console.log('[Remote Sync] Instantly applying remote settings to DOM:', remoteObj);
+
+            // 1. Theme
+            if (remoteObj.theme) {
+                applyThemeToDOM(remoteObj.theme);
+                localStorage.setItem('selectedTheme', remoteObj.theme);
+            }
+
+            // 2. Layout
+            if (remoteObj.layout) {
+                applyLayoutToDOM(remoteObj.layout);
+                localStorage.setItem('selectedLayout', remoteObj.layout);
+            }
+
+            // 3. City & Country
+            if (remoteObj.city) {
+                var cityEl = document.getElementById('current-city');
+                if (cityEl) cityEl.textContent = remoteObj.city;
+            }
+
+            // 4. Hijri Adjustment
+            if (typeof remoteObj.adjustment !== 'undefined') {
+                var iEl = document.getElementById('islamic-date');
+                if (iEl && typeof getHijriEnglishDate === 'function') {
+                    iEl.textContent = getHijriEnglishDate(remoteObj.adjustment);
+                }
+            }
+
+            // 5. Azan Audio Enabled / Volume
+            if (typeof remoteObj.azanAudioEnabled !== 'undefined') {
+                currentAzanEnabled = (remoteObj.azanAudioEnabled !== false);
+                if (typeof updateAzanToggleUI === 'function') updateAzanToggleUI();
+            }
+            if (typeof remoteObj.azanVolume !== 'undefined') {
+                currentAzanVolume = parseInt(remoteObj.azanVolume, 10);
+                if (window.AndroidAudio && typeof window.AndroidAudio.setVolume === 'function') {
+                    try {
+                        window.AndroidAudio.setVolume(currentAzanVolume / 100.0);
+                    } catch (e) {}
+                }
+            }
+
+            // 6. Alarms / Reminders
+            var alarmsList = remoteObj.alarms || remoteObj.reminders;
+            if (Array.isArray(alarmsList) && typeof syncNativeAndroidAlarms === 'function') {
+                syncNativeAndroidAlarms(alarmsList);
+            }
+
+            // 7. Store in localStorage
+            try {
+                localStorage.setItem('settings', JSON.stringify(remoteObj));
+            } catch (e) {}
+        }
+
+        // Attach globally so native Java WebView and outside scripts can call them immediately
+        window.applyThemeToDOM = applyThemeToDOM;
+        window.applyLayoutToDOM = applyLayoutToDOM;
+        window.applyRemoteSettings = applyRemoteSettings;
 
         // Shared Universal Kiosk Audio Player & Audio State
         var kioskAudio = new Audio();
@@ -1315,6 +1399,7 @@
             };
             xhr.send();
         }
+        window.fetchAvailableAudioTracks = fetchAvailableAudioTracks;
 
         function populateAudioSelect(selectEl, selectedVal) {
             if (!selectEl) return;
@@ -2102,6 +2187,23 @@
         // Live Network Polling for Remote Settings Changes (from admin.html on another phone/device)
         var lastRemotePollHash = '';
         function pollRemoteSettingsFromNetwork() {
+            // 1. Check Android native bridge directly (zero latency)
+            if (window.AndroidAudio && typeof window.AndroidAudio.getLatestSettingsJson === 'function') {
+                try {
+                    var nativeJson = window.AndroidAudio.getLatestSettingsJson();
+                    if (nativeJson && nativeJson.length > 2) {
+                        if (lastRemotePollHash && lastRemotePollHash !== nativeJson) {
+                            lastRemotePollHash = nativeJson;
+                            var obj = JSON.parse(nativeJson);
+                            applyRemoteSettings(obj);
+                        } else if (!lastRemotePollHash) {
+                            lastRemotePollHash = nativeJson;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            // 2. Poll HTTP endpoint (works in both Web Preview and Android local network server)
             try {
                 var xhr = new XMLHttpRequest();
                 xhr.open('GET', '/save_settings.php?_t=' + Date.now(), true);
@@ -2112,30 +2214,9 @@
                             if (remoteObj && typeof remoteObj === 'object') {
                                 var remoteStr = JSON.stringify(remoteObj);
                                 if (lastRemotePollHash && lastRemotePollHash !== remoteStr) {
-                                    console.log("[Remote Sync] Remote settings change detected!");
+                                    console.log("[Remote Sync] Remote settings change detected via HTTP!");
                                     lastRemotePollHash = remoteStr;
-                                    localStorage.setItem('settings', remoteStr);
-
-                                    // Instantly apply layout and theme on wall screen
-                                    if (remoteObj.layout) applyLayoutToDOM(remoteObj.layout);
-                                    if (remoteObj.theme) applyThemeToDOM(remoteObj.theme);
-                                    if (remoteObj.city) {
-                                        var cEl = document.getElementById('current-city');
-                                        if (cEl) cEl.textContent = remoteObj.city;
-                                    }
-                                    if (typeof remoteObj.adjustment !== 'undefined') {
-                                        var iEl = document.getElementById('islamic-date');
-                                        if (iEl) iEl.textContent = getHijriEnglishDate(remoteObj.adjustment);
-                                    }
-                                    if (typeof remoteObj.azanAudioEnabled !== 'undefined') {
-                                        currentAzanEnabled = (remoteObj.azanAudioEnabled !== false);
-                                    }
-                                    if (typeof remoteObj.azanVolume !== 'undefined') {
-                                        currentAzanVolume = parseInt(remoteObj.azanVolume, 10);
-                                    }
-                                    if (Array.isArray(remoteObj.alarms)) {
-                                        syncNativeAndroidAlarms(remoteObj.alarms);
-                                    }
+                                    applyRemoteSettings(remoteObj);
                                 } else if (!lastRemotePollHash) {
                                     lastRemotePollHash = remoteStr;
                                 }
@@ -2146,7 +2227,7 @@
                 xhr.send();
             } catch (e) {}
         }
-        setInterval(pollRemoteSettingsFromNetwork, 2500);
+        setInterval(pollRemoteSettingsFromNetwork, 1500);
     })();
     </script>
     <script src="script.js"></script>

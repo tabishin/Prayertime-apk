@@ -41,8 +41,12 @@ import java.net.InetAddress;
 import java.net.Inet4Address;
 import java.util.Collections;
 import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Calendar;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import org.json.JSONObject;
+import org.json.JSONArray;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebViewAssetLoader;
@@ -134,6 +138,41 @@ public class MainActivity extends AppCompatActivity {
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                if (request != null && request.getUrl() != null) {
+                    String urlStr = request.getUrl().toString();
+                    if (urlStr.contains("save_settings.php")) {
+                        try {
+                            File settingsFile = new File(getFilesDir(), "settings.json");
+                            byte[] data = "{}".getBytes("UTF-8");
+                            if (settingsFile.exists()) {
+                                FileInputStream fis = new FileInputStream(settingsFile);
+                                data = new byte[(int) settingsFile.length()];
+                                fis.read(data);
+                                fis.close();
+                            }
+                            return new WebResourceResponse("application/json", "UTF-8", new ByteArrayInputStream(data));
+                        } catch (Exception ignored) {}
+                    }
+                    if (urlStr.contains("list_mp3.php")) {
+                        try {
+                            LinkedHashSet<String> set = new LinkedHashSet<>();
+                            String[] defaults = new String[]{"fajr.mp3", "dhuhr.mp3", "asr.mp3", "maghrib.mp3", "isha.mp3", "Alhamd.mp3", "buzzer.mp3", "silent.mp3"};
+                            for (String d : defaults) set.add(d);
+                            File[] internalFiles = getFilesDir().listFiles();
+                            if (internalFiles != null) {
+                                for (File f : internalFiles) {
+                                    if (f.getName().toLowerCase().endsWith(".mp3")) {
+                                        set.add(f.getName());
+                                    }
+                                }
+                            }
+                            JSONArray arr = new JSONArray();
+                            for (String s : set) arr.put(s);
+                            byte[] data = arr.toString().getBytes("UTF-8");
+                            return new WebResourceResponse("application/json", "UTF-8", new ByteArrayInputStream(data));
+                        } catch (Exception ignored) {}
+                    }
+                }
                 if (assetLoader != null) {
                     WebResourceResponse response = assetLoader.shouldInterceptRequest(request.getUrl());
                     if (response != null) {
@@ -421,6 +460,21 @@ public class MainActivity extends AppCompatActivity {
             return "http://" + ip + ":8080/admin.html";
         }
 
+        @JavascriptInterface
+        public String getLatestSettingsJson() {
+            try {
+                File settingsFile = new File(getFilesDir(), "settings.json");
+                if (settingsFile.exists()) {
+                    FileInputStream fis = new FileInputStream(settingsFile);
+                    byte[] data = new byte[(int) settingsFile.length()];
+                    fis.read(data);
+                    fis.close();
+                    return new String(data, "UTF-8");
+                }
+            } catch (Exception ignored) {}
+            return "{}";
+        }
+
         private void stopAudioInternal() {
             if (mediaPlayer != null) {
                 try {
@@ -494,30 +548,52 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     try {
+                        client.setSoTimeout(30000);
                         InputStream in = client.getInputStream();
                         OutputStream out = client.getOutputStream();
-                        BufferedReader reader = new BufferedReader(new InputStreamReader(in));
 
-                        String line = reader.readLine();
-                        if (line == null) {
+                        ByteArrayOutputStream headerBuffer = new ByteArrayOutputStream();
+                        int b;
+                        int p1 = -1, p2 = -1, p3 = -1;
+                        while ((b = in.read()) != -1) {
+                            headerBuffer.write(b);
+                            if (b == '\n') {
+                                if (p1 == '\r' && p2 == '\n' && p3 == '\r') break; // \r\n\r\n
+                                if (p1 == '\n') break; // \n\n
+                            }
+                            p3 = p2;
+                            p2 = p1;
+                            p1 = b;
+                        }
+
+                        if (headerBuffer.size() == 0) {
                             client.close();
                             return;
                         }
 
-                        String[] parts = line.split(" ");
-                        if (parts.length < 2) {
+                        String headerStr = headerBuffer.toString("UTF-8");
+                        String[] headerLines = headerStr.split("\r?\n");
+                        if (headerLines.length == 0 || headerLines[0].trim().isEmpty()) {
                             client.close();
                             return;
                         }
 
-                        String method = parts[0];
-                        String path = parts[1];
+                        String[] requestLine = headerLines[0].trim().split(" ");
+                        if (requestLine.length < 2) {
+                            client.close();
+                            return;
+                        }
+
+                        String method = requestLine[0];
+                        String path = requestLine[1];
                         if (path.contains("?")) path = path.split("\\?")[0];
 
                         int contentLength = 0;
-                        while ((line = reader.readLine()) != null && !line.isEmpty()) {
-                            if (line.toLowerCase().startsWith("content-length:")) {
-                                contentLength = Integer.parseInt(line.substring(15).trim());
+                        for (String hLine : headerLines) {
+                            if (hLine.toLowerCase().startsWith("content-length:")) {
+                                try {
+                                    contentLength = Integer.parseInt(hLine.substring(15).trim());
+                                } catch (Exception ignored) {}
                             }
                         }
 
@@ -529,26 +605,34 @@ public class MainActivity extends AppCompatActivity {
 
                         if ("/save_settings.php".equals(path)) {
                             if ("POST".equalsIgnoreCase(method) && contentLength > 0) {
-                                char[] bodyChars = new char[contentLength];
-                                int read = 0;
-                                while (read < contentLength) {
-                                    int r = reader.read(bodyChars, read, contentLength - read);
-                                    if (r == -1) break;
-                                    read += r;
+                                byte[] bodyBytes = new byte[contentLength];
+                                int totalRead = 0;
+                                while (totalRead < contentLength) {
+                                    int count = in.read(bodyBytes, totalRead, contentLength - totalRead);
+                                    if (count == -1) break;
+                                    totalRead += count;
                                 }
-                                final String bodyStr = new String(bodyChars);
+                                final String bodyStr = new String(bodyBytes, 0, totalRead, "UTF-8");
                                 File settingsFile = new File(getFilesDir(), "settings.json");
                                 FileOutputStream fos = new FileOutputStream(settingsFile);
                                 fos.write(bodyStr.getBytes("UTF-8"));
                                 fos.flush();
                                 fos.close();
 
-                                // Notify WebView to reload/update instantly
+                                // Notify WebView to reload/update instantly without needing to touch settings icon
                                 runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
                                         if (webView != null) {
-                                            webView.evaluateJavascript("if (typeof applyRemoteSettings === 'function') { applyRemoteSettings(" + bodyStr + "); } else { localStorage.setItem('settings', " + JSONObject.quote(bodyStr) + "); }", null);
+                                            webView.evaluateJavascript(
+                                                "(function() { try { " +
+                                                "  var raw = " + JSONObject.quote(bodyStr) + "; " +
+                                                "  var obj = JSON.parse(raw); " +
+                                                "  localStorage.setItem('settings', raw); " +
+                                                "  if (obj.theme) { localStorage.setItem('selectedTheme', obj.theme); if (window.applyThemeToDOM) window.applyThemeToDOM(obj.theme); } " +
+                                                "  if (obj.layout) { localStorage.setItem('selectedLayout', obj.layout); if (window.applyLayoutToDOM) window.applyLayoutToDOM(obj.layout); } " +
+                                                "  if (window.applyRemoteSettings) { window.applyRemoteSettings(obj); } " +
+                                                "} catch(e) { console.error('Error applying remote settings:', e); } })()", null);
                                         }
                                     }
                                 });
@@ -566,6 +650,90 @@ public class MainActivity extends AppCompatActivity {
                                 }
                                 sendResponse(out, 200, "application/json", content);
                             }
+                            client.close();
+                            return;
+                        }
+
+                        if ("/upload_audio.php".equals(path) || "/upload_audio".equals(path)) {
+                            if ("POST".equalsIgnoreCase(method) && contentLength > 0) {
+                                byte[] bodyBytes = new byte[contentLength];
+                                int totalRead = 0;
+                                while (totalRead < contentLength) {
+                                    int count = in.read(bodyBytes, totalRead, contentLength - totalRead);
+                                    if (count == -1) break;
+                                    totalRead += count;
+                                }
+                                String bodyStr = new String(bodyBytes, 0, totalRead, "UTF-8");
+                                try {
+                                    JSONObject json = new JSONObject(bodyStr);
+                                    String rawName = json.optString("fileName", json.optString("name", "custom_alert.mp3"));
+                                    String safeName = rawName.replaceAll("[^a-zA-Z0-9_\\-\\.]", "_");
+                                    if (!safeName.toLowerCase().endsWith(".mp3")) safeName += ".mp3";
+
+                                    String base64Data = json.optString("base64", json.optString("data", ""));
+                                    if (base64Data.contains(",")) base64Data = base64Data.split(",")[1];
+                                    byte[] decoded = Base64.decode(base64Data, Base64.DEFAULT);
+
+                                    File target = new File(getFilesDir(), safeName);
+                                    FileOutputStream fos = new FileOutputStream(target);
+                                    fos.write(decoded);
+                                    fos.flush();
+                                    fos.close();
+                                    Log.i(TAG, "Audio uploaded via Wi-Fi: " + target.getAbsolutePath() + " (" + target.length() + " bytes)");
+
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            if (webView != null) {
+                                                webView.evaluateJavascript("if (typeof window.fetchAvailableAudioTracks === 'function') { window.fetchAvailableAudioTracks(); }", null);
+                                            }
+                                        }
+                                    });
+
+                                    JSONObject resp = new JSONObject();
+                                    resp.put("status", "success");
+                                    resp.put("fileName", safeName);
+                                    resp.put("audioPath", "azan/" + safeName);
+                                    sendResponse(out, 200, "application/json", resp.toString());
+                                } catch (Exception ex) {
+                                    Log.e(TAG, "Error handling /upload_audio.php: " + ex.getMessage(), ex);
+                                    sendResponse(out, 500, "application/json", "{\"status\":\"error\",\"message\":\"" + ex.getMessage() + "\"}");
+                                }
+                            } else {
+                                sendResponse(out, 400, "application/json", "{\"status\":\"error\",\"message\":\"Invalid request\"}");
+                            }
+                            client.close();
+                            return;
+                        }
+
+                        if ("/list_mp3.php".equals(path)) {
+                            try {
+                                LinkedHashSet<String> set = new LinkedHashSet<>();
+                                String[] defaults = new String[]{"fajr.mp3", "dhuhr.mp3", "asr.mp3", "maghrib.mp3", "isha.mp3", "Alhamd.mp3", "buzzer.mp3", "silent.mp3"};
+                                for (String d : defaults) set.add(d);
+
+                                File[] internalFiles = getFilesDir().listFiles();
+                                if (internalFiles != null) {
+                                    for (File f : internalFiles) {
+                                        if (f.getName().toLowerCase().endsWith(".mp3")) {
+                                            set.add(f.getName());
+                                        }
+                                    }
+                                }
+
+                                JSONArray arr = new JSONArray();
+                                for (String s : set) arr.put(s);
+                                sendResponse(out, 200, "application/json", arr.toString());
+                            } catch (Exception ex) {
+                                sendResponse(out, 200, "application/json", "[\"fajr.mp3\",\"dhuhr.mp3\",\"asr.mp3\",\"maghrib.mp3\",\"isha.mp3\",\"Alhamd.mp3\",\"buzzer.mp3\",\"silent.mp3\"]");
+                            }
+                            client.close();
+                            return;
+                        }
+
+                        if ("/get_network_info.php".equals(path) || "/get_network_info".equals(path)) {
+                            String ip = getDeviceIpAddress();
+                            sendResponse(out, 200, "application/json", "{\"lanIp\":\"" + ip + "\",\"port\":8080,\"adminUrl\":\"http://" + ip + ":8080/admin.html\"}");
                             client.close();
                             return;
                         }
@@ -605,12 +773,14 @@ public class MainActivity extends AppCompatActivity {
 
         private void sendByteResponse(OutputStream out, int code, String mime, byte[] bytes) {
             try {
-                String header = "HTTP/1.1 " + code + " OK\r\n" +
+                String statusMsg = (code == 200) ? "OK" : (code == 404 ? "Not Found" : (code == 400 ? "Bad Request" : "Status " + code));
+                String header = "HTTP/1.1 " + code + " " + statusMsg + "\r\n" +
                         "Content-Type: " + mime + "\r\n" +
                         "Content-Length: " + bytes.length + "\r\n" +
                         "Access-Control-Allow-Origin: *\r\n" +
-                        "Access-Control-Allow-Methods: GET, POST, OPTIONS\r\n" +
-                        "Access-Control-Allow-Headers: Content-Type\r\n" +
+                        "Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE\r\n" +
+                        "Access-Control-Allow-Headers: *\r\n" +
+                        "Access-Control-Max-Age: 86400\r\n" +
                         "Connection: close\r\n\r\n";
                 out.write(header.getBytes("UTF-8"));
                 out.write(bytes);

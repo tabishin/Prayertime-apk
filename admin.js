@@ -1,4 +1,4 @@
-var BASE_URL = window.location.origin;
+var BASE_URL = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : '';
 var audioPlayer = new Audio();
 var currentlyPlayingTrack = null;
 var azanFiles = [];
@@ -206,18 +206,28 @@ function setupAudioUpload() {
             var cleanName = file.name.replace(/[^a-zA-Z0-9_\-\. ]/g, '_');
             if (!cleanName.toLowerCase().endsWith('.mp3')) cleanName += '.mp3';
 
-            fetch('/upload_audio.php', {
+            var targetUrl = (BASE_URL || '') + '/upload_audio.php';
+
+            fetch(targetUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
                 body: JSON.stringify({ fileName: cleanName, base64: base64 })
             })
-            .then(function(res) { return res.json(); })
+            .then(function(res) {
+                if (!res.ok) {
+                    throw new Error('Server returned HTTP ' + res.status);
+                }
+                return res.json();
+            })
             .then(function(data) {
                 if (data && data.status === 'success') {
                     if (statusEl) {
                         statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 block';
                         statusEl.textContent = '✓ Successfully uploaded "' + data.fileName + '"!';
-                        setTimeout(function() { statusEl.classList.add('hidden'); }, 4000);
+                        setTimeout(function() { statusEl.classList.add('hidden'); }, 5000);
                     }
                     fetchAzanFiles().then(function() {
                         if (!Array.isArray(settings.reminders)) settings.reminders = [];
@@ -240,11 +250,18 @@ function setupAudioUpload() {
                 }
             })
             .catch(function(err) {
+                console.error('Audio upload error:', err);
                 if (statusEl) {
                     statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 block';
-                    statusEl.textContent = '⚠️ Upload failed: ' + (err.message || 'Network error');
+                    statusEl.textContent = '⚠️ Upload failed: ' + (err.message || 'Network error (check Wi-Fi connection)');
                 }
             });
+        };
+        reader.onerror = function() {
+            if (statusEl) {
+                statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 block';
+                statusEl.textContent = '⚠️ Error reading local audio file.';
+            }
         };
         reader.readAsDataURL(file);
     };
@@ -631,7 +648,7 @@ function showNotification(message) {
 
 async function fetchAzanFiles() {
     try {
-        var response = await fetch('list_mp3.php');
+        var response = await fetch((BASE_URL || '') + '/list_mp3.php');
         if (!response.ok) throw new Error('HTTP error ' + response.status);
         azanFiles = await response.json();
 
