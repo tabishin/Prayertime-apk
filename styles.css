@@ -261,14 +261,13 @@ html, body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: 0.8vh 2vw;
+    padding: clamp(4px, 0.8vh, 10px) clamp(8px, 1.8vw, 24px);
     background-color: rgba(0, 0, 0, 0.45);
     border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-    min-height: 48px;
-    height: 9vh;
-    max-height: 80px;
+    min-height: 44px;
+    height: clamp(50px, 9vh, 88px);
     flex-shrink: 0;
-    gap: 1vw;
+    gap: 1.2vw;
 }
 
 .top-bar > div {
@@ -277,24 +276,20 @@ html, body {
 }
 
 .current-time {
-    font-size: 2.2rem;
-    font-size: 4.8vh;
-    font-size: clamp(1.4rem, 4.8vh, 3.2rem);
+    font-size: clamp(1.8rem, 5.2vh, 4.2rem);
     font-weight: 800;
     letter-spacing: -0.5px;
+    line-height: 1;
 }
 
 .next-prayer {
-    font-size: 1.1rem;
-    font-size: 2.2vh;
-    font-size: clamp(0.85rem, 2vh, 1.35rem);
+    font-size: clamp(0.95rem, 2.4vh, 1.6rem);
     font-weight: 600;
+    line-height: 1.1;
 }
 
 .date-info {
-    font-size: 2.2rem;
-    font-size: 4.8vh;
-    font-size: clamp(1.4rem, 4.8vh, 3.2rem);
+    font-size: clamp(1.4rem, 4.4vh, 3.4rem);
     font-weight: 800;
     letter-spacing: -0.5px;
     display: flex;
@@ -302,6 +297,7 @@ html, body {
     gap: 0.8vw;
     opacity: 0.95;
     white-space: nowrap;
+    line-height: 1;
 }
 
 .date-info span,
@@ -313,10 +309,9 @@ html, body {
 }
 
 #location {
-    font-size: 1.1rem;
-    font-size: 2.2vh;
-    font-size: clamp(0.85rem, 2vh, 1.35rem);
+    font-size: clamp(0.95rem, 2.4vh, 1.6rem);
     opacity: 0.95;
+    line-height: 1.1;
 }
 
 .makruh-warning {
@@ -347,13 +342,11 @@ html, body {
 .prayer-grid {
     box-sizing: border-box;
     width: 100%;
-    height: calc(100% - 9vh);
-    height: calc(100vh - 9vh);
-    padding: 10px;
-    padding: clamp(6px, 1.2vmin, 16px);
-    overflow: hidden;
-    flex: 1 1 auto;
+    height: auto;
+    flex: 1 1 0;
     min-height: 0;
+    padding: clamp(6px, 1.4vmin, 18px);
+    overflow: hidden;
 
     /* Primary: Flexbox 2-column layout (Rock-solid on Android 4.4, 5, 6, 7, 8+) */
     display: -webkit-flex;
@@ -369,8 +362,7 @@ html, body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: 1fr 1fr 1fr;
-    gap: 10px;
-    gap: clamp(6px, 1.5vmin, 16px);
+    gap: clamp(6px, 1.5vmin, 18px);
 }
 
 /* Prayer Box Styles (Universal Card Sizing) */
@@ -423,9 +415,7 @@ html, body {
 
 .layout-default .prayer-name,
 .prayer-name {
-    font-size: 1.8rem;
-    font-size: 4vmin;
-    font-size: clamp(1.1rem, 4.2vmin, 3rem);
+    font-size: clamp(1.1rem, 4.4vmin, 3.2rem);
     font-weight: 800;
     text-transform: uppercase;
     margin-bottom: 0.2vmin;
@@ -437,11 +427,9 @@ html, body {
 
 .layout-default .prayer-time,
 .prayer-time {
-    font-size: 2.8rem;
-    font-size: 6.5vmin;
-    font-size: clamp(1.5rem, 6vmin, 4.5rem);
+    font-size: clamp(1.8rem, 7.5vmin, 5.5rem);
     font-weight: 900;
-    margin: 0.3vmin 0;
+    margin: 0.2vmin 0;
     text-align: center;
     width: 100%;
     line-height: 1.05;
@@ -449,9 +437,7 @@ html, body {
 
 .layout-default .prayer-details,
 .prayer-details {
-    font-size: 1rem;
-    font-size: 2.2vmin;
-    font-size: clamp(0.75rem, 2.2vmin, 1.6rem);
+    font-size: clamp(0.75rem, 2.4vmin, 1.8rem);
     text-align: center;
     width: 100%;
     display: -webkit-flex;
@@ -460,7 +446,7 @@ html, body {
     flex-direction: column;
     -webkit-align-items: center;
     align-items: center;
-    margin-top: 0.4vmin;
+    margin-top: 0.3vmin;
     line-height: 1.25;
     opacity: 0.95;
 }
@@ -846,7 +832,9 @@ html, body {
     }
 
     .prayer-grid {
-        height: calc(100% - 44px);
+        height: auto;
+        flex: 1 1 0;
+        min-height: 0;
         gap: 6px;
         padding: 6px 10px;
     }
@@ -900,17 +888,17 @@ html, body {
         padding: clamp(12px, 1.8vmin, 28px);
     }
     .current-time, .date-info {
-        font-size: clamp(2rem, 4.8vh, 4rem);
+        font-size: clamp(2.4rem, 5.5vh, 4.8rem);
         font-weight: 800;
     }
     .layout-default .prayer-name {
-        font-size: clamp(1.6rem, 4.2vmin, 3.2rem);
+        font-size: clamp(1.8rem, 4.6vmin, 3.6rem);
     }
     .layout-default .prayer-time {
-        font-size: clamp(2.4rem, 6.5vmin, 5.2rem);
+        font-size: clamp(2.8rem, 7.8vmin, 6.2rem);
     }
     .layout-default .prayer-details {
-        font-size: clamp(1rem, 2.4vmin, 1.9rem);
+        font-size: clamp(1.1rem, 2.6vmin, 2.2rem);
     }
 }
 
