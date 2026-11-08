@@ -1685,3 +1685,107 @@ html, body {
     margin-right: auto;
 }
 
+/* Alarm & Recurrence Styling */
+.alarm-alert-banner {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #b91c1c;
+    color: #ffffff;
+    padding: 12px 24px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5), 0 0 0 3px rgba(239, 68, 68, 0.4);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    animation: alarmPulse 1.5s infinite;
+}
+
+@keyframes alarmPulse {
+    0%, 100% { transform: translateX(-50%) scale(1); }
+    50% { transform: translateX(-50%) scale(1.02); }
+}
+
+.alarm-alert-banner .alarm-banner-icon {
+    font-size: 1.8rem;
+    animation: bellRing 0.8s infinite;
+}
+
+@keyframes bellRing {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-15deg); }
+    75% { transform: rotate(15deg); }
+}
+
+.btn-dismiss-alarm {
+    background: #ffffff;
+    color: #b91c1c;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    transition: all 0.2s;
+}
+
+.btn-dismiss-alarm:hover {
+    background: #fee2e2;
+    transform: scale(0.98);
+}
+
+.alarm-card-advanced {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    transition: border-color 0.2s;
+}
+
+.alarm-card-advanced:hover {
+    border-color: #cbd5e1;
+}
+
+.alarm-days-group {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+}
+
+.day-pill-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #64748b;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.day-pill-btn.active {
+    background: #15803d;
+    border-color: #15803d;
+    color: #ffffff;
+    box-shadow: 0 1px 3px rgba(21, 128, 61, 0.3);
+}
+
+.audio-upload-container {
+    background: #f8fafc;
+    border: 1.5px dashed #cbd5e1;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+}
+

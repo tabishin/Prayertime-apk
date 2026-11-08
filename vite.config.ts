@@ -98,17 +98,81 @@ export default defineConfig(() => {
               });
               let mp3s = ['fajr.mp3', 'dhuhr.mp3', 'asr.mp3', 'maghrib.mp3', 'isha.mp3', 'Alhamd.mp3', 'buzzer.mp3', 'silent.mp3'];
               try {
-                if (fs.existsSync('./azan')) {
-                  const files = fs.readdirSync('./azan');
-                  const scanned = files.filter(f => f.toLowerCase().endsWith('.mp3'));
-                  if (scanned.length > 0) {
-                    mp3s = scanned;
+                const scannedSet = new Set(mp3s);
+                ['./azan', './public/azan'].forEach(dir => {
+                  if (fs.existsSync(dir)) {
+                    const files = fs.readdirSync(dir);
+                    files.filter(f => f.toLowerCase().endsWith('.mp3')).forEach(f => scannedSet.add(f));
                   }
-                }
+                });
+                mp3s = Array.from(scannedSet);
               } catch (e) {
                 // ignore
               }
               res.end(JSON.stringify(mp3s));
+              return;
+            }
+
+            if (pathname === '/upload_audio.php' || pathname === '/upload_audio') {
+              res.setHeader('Access-Control-Allow-Origin', '*');
+              res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+              res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+              if (req.method === 'OPTIONS') {
+                res.writeHead(200);
+                res.end();
+                return;
+              }
+
+              if (req.method === 'POST') {
+                let body = '';
+                req.on('data', chunk => {
+                  body += chunk;
+                });
+                req.on('end', () => {
+                  try {
+                    const parsed = JSON.parse(body);
+                    const rawName = (parsed.fileName || parsed.name || 'custom_alert.mp3').trim();
+                    // Sanitize filename to prevent directory traversal
+                    let safeName = rawName.replace(/[^a-zA-Z0-9_\-\. ]/g, '_');
+                    if (!safeName.toLowerCase().endsWith('.mp3')) {
+                      safeName += '.mp3';
+                    }
+                    let base64Data = parsed.base64 || parsed.data || '';
+                    if (base64Data.includes(',')) {
+                      base64Data = base64Data.split(',')[1];
+                    }
+                    const buffer = Buffer.from(base64Data, 'base64');
+
+                    // Save to both ./azan and ./public/azan
+                    ['./azan', './public/azan'].forEach(dir => {
+                      if (!fs.existsSync(dir)) {
+                        fs.mkdirSync(dir, { recursive: true });
+                      }
+                      fs.writeFileSync(path.join(dir, safeName), buffer);
+                    });
+
+                    // If android kiosk assets exist, copy there as well
+                    const androidAzan = './android-kiosk/app/src/main/assets/azan';
+                    if (fs.existsSync(androidAzan)) {
+                      fs.writeFileSync(path.join(androidAzan, safeName), buffer);
+                    }
+
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ 
+                      status: 'success', 
+                      fileName: safeName, 
+                      audioPath: 'azan/' + safeName 
+                    }));
+                  } catch (err: any) {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ status: 'error', message: err.message }));
+                  }
+                });
+              } else {
+                res.writeHead(405, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ status: 'error', message: 'Method Not Allowed' }));
+              }
               return;
             }
 

@@ -22,6 +22,14 @@ import android.content.res.AssetFileDescriptor;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.webkit.JavascriptInterface;
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Base64;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.util.Calendar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebViewAssetLoader;
@@ -227,16 +235,27 @@ public class MainActivity extends AppCompatActivity {
                             clean = "azan/" + clean;
                         }
 
-                        Log.d(TAG, "Opening asset for native playback: " + clean);
-                        AssetFileDescriptor afd = getAssets().openFd(clean);
                         mediaPlayer = new MediaPlayer();
                         mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                        mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
-                        afd.close();
+
+                        // Check if file exists in internal storage (uploaded by user)
+                        String fileNameOnly = clean.replace("azan/", "");
+                        File internalFile = new File(getFilesDir(), fileNameOnly);
+
+                        if (internalFile.exists() && internalFile.length() > 0) {
+                            Log.d(TAG, "Opening internal storage file for native playback: " + internalFile.getAbsolutePath());
+                            mediaPlayer.setDataSource(internalFile.getAbsolutePath());
+                        } else {
+                            Log.d(TAG, "Opening APK asset for native playback: " + clean);
+                            AssetFileDescriptor afd = getAssets().openFd(clean);
+                            mediaPlayer.setDataSource(afd.getFileDescriptor(), afd.getStartOffset(), afd.getLength());
+                            afd.close();
+                        }
+
                         mediaPlayer.setVolume(currentVolume, currentVolume);
                         mediaPlayer.prepare();
                         mediaPlayer.start();
-                        Log.d(TAG, "Native MediaPlayer playing: " + clean);
+                        Log.d(TAG, "Native MediaPlayer playing successfully: " + clean);
                     } catch (Exception e) {
                         Log.e(TAG, "Error in native playAudio for " + rawPath, e);
                     }
@@ -267,6 +286,103 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
             });
+        }
+
+        @JavascriptInterface
+        public boolean saveCustomAudio(final String fileName, final String base64Data) {
+            try {
+                String safeName = fileName != null ? fileName.replaceAll("[^a-zA-Z0-9_\\-\\.]", "_") : "custom.mp3";
+                if (!safeName.toLowerCase().endsWith(".mp3")) safeName += ".mp3";
+
+                String cleanBase64 = base64Data;
+                if (cleanBase64.contains(",")) cleanBase64 = cleanBase64.split(",")[1];
+                byte[] decoded = Base64.decode(cleanBase64, Base64.DEFAULT);
+
+                File target = new File(getFilesDir(), safeName);
+                FileOutputStream fos = new FileOutputStream(target);
+                fos.write(decoded);
+                fos.flush();
+                fos.close();
+                Log.i(TAG, "Saved custom audio file to: " + target.getAbsolutePath() + " (" + target.length() + " bytes)");
+                return true;
+            } catch (Exception e) {
+                Log.e(TAG, "Failed to save custom audio in Android internal storage: " + e.getMessage(), e);
+                return false;
+            }
+        }
+
+        @JavascriptInterface
+        public void scheduleNativeAlarm(final String alarmId, final int hour, final int minute, final int dayOfWeek, final String audioPath, final String label) {
+            try {
+                AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                if (am == null) return;
+
+                int reqCode = Math.abs((alarmId != null ? alarmId.hashCode() : (hour * 100 + minute)));
+
+                Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                intent.putExtra("alarmId", alarmId);
+                intent.putExtra("audioPath", audioPath);
+                intent.putExtra("alarmName", label);
+
+                int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    flags |= PendingIntent.FLAG_IMMUTABLE;
+                }
+                PendingIntent pi = PendingIntent.getBroadcast(MainActivity.this, reqCode, intent, flags);
+
+                Calendar cal = Calendar.getInstance();
+                cal.set(Calendar.HOUR_OF_DAY, hour);
+                cal.set(Calendar.MINUTE, minute);
+                cal.set(Calendar.SECOND, 0);
+                cal.set(Calendar.MILLISECOND, 0);
+
+                if (dayOfWeek > 0) {
+                    cal.set(Calendar.DAY_OF_WEEK, dayOfWeek);
+                }
+
+                if (cal.getTimeInMillis() <= System.currentTimeMillis()) {
+                    if (dayOfWeek > 0) {
+                        cal.add(Calendar.WEEK_OF_YEAR, 1);
+                    } else {
+                        cal.add(Calendar.DAY_OF_YEAR, 1);
+                    }
+                }
+
+                long triggerMs = cal.getTimeInMillis();
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    Intent showIntent = new Intent(MainActivity.this, MainActivity.class);
+                    PendingIntent showPi = PendingIntent.getActivity(MainActivity.this, reqCode + 1, showIntent, flags);
+                    AlarmManager.AlarmClockInfo clockInfo = new AlarmManager.AlarmClockInfo(triggerMs, showPi);
+                    am.setAlarmClock(clockInfo, pi);
+                } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerMs, pi);
+                } else {
+                    am.setExact(AlarmManager.RTC_WAKEUP, triggerMs, pi);
+                }
+
+                Log.i(TAG, "Native Alarm scheduled: " + label + " at " + cal.getTime() + " (reqCode=" + reqCode + ")");
+            } catch (Exception e) {
+                Log.e(TAG, "Error scheduling native alarm: " + e.getMessage(), e);
+            }
+        }
+
+        @JavascriptInterface
+        public void cancelNativeAlarm(final String alarmId) {
+            try {
+                AlarmManager am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+                if (am == null) return;
+
+                int reqCode = Math.abs(alarmId != null ? alarmId.hashCode() : 0);
+                Intent intent = new Intent(MainActivity.this, AlarmReceiver.class);
+                int flags = PendingIntent.FLAG_UPDATE_CURRENT;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) flags |= PendingIntent.FLAG_IMMUTABLE;
+                PendingIntent pi = PendingIntent.getBroadcast(MainActivity.this, reqCode, intent, flags);
+                am.cancel(pi);
+                Log.i(TAG, "Native Alarm canceled for id: " + alarmId);
+            } catch (Exception e) {
+                Log.w(TAG, "Error canceling native alarm: " + e.getMessage());
+            }
         }
 
         private void stopAudioInternal() {

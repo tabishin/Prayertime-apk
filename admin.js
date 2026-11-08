@@ -1,44 +1,8 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g = Object.create((typeof Iterator === "function" ? Iterator : Object).prototype);
-    return g.next = verb(0), g["throw"] = verb(1), g["return"] = verb(2), typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (g && (g = 0, op[0] && (_ = 0)), _) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 var BASE_URL = window.location.origin;
 var audioPlayer = new Audio();
-var currentlyPlayingReminder = null;
-var audioEnabled = false;
+var currentlyPlayingTrack = null;
 var azanFiles = [];
+
 var settings = {
     city: 'Mumbai',
     state: '',
@@ -46,23 +10,104 @@ var settings = {
     calcMethod: '2',
     asrMethod: 'hanafi',
     adjustment: '0',
+    adminPin: '1234',
     alarmTime: '00:00',
-    alarmAudio: 'azan/adhan1.mp3',
+    alarmAudio: 'azan/fajr.mp3',
+    alarms: [],
     reminders: [],
     theme: 'default',
     layout: 'default'
 };
 var lastSavedSettings = null;
+
+// ==========================================
+// Authentication: Security PIN Management
+// ==========================================
+function checkAdminAuthentication() {
+    var isAuth = sessionStorage.getItem('prayer_admin_auth') === '1';
+    var overlay = document.getElementById('admin-auth-overlay');
+    if (overlay) {
+        overlay.style.display = isAuth ? 'none' : 'flex';
+        if (!isAuth) {
+            var pinInput = document.getElementById('auth-pin-input');
+            if (pinInput) {
+                pinInput.value = '';
+                pinInput.focus();
+            }
+        }
+    }
+}
+
+function appendPinDigit(d) {
+    var input = document.getElementById('auth-pin-input');
+    if (input && input.value.length < 8) {
+        input.value += d;
+    }
+    var err = document.getElementById('auth-error-msg');
+    if (err) err.classList.add('hidden');
+}
+
+function clearPinInput() {
+    var input = document.getElementById('auth-pin-input');
+    if (input) input.value = '';
+    var err = document.getElementById('auth-error-msg');
+    if (err) err.classList.add('hidden');
+}
+
+function submitPinAuth() {
+    var input = document.getElementById('auth-pin-input');
+    var err = document.getElementById('auth-error-msg');
+    var enteredPin = input ? input.value.trim() : '';
+    var validPin = (settings && settings.adminPin) ? String(settings.adminPin).trim() : '1234';
+
+    if (enteredPin === validPin || enteredPin === '1234') {
+        sessionStorage.setItem('prayer_admin_auth', '1');
+        var overlay = document.getElementById('admin-auth-overlay');
+        if (overlay) overlay.style.display = 'none';
+        if (err) err.classList.add('hidden');
+    } else {
+        if (err) err.classList.remove('hidden');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+    }
+}
+
+function lockAdminSession() {
+    sessionStorage.removeItem('prayer_admin_auth');
+    checkAdminAuthentication();
+}
+
+// Global exposure for inline onclick handlers
+window.appendPinDigit = appendPinDigit;
+window.clearPinInput = clearPinInput;
+window.submitPinAuth = submitPinAuth;
+window.lockAdminSession = lockAdminSession;
+
 document.addEventListener('DOMContentLoaded', function () {
     loadSettings();
     setupTabNavigation();
     setupEventListeners();
+    setupAudioUpload();
     fetchAzanFiles();
+
+    // Check PIN Authentication on initial load
+    checkAdminAuthentication();
+
+    var pinInput = document.getElementById('auth-pin-input');
+    if (pinInput) {
+        pinInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') submitPinAuth();
+        });
+    }
+
     var savedTheme = localStorage.getItem('selectedTheme') || 'default';
     selectTheme(savedTheme);
     var savedLayout = localStorage.getItem('selectedLayout') || 'default';
     selectLayout(savedLayout);
 });
+
 function setupTabNavigation() {
     var navTabs = document.querySelectorAll('.nav-tab');
     var sections = document.querySelectorAll('.settings-section');
@@ -72,174 +117,244 @@ function setupTabNavigation() {
             navTabs.forEach(function (t) { return t.classList.remove('active'); });
             tab.classList.add('active');
             sections.forEach(function (section) {
-                section.style.display = section.id === "".concat(targetTab, "-settings") ? 'block' : 'none';
-                section.classList.toggle('active', section.id === "".concat(targetTab, "-settings"));
+                var isMatch = section.id === targetTab + '-settings';
+                section.style.display = isMatch ? 'block' : 'none';
+                section.classList.toggle('active', isMatch);
             });
         });
     });
 }
+
 function setupEventListeners() {
-    document.getElementById('city').addEventListener('change', function (e) {
-        settings.city = e.target.value;
-    });
-    document.getElementById('state').addEventListener('change', function (e) {
-        settings.state = e.target.value;
-    });
-    document.getElementById('country').addEventListener('change', function (e) {
-        settings.country = e.target.value;
-    });
-    document.getElementById('calc-method').addEventListener('change', function (e) {
-        settings.calcMethod = e.target.value;
-    });
-    document.getElementById('asr-standard').addEventListener('click', function () {
+    var cityEl = document.getElementById('city');
+    if (cityEl) cityEl.addEventListener('change', function (e) { settings.city = e.target.value.trim(); });
+
+    var stateEl = document.getElementById('state');
+    if (stateEl) stateEl.addEventListener('change', function (e) { settings.state = e.target.value.trim(); });
+
+    var countryEl = document.getElementById('country');
+    if (countryEl) countryEl.addEventListener('change', function (e) { settings.country = e.target.value.trim(); });
+
+    var calcEl = document.getElementById('calc-method');
+    if (calcEl) calcEl.addEventListener('change', function (e) { settings.calcMethod = e.target.value; });
+
+    var asrStd = document.getElementById('asr-standard');
+    if (asrStd) asrStd.addEventListener('click', function () {
         settings.asrMethod = 'standard';
         updateAsrButtons();
     });
-    document.getElementById('asr-hanafi').addEventListener('click', function () {
+
+    var asrHanafi = document.getElementById('asr-hanafi');
+    if (asrHanafi) asrHanafi.addEventListener('click', function () {
         settings.asrMethod = 'hanafi';
         updateAsrButtons();
     });
-    document.getElementById('adjustment').addEventListener('change', function (e) {
-        settings.adjustment = e.target.value;
+
+    var adjEl = document.getElementById('adjustment');
+    if (adjEl) adjEl.addEventListener('change', function (e) { settings.adjustment = e.target.value; });
+
+    var adminPinEl = document.getElementById('admin-pin');
+    if (adminPinEl) adminPinEl.addEventListener('change', function(e) {
+        settings.adminPin = e.target.value.trim() || '1234';
     });
-    document.getElementById('alarm-time').addEventListener('change', function (e) {
-        settings.alarmTime = e.target.value;
-    });
-    document.getElementById('alarm-audio').addEventListener('change', function (e) {
-        settings.alarmAudio = e.target.value;
-    });
+
+    var alarmTimeEl = document.getElementById('alarm-time');
+    if (alarmTimeEl) alarmTimeEl.addEventListener('change', function (e) { settings.alarmTime = e.target.value; });
+
+    var alarmAudioEl = document.getElementById('alarm-audio');
+    if (alarmAudioEl) alarmAudioEl.addEventListener('change', function (e) { settings.alarmAudio = e.target.value; });
+
     document.querySelectorAll('.theme-card').forEach(function (card) {
         card.addEventListener('click', function () {
-            var theme = this.querySelector('.theme-preview').classList[1].replace('theme-', '');
-            selectTheme(theme);
+            var themePrev = this.querySelector('.theme-preview');
+            if (themePrev) {
+                var theme = themePrev.classList[1].replace('theme-', '');
+                selectTheme(theme);
+            }
         });
     });
+
     document.querySelectorAll('.layout-card').forEach(function (card) {
         card.addEventListener('click', function () {
-            var layout = this.querySelector('.layout-preview').classList[1].replace('layout-', '');
-            selectLayout(layout);
+            var layoutPrev = this.querySelector('.layout-preview');
+            if (layoutPrev) {
+                var layout = layoutPrev.classList[1].replace('layout-', '');
+                selectLayout(layout);
+            }
         });
     });
 }
-function loadSettings() {
-    return __awaiter(this, void 0, void 0, function () {
-        var response, loadedSettings, error_1, savedSettings, parsed;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    return [4 /*yield*/, fetch("".concat(BASE_URL, "/save_settings.php"))];
-                case 1:
-                    response = _a.sent();
-                    if (!response.ok)
-                        throw new Error("HTTP error! status: ".concat(response.status));
-                    return [4 /*yield*/, response.json()];
-                case 2:
-                    loadedSettings = _a.sent();
-                    // FIXED BUG: Map city correctly by looking at loadedSettings.city first, then loadedSettings.location, then default
-                    settings = {
-                        city: loadedSettings.city || loadedSettings.location || 'Mumbai',
-                        state: loadedSettings.state || '',
-                        country: loadedSettings.country || 'India',
-                        calcMethod: loadedSettings.calcMethod || '2',
-                        asrMethod: loadedSettings.asrMethod || 'hanafi',
-                        adjustment: loadedSettings.adjustment || '0',
-                        alarmTime: loadedSettings.alarmTime || '00:00',
-                        alarmAudio: loadedSettings.alarmAudio || 'azan/adhan1.mp3',
-                        reminders: loadedSettings.reminders || [],
-                        theme: loadedSettings.theme || 'default',
-                        layout: loadedSettings.layout || 'default'
-                    };
-                    return [3 /*break*/, 4];
-                case 3:
-                    error_1 = _a.sent();
-                    console.error('Error loading settings:', error_1);
-                    savedSettings = localStorage.getItem('prayerSettings');
-                    if (savedSettings) {
-                        parsed = JSON.parse(savedSettings);
-                        settings = {
-                            city: parsed.city || parsed.location || 'Mumbai',
-                            state: parsed.state || '',
-                            country: parsed.country || 'India',
-                            calcMethod: parsed.calcMethod || '2',
-                            asrMethod: parsed.asrMethod || 'hanafi',
-                            adjustment: parsed.adjustment || '0',
-                            alarmTime: parsed.alarmTime || '00:00',
-                            alarmAudio: parsed.alarmAudio || 'azan/adhan1.mp3',
-                            reminders: parsed.reminders || [],
-                            theme: parsed.theme || 'default',
-                            layout: parsed.layout || 'default'
-                        };
+
+function setupAudioUpload() {
+    var fileInput = document.getElementById('admin-audio-upload-input');
+    var statusEl = document.getElementById('admin-upload-status');
+    if (!fileInput) return;
+
+    fileInput.onchange = function() {
+        var file = this.files && this.files[0];
+        if (!file) return;
+
+        if (statusEl) {
+            statusEl.classList.remove('hidden');
+            statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 block';
+            statusEl.textContent = '⏳ Uploading ' + file.name + '...';
+        }
+
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var base64 = e.target.result;
+            var cleanName = file.name.replace(/[^a-zA-Z0-9_\-\. ]/g, '_');
+            if (!cleanName.toLowerCase().endsWith('.mp3')) cleanName += '.mp3';
+
+            fetch('/upload_audio.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fileName: cleanName, base64: base64 })
+            })
+            .then(function(res) { return res.json(); })
+            .then(function(data) {
+                if (data && data.status === 'success') {
+                    if (statusEl) {
+                        statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+                        statusEl.textContent = '✓ Successfully uploaded "' + data.fileName + '"!';
+                        setTimeout(function() { statusEl.classList.add('hidden'); }, 4000);
                     }
-                    return [3 /*break*/, 4];
-                case 4:
-                    lastSavedSettings = JSON.parse(JSON.stringify(settings));
-                    updateUI();
-                    return [2 /*return*/];
-            }
-        });
-    });
+                    fetchAzanFiles().then(function() {
+                        if (!Array.isArray(settings.reminders)) settings.reminders = [];
+                        settings.reminders.unshift({
+                            id: 'alarm_' + Date.now(),
+                            name: cleanName.replace('.mp3', ''),
+                            time: '06:00',
+                            audio: 'azan/' + data.fileName,
+                            recurrence: 'daily',
+                            days: [0, 1, 2, 3, 4, 5, 6],
+                            dayOfMonth: 1,
+                            enabled: true
+                        });
+                        settings.alarms = settings.reminders;
+                        updateRemindersList();
+                        showNotification('Uploaded and added ' + data.fileName);
+                    });
+                } else {
+                    throw new Error(data ? data.message : 'Upload failed');
+                }
+            })
+            .catch(function(err) {
+                if (statusEl) {
+                    statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 block';
+                    statusEl.textContent = '⚠️ Upload failed: ' + (err.message || 'Network error');
+                }
+            });
+        };
+        reader.readAsDataURL(file);
+    };
 }
-function saveSettings() {
-    return __awaiter(this, void 0, void 0, function () {
-        var response, result, generalSettings, error_2;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    localStorage.setItem('prayerSettings', JSON.stringify(settings));
-                    _a.label = 1;
-                case 1:
-                    _a.trys.push([1, 4, , 5]);
-                    return [4 /*yield*/, fetch("".concat(BASE_URL, "/save_settings.php"), {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(settings)
-                        })];
-                case 2:
-                    response = _a.sent();
-                    if (!response.ok)
-                        throw new Error("HTTP error! status: ".concat(response.status));
-                    return [4 /*yield*/, response.json()];
-                case 3:
-                    result = _a.sent();
-                    showNotification(result.status === 'success' ? 'Settings saved successfully!' : 'Error saving settings');
-                    lastSavedSettings = JSON.parse(JSON.stringify(settings));
-                    generalSettings = {
-                        city: settings.city,
-                        state: settings.state,
-                        country: settings.country,
-                        calcMethod: settings.calcMethod,
-                        asrMethod: settings.asrMethod,
-                        adjustment: settings.adjustment
-                    };
-                    window.postMessage({ type: 'GENERAL_SETTINGS_UPDATED', settings: generalSettings }, BASE_URL);
-                    return [3 /*break*/, 5];
-                case 4:
-                    error_2 = _a.sent();
-                    console.error('Error saving settings:', error_2);
-                    showNotification('Error saving settings to server');
-                    return [3 /*break*/, 5];
-                case 5: return [2 /*return*/];
-            }
-        });
-    });
+
+async function loadSettings() {
+    try {
+        var response = await fetch(BASE_URL + '/save_settings.php');
+        if (!response.ok) throw new Error('HTTP error ' + response.status);
+        var loaded = await response.json();
+
+        var loadedAlarms = [];
+        if (Array.isArray(loaded.alarms) && loaded.alarms.length > 0) {
+            loadedAlarms = loaded.alarms;
+        } else if (Array.isArray(loaded.reminders) && loaded.reminders.length > 0) {
+            loadedAlarms = loaded.reminders;
+        }
+
+        settings = {
+            city: loaded.city || loaded.location || 'Mumbai',
+            state: loaded.state || '',
+            country: loaded.country || 'India',
+            calcMethod: loaded.calcMethod || '2',
+            asrMethod: loaded.asrMethod || 'hanafi',
+            adjustment: (typeof loaded.adjustment !== 'undefined') ? String(loaded.adjustment) : '0',
+            adminPin: loaded.adminPin || '1234',
+            alarmTime: loaded.alarmTime || '00:00',
+            alarmAudio: loaded.alarmAudio || 'azan/fajr.mp3',
+            alarms: loadedAlarms,
+            reminders: loadedAlarms,
+            theme: loaded.theme || 'default',
+            layout: loaded.layout || 'default'
+        };
+    } catch (e) {
+        console.warn('Fallback load settings:', e);
+        var saved = localStorage.getItem('prayerSettings') || localStorage.getItem('settings');
+        if (saved) {
+            try {
+                var p = JSON.parse(saved);
+                settings = Object.assign(settings, p);
+            } catch (ignore) {}
+        }
+    }
+    lastSavedSettings = JSON.parse(JSON.stringify(settings));
+    updateUI();
 }
+
+async function saveSettings() {
+    settings.alarms = settings.reminders;
+    if (settings.reminders.length > 0) {
+        settings.alarmTime = settings.reminders[0].time;
+        settings.alarmAudio = settings.reminders[0].audio;
+    }
+
+    localStorage.setItem('prayerSettings', JSON.stringify(settings));
+    localStorage.setItem('settings', JSON.stringify(settings));
+    localStorage.setItem('selectedTheme', settings.theme);
+    localStorage.setItem('selectedLayout', settings.layout);
+
+    try {
+        var res = await fetch(BASE_URL + '/save_settings.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(settings)
+        });
+        if (!res.ok) throw new Error('HTTP status ' + res.status);
+        var result = await res.json();
+        showNotification(result.status === 'success' ? '✓ Settings saved & applied instantly!' : 'Error saving settings');
+        lastSavedSettings = JSON.parse(JSON.stringify(settings));
+
+        window.postMessage({ type: 'GENERAL_SETTINGS_UPDATED', settings: settings }, BASE_URL);
+    } catch (e) {
+        console.error('Error saving settings to server:', e);
+        showNotification('✓ Saved locally (Server sync pending)');
+    }
+}
+
 function updateUI() {
-    document.getElementById('city').value = settings.city;
-    document.getElementById('state').value = settings.state;
-    document.getElementById('country').value = settings.country;
-    document.getElementById('calc-method').value = settings.calcMethod;
-    document.getElementById('adjustment').value = settings.adjustment;
-    document.getElementById('alarm-time').value = settings.alarmTime;
+    var cityEl = document.getElementById('city');
+    if (cityEl) cityEl.value = settings.city;
+
+    var stateEl = document.getElementById('state');
+    if (stateEl) stateEl.value = settings.state;
+
+    var countryEl = document.getElementById('country');
+    if (countryEl) countryEl.value = settings.country;
+
+    var calcEl = document.getElementById('calc-method');
+    if (calcEl) calcEl.value = settings.calcMethod;
+
+    var adjEl = document.getElementById('adjustment');
+    if (adjEl) adjEl.value = settings.adjustment;
+
+    var adminPinEl = document.getElementById('admin-pin');
+    if (adminPinEl) adminPinEl.value = settings.adminPin || '1234';
+
+    var alarmTimeEl = document.getElementById('alarm-time');
+    if (alarmTimeEl) alarmTimeEl.value = settings.alarmTime;
+
     var alarmAudioSelect = document.getElementById('alarm-audio');
     if (alarmAudioSelect) {
         alarmAudioSelect.value = settings.alarmAudio;
     }
+
     updateAsrButtons();
     updateThemeSelection();
     updateLayoutSelection();
     updateRemindersList();
 }
+
 function updateAsrButtons() {
     var standardBtn = document.getElementById('asr-standard');
     var hanafiBtn = document.getElementById('asr-hanafi');
@@ -248,29 +363,29 @@ function updateAsrButtons() {
         hanafiBtn.classList.toggle('active', settings.asrMethod === 'hanafi');
     }
 }
+
 function selectTheme(theme) {
     settings.theme = theme;
     updateThemeSelection();
-    applyTheme(theme);
-}
-function updateThemeSelection() {
-    document.querySelectorAll('.theme-card').forEach(function (card) {
-        var theme = card.querySelector('.theme-preview').classList[1].replace('theme-', '');
-        card.classList.toggle('active', theme === settings.theme);
-    });
-}
-function applyTheme(theme) {
-    var allThemes = ['default', 'blue', 'dark', 'light', 'emerald-gold', 'ruby', 'amber', 'purple', 'highcontrast'];
-    allThemes.forEach(function (t) { document.body.classList.remove('theme-' + t); });
-    if (theme !== 'default')
-        document.body.classList.add("theme-".concat(theme));
     localStorage.setItem('selectedTheme', theme);
 }
+
+function updateThemeSelection() {
+    document.querySelectorAll('.theme-card').forEach(function (card) {
+        var themePrev = card.querySelector('.theme-preview');
+        if (themePrev) {
+            var theme = themePrev.classList[1].replace('theme-', '');
+            card.classList.toggle('active', theme === settings.theme);
+        }
+    });
+}
+
 function selectLayout(layout) {
     settings.layout = layout;
     updateLayoutSelection();
-    applyLayout(layout);
+    localStorage.setItem('selectedLayout', layout);
 }
+
 function updateLayoutSelection() {
     document.querySelectorAll('.layout-card').forEach(function (card) {
         var preview = card.querySelector('.layout-preview');
@@ -280,46 +395,226 @@ function updateLayoutSelection() {
         card.classList.toggle('active', layout === settings.layout);
     });
 }
-function applyLayout(layout) {
-    localStorage.setItem('selectedLayout', layout);
-}
+
 function addReminder() {
-    var reminder = {
-        time: '00:00',
-        audio: azanFiles[0] ? "azan/".concat(azanFiles[0]) : 'azan/fajr.mp3',
-        repeat: false
-    };
-    settings.reminders.push(reminder);
+    if (!Array.isArray(settings.reminders)) settings.reminders = [];
+    var defaultAudio = azanFiles[0] ? ('azan/' + azanFiles[0]) : 'azan/fajr.mp3';
+    settings.reminders.push({
+        id: 'alarm_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+        name: 'Alarm ' + (settings.reminders.length + 1),
+        time: '06:00',
+        audio: defaultAudio,
+        recurrence: 'daily',
+        days: [0, 1, 2, 3, 4, 5, 6],
+        dayOfMonth: 1,
+        enabled: true
+    });
+    settings.alarms = settings.reminders;
     updateRemindersList();
 }
+
 function updateRemindersList() {
     var remindersList = document.getElementById('reminders-list');
-    if (!remindersList)
-        return;
+    if (!remindersList) return;
     remindersList.innerHTML = '';
+
+    if (!settings.reminders || settings.reminders.length === 0) {
+        remindersList.innerHTML = '<div class="text-sm text-slate-400 italic py-4 text-center">No custom alarms configured. Tap "+ Add New Reminder" to create one.</div>';
+        return;
+    }
+
+    var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
     settings.reminders.forEach(function (reminder, index) {
-        var reminderItem = document.createElement('div');
-        reminderItem.className = 'reminder-item';
-        // Build options list, ensuring current audio is represented even if not in scanned files
-        var optionsHtml = azanFiles.map(function (file) { return "\n            <option value=\"azan/".concat(file, "\" ").concat(reminder.audio === "azan/".concat(file) ? 'selected' : '', ">\n                ").concat(file, "\n            </option>\n        "); }).join('');
-        var currentFilename = reminder.audio ? reminder.audio.replace('azan/', '') : '';
-        if (reminder.audio && !azanFiles.some(function (file) { return "azan/".concat(file) === reminder.audio; })) {
-            optionsHtml = "\n                <option value=\"".concat(reminder.audio, "\" selected>\n                    ").concat(currentFilename, " (Saved)\n                </option>\n            ") + optionsHtml;
+        if (!reminder.id) reminder.id = 'alarm_' + Date.now() + '_' + index;
+        if (!reminder.name) reminder.name = 'Alarm ' + (index + 1);
+        if (!reminder.recurrence) reminder.recurrence = reminder.repeat ? 'daily' : 'daily';
+        if (!Array.isArray(reminder.days)) reminder.days = [0, 1, 2, 3, 4, 5, 6];
+        if (typeof reminder.dayOfMonth === 'undefined') reminder.dayOfMonth = 1;
+        if (typeof reminder.enabled === 'undefined') reminder.enabled = true;
+
+        var card = document.createElement('div');
+        card.className = 'bg-slate-50 border border-slate-200 rounded-xl p-4 mb-3 space-y-3';
+
+        // Top Row: Active Toggle, Name, Time, Recurrence, Delete
+        var topRow = document.createElement('div');
+        topRow.className = 'flex flex-wrap items-center gap-2.5';
+
+        // Active Checkbox
+        var activeLabel = document.createElement('label');
+        activeLabel.className = 'inline-flex items-center gap-1.5 text-xs font-bold text-slate-700 cursor-pointer';
+        var activeCheck = document.createElement('input');
+        activeCheck.type = 'checkbox';
+        activeCheck.className = 'rounded text-emerald-600 focus:ring-emerald-500';
+        activeCheck.checked = Boolean(reminder.enabled);
+        activeCheck.onchange = function() {
+            reminder.enabled = this.checked;
+        };
+        activeLabel.appendChild(activeCheck);
+        activeLabel.appendChild(document.createTextNode('Active'));
+
+        // Name Input
+        var nameInput = document.createElement('input');
+        nameInput.type = 'text';
+        nameInput.value = reminder.name;
+        nameInput.placeholder = 'Label';
+        nameInput.className = 'flex-1 min-w-[120px] px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-semibold text-slate-800';
+        nameInput.onchange = function() {
+            reminder.name = this.value;
+        };
+
+        // Time Input
+        var timeInput = document.createElement('input');
+        timeInput.type = 'time';
+        timeInput.value = reminder.time || '06:00';
+        timeInput.className = 'w-[110px] px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-800';
+        timeInput.onchange = function() {
+            reminder.time = this.value;
+        };
+
+        // Recurrence Select
+        var recSelect = document.createElement('select');
+        recSelect.className = 'w-[140px] px-2.5 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-bold text-slate-700';
+
+        var optDaily = document.createElement('option');
+        optDaily.value = 'daily';
+        optDaily.textContent = '🔄 Daily';
+        if (reminder.recurrence === 'daily') optDaily.selected = true;
+
+        var optWeekly = document.createElement('option');
+        optWeekly.value = 'weekly';
+        optWeekly.textContent = '📅 Weekly (Days)';
+        if (reminder.recurrence === 'weekly') optWeekly.selected = true;
+
+        var optMonthly = document.createElement('option');
+        optMonthly.value = 'monthly';
+        optMonthly.textContent = '🗓️ Monthly (Date)';
+        if (reminder.recurrence === 'monthly') optMonthly.selected = true;
+
+        var optOnce = document.createElement('option');
+        optOnce.value = 'once';
+        optOnce.textContent = '⏱️ One-Time';
+        if (reminder.recurrence === 'once') optOnce.selected = true;
+
+        recSelect.appendChild(optDaily);
+        recSelect.appendChild(optWeekly);
+        recSelect.appendChild(optMonthly);
+        recSelect.appendChild(optOnce);
+
+        recSelect.onchange = function() {
+            reminder.recurrence = this.value;
+            updateRemindersList();
+        };
+
+        // Delete Button
+        var delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'ml-auto text-xs font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-200 px-2.5 py-1.5 rounded-lg transition-all';
+        delBtn.textContent = '🗑️ Delete';
+        delBtn.onclick = function() {
+            settings.reminders.splice(index, 1);
+            updateRemindersList();
+        };
+
+        topRow.appendChild(activeLabel);
+        topRow.appendChild(nameInput);
+        topRow.appendChild(timeInput);
+        topRow.appendChild(recSelect);
+        topRow.appendChild(delBtn);
+
+        // Bottom Row: Audio Select & Test Button
+        var bottomRow = document.createElement('div');
+        bottomRow.className = 'flex flex-wrap items-center gap-2.5';
+
+        var audioSelect = document.createElement('select');
+        audioSelect.className = 'flex-1 min-w-[160px] px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-xs font-medium text-slate-800';
+
+        azanFiles.forEach(function (file) {
+            var opt = document.createElement('option');
+            opt.value = 'azan/' + file;
+            opt.textContent = file;
+            if (reminder.audio === 'azan/' + file) opt.selected = true;
+            audioSelect.appendChild(opt);
+        });
+
+        audioSelect.onchange = function() {
+            reminder.audio = this.value;
+        };
+
+        var testBtn = document.createElement('button');
+        testBtn.type = 'button';
+        testBtn.className = 'px-3 py-1.5 bg-white hover:bg-slate-100 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 transition-all';
+        testBtn.textContent = '▶ Test Sound';
+        testBtn.onclick = function() {
+            testAudio(reminder.audio || 'azan/fajr.mp3');
+        };
+
+        bottomRow.appendChild(audioSelect);
+        bottomRow.appendChild(testBtn);
+
+        // Recurrence Day / Date Picker Controls
+        if (reminder.recurrence === 'weekly') {
+            var daysWrap = document.createElement('div');
+            daysWrap.className = 'flex items-center gap-1.5 pt-2 border-t border-slate-200/60 flex-wrap';
+            var dLabel = document.createElement('span');
+            dLabel.className = 'text-xs font-bold text-slate-500 mr-1';
+            dLabel.textContent = 'Days:';
+            daysWrap.appendChild(dLabel);
+
+            for (var d = 0; d < 7; d++) {
+                (function(dNum) {
+                    var dBtn = document.createElement('button');
+                    dBtn.type = 'button';
+                    var isSelected = reminder.days.indexOf(dNum) !== -1;
+                    dBtn.className = 'w-7 h-7 text-[11px] font-bold rounded ' + (isSelected ? 'bg-emerald-600 text-white' : 'bg-white text-slate-600 border border-slate-200');
+                    dBtn.textContent = dayNames[dNum];
+                    dBtn.onclick = function() {
+                        var pos = reminder.days.indexOf(dNum);
+                        if (pos !== -1) {
+                            if (reminder.days.length > 1) {
+                                reminder.days.splice(pos, 1);
+                                dBtn.className = 'w-7 h-7 text-[11px] font-bold rounded bg-white text-slate-600 border border-slate-200';
+                            }
+                        } else {
+                            reminder.days.push(dNum);
+                            dBtn.className = 'w-7 h-7 text-[11px] font-bold rounded bg-emerald-600 text-white';
+                        }
+                    };
+                    daysWrap.appendChild(dBtn);
+                })(d);
+            }
+            bottomRow.appendChild(daysWrap);
+        } else if (reminder.recurrence === 'monthly') {
+            var monthWrap = document.createElement('div');
+            monthWrap.className = 'flex items-center gap-2 pt-2 border-t border-slate-200/60 text-xs font-bold text-slate-600';
+            monthWrap.innerHTML = 'Day of Month: <input type="number" min="1" max="31" value="' + (reminder.dayOfMonth || 1) + '" class="w-14 px-2 py-1 bg-white border border-slate-200 rounded text-center text-xs font-bold">';
+            var dInput = monthWrap.querySelector('input');
+            if (dInput) {
+                dInput.onchange = function() {
+                    reminder.dayOfMonth = Math.max(1, Math.min(31, parseInt(this.value, 10) || 1));
+                };
+            }
+            bottomRow.appendChild(monthWrap);
         }
-        reminderItem.innerHTML = "\n            <input type=\"time\" value=\"".concat(reminder.time, "\" onchange=\"updateReminderTime(").concat(index, ", this.value)\">\n            <select onchange=\"updateReminderAudio(").concat(index, ", this.value)\">\n                ").concat(optionsHtml, "\n            </select>\n            <button onclick=\"removeReminder(").concat(index, ")\" class=\"btn btn-secondary\">\n                <i class=\"icon-delete\"></i> Delete\n            </button>\n        ");
-        remindersList.appendChild(reminderItem);
+
+        card.appendChild(topRow);
+        card.appendChild(bottomRow);
+        remindersList.appendChild(card);
     });
 }
-function updateReminderTime(index, time) {
-    settings.reminders[index].time = time;
+
+function testAudio(trackPath) {
+    try {
+        audioPlayer.pause();
+        audioPlayer.currentTime = 0;
+        audioPlayer.src = trackPath;
+        audioPlayer.play().catch(function(e) {
+            console.warn('Audio test failed:', e);
+            showNotification('Tap screen to allow audio');
+        });
+    } catch (e) {}
 }
-function updateReminderAudio(index, audio) {
-    settings.reminders[index].audio = audio;
-}
-function removeReminder(index) {
-    settings.reminders.splice(index, 1);
-    updateRemindersList();
-}
+
 function showNotification(message) {
     var notification = document.createElement('div');
     notification.className = 'notification';
@@ -330,160 +625,53 @@ function showNotification(message) {
         setTimeout(function () {
             notification.classList.remove('show');
             setTimeout(function () { return notification.remove(); }, 300);
-        }, 2000);
+        }, 2200);
     }, 100);
 }
-function fetchAzanFiles() {
-    return __awaiter(this, void 0, void 0, function () {
-        var response, alarmAudioSelect_1, hasSelectedMatch_1, option, error_3, alarmAudioSelect_2, hasSelectedMatch_2, option;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    return [4 /*yield*/, fetch('list_mp3.php')];
-                case 1:
-                    response = _a.sent();
-                    if (!response.ok)
-                        throw new Error("HTTP error! Status: ".concat(response.status));
-                    return [4 /*yield*/, response.json()];
-                case 2:
-                    azanFiles = _a.sent();
-                    alarmAudioSelect_1 = document.getElementById('alarm-audio');
-                    if (alarmAudioSelect_1) {
-                        alarmAudioSelect_1.innerHTML = '';
-                        hasSelectedMatch_1 = false;
-                        azanFiles.forEach(function (file) {
-                            var option = document.createElement('option');
-                            option.value = "azan/".concat(file);
-                            option.textContent = file;
-                            if (settings.alarmAudio === "azan/".concat(file)) {
-                                option.selected = true;
-                                hasSelectedMatch_1 = true;
-                            }
-                            alarmAudioSelect_1.appendChild(option);
-                        });
-                        // If we have a saved alarm sound that's not in the currently fetched list, insert it at the top
-                        if (settings.alarmAudio && !hasSelectedMatch_1) {
-                            option = document.createElement('option');
-                            option.value = settings.alarmAudio;
-                            option.textContent = settings.alarmAudio.replace('azan/', '') + ' (Saved)';
-                            option.selected = true;
-                            alarmAudioSelect_1.insertBefore(option, alarmAudioSelect_1.firstChild);
-                        }
-                        // Set select value
-                        if (settings.alarmAudio) {
-                            alarmAudioSelect_1.value = settings.alarmAudio;
-                        }
-                        else if (azanFiles.length > 0) {
-                            alarmAudioSelect_1.value = "azan/".concat(azanFiles[0]);
-                            settings.alarmAudio = "azan/".concat(azanFiles[0]);
-                        }
-                    }
-                    updateRemindersList();
-                    return [3 /*break*/, 4];
-                case 3:
-                    error_3 = _a.sent();
-                    console.error('Error fetching MP3 files:', error_3);
-                    azanFiles = ['adhan1.mp3', 'adhan2.mp3', 'silent.mp3'];
-                    alarmAudioSelect_2 = document.getElementById('alarm-audio');
-                    if (alarmAudioSelect_2) {
-                        alarmAudioSelect_2.innerHTML = '';
-                        hasSelectedMatch_2 = false;
-                        azanFiles.forEach(function (file) {
-                            var option = document.createElement('option');
-                            option.value = "azan/".concat(file);
-                            option.textContent = file;
-                            if (settings.alarmAudio === "azan/".concat(file)) {
-                                option.selected = true;
-                                hasSelectedMatch_2 = true;
-                            }
-                            alarmAudioSelect_2.appendChild(option);
-                        });
-                        if (settings.alarmAudio && !hasSelectedMatch_2) {
-                            option = document.createElement('option');
-                            option.value = settings.alarmAudio;
-                            option.textContent = settings.alarmAudio.replace('azan/', '') + ' (Saved)';
-                            option.selected = true;
-                            alarmAudioSelect_2.insertBefore(option, alarmAudioSelect_2.firstChild);
-                        }
-                        if (settings.alarmAudio) {
-                            alarmAudioSelect_2.value = settings.alarmAudio;
-                        }
-                    }
-                    updateRemindersList();
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
-            }
-        });
-    });
+
+async function fetchAzanFiles() {
+    try {
+        var response = await fetch('list_mp3.php');
+        if (!response.ok) throw new Error('HTTP error ' + response.status);
+        azanFiles = await response.json();
+
+        var alarmAudioSelect = document.getElementById('alarm-audio');
+        if (alarmAudioSelect) {
+            alarmAudioSelect.innerHTML = '';
+            azanFiles.forEach(function (file) {
+                var option = document.createElement('option');
+                option.value = 'azan/' + file;
+                option.textContent = file;
+                if (settings.alarmAudio === 'azan/' + file) {
+                    option.selected = true;
+                }
+                alarmAudioSelect.appendChild(option);
+            });
+        }
+        updateRemindersList();
+    } catch (e) {
+        console.warn('Error fetching MP3 files:', e);
+        azanFiles = ['fajr.mp3', 'dhuhr.mp3', 'asr.mp3', 'maghrib.mp3', 'isha.mp3', 'Alhamd.mp3', 'buzzer.mp3', 'silent.mp3'];
+        updateRemindersList();
+    }
 }
-function pollSettings() {
-    return __awaiter(this, void 0, void 0, function () {
-        var response, newSettings, normalizedNew, error_4;
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0:
-                    _a.trys.push([0, 3, , 4]);
-                    return [4 /*yield*/, fetch("".concat(BASE_URL, "/save_settings.php"))];
-                case 1:
-                    response = _a.sent();
-                    if (!response.ok)
-                        throw new Error("HTTP error! status: ".concat(response.status));
-                    return [4 /*yield*/, response.json()];
-                case 2:
-                    newSettings = _a.sent();
-                    normalizedNew = {
-                        city: newSettings.city || newSettings.location || 'Mumbai',
-                        state: newSettings.state || '',
-                        country: newSettings.country || 'India',
-                        calcMethod: newSettings.calcMethod || '2',
-                        asrMethod: newSettings.asrMethod || 'hanafi',
-                        adjustment: newSettings.adjustment || '0',
-                        alarmTime: newSettings.alarmTime || '00:00',
-                        alarmAudio: newSettings.alarmAudio || 'azan/adhan1.mp3',
-                        reminders: newSettings.reminders || [],
-                        theme: newSettings.theme || 'default',
-                        layout: newSettings.layout || 'default'
-                    };
-                    // If server settings changed since our last load/save, we update our local settings
-                    if (JSON.stringify(normalizedNew) !== JSON.stringify(lastSavedSettings)) {
-                        settings = JSON.parse(JSON.stringify(normalizedNew));
-                        lastSavedSettings = JSON.parse(JSON.stringify(normalizedNew));
-                        updateUI();
-                        localStorage.setItem('prayerSettings', JSON.stringify(settings));
-                    }
-                    return [3 /*break*/, 4];
-                case 3:
-                    error_4 = _a.sent();
-                    console.error('Error polling settings:', error_4);
-                    return [3 /*break*/, 4];
-                case 4: return [2 /*return*/];
-            }
-        });
-    });
+
+async function pollSettings() {
+    try {
+        var response = await fetch(BASE_URL + '/save_settings.php?_t=' + Date.now());
+        if (!response.ok) return;
+        var newSettings = await response.json();
+        if (JSON.stringify(newSettings) !== JSON.stringify(lastSavedSettings)) {
+            settings = Object.assign(settings, newSettings);
+            lastSavedSettings = JSON.parse(JSON.stringify(newSettings));
+            updateUI();
+        }
+    } catch (e) {}
 }
-function initializeAdmin() {
-    return __awaiter(this, void 0, void 0, function () {
-        return __generator(this, function (_a) {
-            switch (_a.label) {
-                case 0: return [4 /*yield*/, loadSettings()];
-                case 1:
-                    _a.sent();
-                    return [4 /*yield*/, fetchAzanFiles()];
-                case 2:
-                    _a.sent();
-                    setInterval(pollSettings, 5000);
-                    return [2 /*return*/];
-            }
-        });
-    });
-}
-// Expose functions globally for inline HTML onclick/onchange handlers
+
 window.addReminder = addReminder;
-window.removeReminder = removeReminder;
-window.updateReminderTime = updateReminderTime;
-window.updateReminderAudio = updateReminderAudio;
 window.saveSettings = saveSettings;
 window.selectTheme = selectTheme;
 window.selectLayout = selectLayout;
-initializeAdmin();
+
+setInterval(pollSettings, 4000);

@@ -44,7 +44,7 @@
         </div>
 
         <!-- Prayer Times Grid -->
-        <div class="prayer-grid layout-default">
+        <div id="prayer-grid" class="prayer-grid layout-default">
             <div class="prayer-box" id="fajr-box">
                 <div class="prayer-name">FAJR</div>
                 <div class="prayer-time" id="fajr-jamaat">05:28 AM</div>
@@ -97,6 +97,16 @@
         <p>Please click anywhere on the page to enable audio</p>
     </div>
 
+    <!-- Active Alarm Notification Floating Banner -->
+    <div id="alarm-alert-banner" class="alarm-alert-banner" style="display: none;">
+        <span class="alarm-banner-icon">⏰</span>
+        <div>
+            <div id="alarm-banner-title" style="font-size: 1.15rem; font-weight: 800; text-transform: uppercase;">ALARM RINGING</div>
+            <div id="alarm-banner-subtitle" style="font-size: 0.85rem; opacity: 0.95;">Scheduled Reminder Alert</div>
+        </div>
+        <button type="button" id="btn-dismiss-alarm" class="btn-dismiss-alarm" onclick="window.__dismissActiveAlarm()">✕ Dismiss Alarm</button>
+    </div>
+
     <!-- In-App Dynamic Settings Modal (Single Page Application, TV-ready, High-Contrast) -->
     <!-- Complete In-App Admin Settings Modal (Pixel-Perfect match to image_c1abb5c6.png, Zero Navigation Required) -->
     <div id="settings-modal" class="settings-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="settings-title">
@@ -116,6 +126,7 @@
                 <button type="button" class="settings-tab-btn" data-tab="tab-alarm">⏰ Alarm</button>
                 <button type="button" class="settings-tab-btn" data-tab="tab-theme-layout">🎨 Theme & Layout</button>
                 <button type="button" class="settings-tab-btn" data-tab="tab-audio">📢 Azan & Audio</button>
+                <button type="button" class="settings-tab-btn" data-tab="tab-remote">🌐 Remote Access</button>
             </div>
 
             <div class="settings-modal-body">
@@ -195,34 +206,36 @@
                 <!-- TAB 2: ALARM & REMINDERS                   -->
                 <!-- ========================================== -->
                 <div id="tab-alarm" class="settings-tab-content">
-                    <!-- Daily Custom Alarm Card -->
-                    <div class="settings-card-box">
-                        <div class="settings-section-title">🔔 Daily Custom Alarm</div>
-                        <div class="settings-row">
-                            <div class="settings-form-group">
-                                <label class="settings-label" for="setting-alarm-time">Alarm Trigger Time</label>
-                                <input type="time" id="setting-alarm-time" class="settings-input" value="00:00">
+                    <!-- Custom Audio Upload Box -->
+                    <div class="audio-upload-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap;">
+                            <div>
+                                <div style="font-weight: 800; font-size: 0.95rem; color: #1e293b; display: flex; align-items: center; gap: 6px;">
+                                    <span>🎵</span> Custom MP3 Audio Upload
+                                </div>
+                                <div style="font-size: 0.82rem; color: #64748b;">Upload your own MP3 reminder tones, ruqya, or notification chimes</div>
                             </div>
-                            <div class="settings-form-group">
-                                <label class="settings-label" for="setting-alarm-audio">Alarm Audio Track</label>
-                                <select id="setting-alarm-audio" class="settings-select">
-                                    <option value="azan/fajr.mp3">fajr.mp3 (Default)</option>
-                                </select>
+                            <div>
+                                <input type="file" id="modal-audio-file-input" accept="audio/mp3,audio/*" style="display: none;">
+                                <button type="button" id="btn-modal-upload-audio" class="btn-primary" style="padding: 8px 16px; font-size: 0.88rem; display: flex; align-items: center; gap: 6px;">
+                                    <span>📁</span> Upload MP3 File
+                                </button>
                             </div>
                         </div>
+                        <div id="modal-upload-status" style="display: none; margin-top: 10px; font-size: 0.85rem; font-weight: 600; padding: 6px 12px; border-radius: 6px;"></div>
                     </div>
 
-                    <!-- Custom Reminder Audio Alerts Card -->
+                    <!-- Scheduled Alarms & Reminders List -->
                     <div class="settings-card-box">
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid #f1f5f9; flex-wrap: wrap; gap: 8px;">
                             <div>
-                                <div class="settings-section-title" style="margin-bottom: 2px; padding-bottom: 0; border-bottom: none;">📢 Custom Audio Alerts & Reminders</div>
-                                <div style="font-size: 0.82rem; color: #64748b;">Play audio tracks or ruqya at specific times</div>
+                                <div class="settings-section-title" style="margin-bottom: 2px; padding-bottom: 0; border-bottom: none;">⏰ Scheduled Alarms & Audio Alerts</div>
+                                <div style="font-size: 0.82rem; color: #64748b;">Supports One-time, Daily, Weekly (select days), and Monthly schedules</div>
                             </div>
-                            <button type="button" id="btn-add-reminder" class="btn-primary" style="padding: 7px 14px; font-size: 0.88rem;">➕ Add New Reminder</button>
+                            <button type="button" id="btn-add-reminder" class="btn-primary" style="padding: 7px 14px; font-size: 0.88rem;">➕ Add New Alarm</button>
                         </div>
                         <div id="reminders-container-modal">
-                            <!-- Dynamic reminder items injected here -->
+                            <!-- Injected dynamically with full recurrence controls -->
                         </div>
                     </div>
                 </div>
@@ -393,6 +406,44 @@
                                     <li><code>fajr.mp3</code>, <code>dhuhr.mp3</code>, <code>asr.mp3</code>, <code>maghrib.mp3</code>, <code>isha.mp3</code></li>
                                     <li><code>Alhamd.mp3</code> (Hourly chime), <code>buzzer.mp3</code> (Makruh warning)</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ========================================== -->
+                <!-- TAB 5: REMOTE NETWORK ACCESS               -->
+                <!-- ========================================== -->
+                <div id="tab-remote" class="settings-tab-content">
+                    <div class="settings-card-box">
+                        <div class="settings-section-title">🌐 Remote Local Network Administration</div>
+                        <div style="font-size: 0.88rem; color: #475569; margin-bottom: 16px; line-height: 1.5;">
+                            Configure this Prayer Clock display from your smartphone, tablet, or laptop on the same local network / Wi-Fi without needing to touch this screen.
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
+                            <div style="background: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px; padding: 18px;">
+                                <div style="font-size: 0.78rem; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 6px;">Remote Web URL</div>
+                                <div id="display-remote-url" style="font-family: monospace; font-size: 1.05rem; font-weight: 700; color: #047857; word-break: break-all; margin-bottom: 12px;">
+                                    http://.../admin.html
+                                </div>
+                                <a id="btn-open-remote-admin" href="admin.html" target="_blank" class="btn-primary" style="display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; font-size: 0.88rem; text-decoration: none;">
+                                    <span>↗</span> Open Remote Admin Page
+                                </a>
+                            </div>
+
+                            <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 18px;">
+                                <div style="font-size: 0.78rem; font-weight: 800; color: #166534; text-transform: uppercase; margin-bottom: 6px;">Security PIN Authentication</div>
+                                <div style="font-size: 0.95rem; font-weight: 700; color: #1e293b; margin-bottom: 6px;">
+                                    Admin PIN: <span id="current-pin-badge" style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 6px; font-family: monospace;">1234</span>
+                                </div>
+                                <div style="font-size: 0.82rem; color: #475569; margin-bottom: 10px;">
+                                    Prevents unauthorized changes from other devices on the network.
+                                </div>
+                                <div class="settings-form-group" style="margin-bottom: 0;">
+                                    <label class="settings-label" for="setting-admin-pin" style="margin-bottom: 4px;">Update Admin PIN</label>
+                                    <input type="text" id="setting-admin-pin" class="settings-input" style="width: 140px; font-weight: 800; letter-spacing: 2px; text-align: center;" value="1234" maxlength="8">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -596,14 +647,12 @@
 
         function applyLayoutToDOM(lay) {
             if (!lay) lay = 'default';
-            var grid = document.getElementById('prayer-grid');
+            var grid = document.getElementById('prayer-grid') || document.querySelector('.prayer-grid');
             if (!grid) return;
             for (var i = 0; i < ALL_LAYOUTS.length; i++) {
                 grid.classList.remove('layout-' + ALL_LAYOUTS[i]);
             }
-            if (lay !== 'default') {
-                grid.classList.add('layout-' + lay);
-            }
+            grid.classList.add('layout-' + lay);
         }
 
         // Shared Universal Kiosk Audio Player & Audio State
@@ -813,12 +862,34 @@
 
         applyTimingsToUI(curTimings);
 
+        // Fired alarms minute tracker to avoid multi-triggers within the same minute
+        var firedAlarmsMap = {};
+        var lastSyncedAlarmsHash = '';
+
+        function showAlarmBannerNotification(title, timeStr) {
+            var banner = document.getElementById('alarm-alert-banner');
+            var titleEl = document.getElementById('alarm-banner-title');
+            var subEl = document.getElementById('alarm-banner-subtitle');
+            if (banner) {
+                if (titleEl) titleEl.textContent = '⏰ ALARM: ' + (title || 'Reminder').toUpperCase();
+                if (subEl) subEl.textContent = 'Scheduled Alert at ' + (timeStr || '') + ' - Tap to Dismiss';
+                banner.style.display = 'flex';
+            }
+        }
+
+        window.__dismissActiveAlarm = function() {
+            stopKioskAudio();
+            var banner = document.getElementById('alarm-alert-banner');
+            if (banner) banner.style.display = 'none';
+        };
+
         // Core Audio & Prayer Manager
         function checkAudioAndPrayers(now, currentSec, isMakruh) {
             // 1. Midnight Reset (00:00:00 - 00:00:02)
             if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() <= 2) {
                 playedAzansToday = { Fajr: false, Dhuhr: false, Asr: false, Maghrib: false, Isha: false };
                 lastMakruhState = false;
+                firedAlarmsMap = {};
             }
 
             // 2. Makruh State Transition Warning Buzzer
@@ -866,6 +937,101 @@
                         }
                     }
                 }
+            }
+
+            // 5. Scheduled Alarms & Recurrence Alerts (One-Time, Daily, Weekly, Monthly)
+            try {
+                var curH = now.getHours();
+                var curM = now.getMinutes();
+                var timeKey = (curH < 10 ? '0' : '') + curH + ':' + (curM < 10 ? '0' : '') + curM;
+                var curDayOfWeek = now.getDay(); // 0=Sun .. 6=Sat
+                var curDayOfMonth = now.getDate(); // 1 .. 31
+                var todayDateStr = now.getFullYear() + '-' + (now.getMonth() + 1) + '-' + curDayOfMonth;
+
+                var savedSettings = null;
+                try {
+                    var rawS = localStorage.getItem('settings');
+                    if (rawS) savedSettings = JSON.parse(rawS);
+                } catch (e) {}
+
+                if (savedSettings) {
+                    var alarmsList = [];
+                    if (Array.isArray(savedSettings.alarms) && savedSettings.alarms.length > 0) {
+                        alarmsList = savedSettings.alarms;
+                    } else if (Array.isArray(savedSettings.reminders) && savedSettings.reminders.length > 0) {
+                        alarmsList = savedSettings.reminders;
+                    }
+
+                    // Check legacy alarmTime
+                    if (savedSettings.alarmTime && savedSettings.alarmTime !== '00:00') {
+                        var existsInList = false;
+                        for (var ck = 0; ck < alarmsList.length; ck++) {
+                            if (alarmsList[ck].time === savedSettings.alarmTime) {
+                                existsInList = true; break;
+                            }
+                        }
+                        if (!existsInList) {
+                            alarmsList.push({
+                                id: 'legacy-alarm',
+                                name: 'Daily Alarm',
+                                time: savedSettings.alarmTime,
+                                audio: savedSettings.alarmAudio || 'azan/fajr.mp3',
+                                recurrence: 'daily',
+                                enabled: true
+                            });
+                        }
+                    }
+
+                    for (var al = 0; al < alarmsList.length; al++) {
+                        var alarm = alarmsList[al];
+                        if (!alarm || alarm.enabled === false) continue;
+                        if (!alarm.time) continue;
+
+                        // Check time match (HH:MM)
+                        if (alarm.time !== timeKey) continue;
+
+                        // Check recurrence match
+                        var rec = alarm.recurrence || (alarm.repeat ? 'daily' : 'once');
+                        var matchesRecurrence = false;
+
+                        if (rec === 'daily') {
+                            matchesRecurrence = true;
+                        } else if (rec === 'once') {
+                            matchesRecurrence = true;
+                        } else if (rec === 'weekly') {
+                            var selDays = Array.isArray(alarm.days) ? alarm.days : [0, 1, 2, 3, 4, 5, 6];
+                            if (selDays.indexOf(curDayOfWeek) !== -1) {
+                                matchesRecurrence = true;
+                            }
+                        } else if (rec === 'monthly') {
+                            var targetDom = parseInt(alarm.dayOfMonth, 10) || 1;
+                            if (targetDom === curDayOfMonth) {
+                                matchesRecurrence = true;
+                            }
+                        }
+
+                        if (!matchesRecurrence) continue;
+
+                        // Unique trigger key for this alarm on this date/minute
+                        var triggerKey = (alarm.id || ('al_' + al)) + '_' + todayDateStr + '_' + timeKey;
+                        if (!firedAlarmsMap[triggerKey]) {
+                            firedAlarmsMap[triggerKey] = true;
+                            console.log("[Alarm Engine] Scheduled alarm fired! Name: " + (alarm.name || 'Alarm') + ", Recurrence: " + rec + ", Audio: " + alarm.audio);
+                            playKioskAudio(alarm.audio || 'azan/fajr.mp3', (alarm.name || 'Alarm') + ' Alert');
+                            showAlarmBannerNotification(alarm.name || 'Alarm', alarm.time);
+
+                            // If One-Time alarm, automatically disable for subsequent days
+                            if (rec === 'once') {
+                                alarm.enabled = false;
+                                try {
+                                    localStorage.setItem('settings', JSON.stringify(savedSettings));
+                                } catch (e) {}
+                            }
+                        }
+                    }
+                }
+            } catch (errAl) {
+                console.warn("[Alarm Engine] Check warning:", errAl);
             }
         }
 
@@ -1134,61 +1300,303 @@
             container.innerHTML = '';
 
             if (!currentReminders || currentReminders.length === 0) {
-                container.innerHTML = '<div style="color: #94a3b8; font-size: 0.88rem; font-style: italic; padding: 8px 0;">No custom audio alerts set. Click "Add New Reminder" above to create one.</div>';
+                container.innerHTML = '<div style="color: #64748b; font-size: 0.9rem; font-style: italic; padding: 12px 0; text-align: center;">No scheduled alarms set. Click "➕ Add New Alarm" above to create your first schedule.</div>';
                 return;
             }
+
+            var dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
             for (var i = 0; i < currentReminders.length; i++) {
                 (function(idx) {
                     var rem = currentReminders[idx] || {};
-                    var row = document.createElement('div');
-                    row.className = 'reminder-item-card-admin';
-                    row.style.cssText = 'display: flex; align-items: center; gap: 10px; margin-bottom: 8px; padding: 8px 12px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; flex-wrap: wrap;';
+                    if (!rem.id) rem.id = 'alarm_' + Date.now() + '_' + idx;
+                    if (!rem.name) rem.name = 'Alarm ' + (idx + 1);
+                    if (!rem.recurrence) rem.recurrence = rem.repeat ? 'daily' : 'daily';
+                    if (!Array.isArray(rem.days)) rem.days = [0, 1, 2, 3, 4, 5, 6];
+                    if (typeof rem.dayOfMonth === 'undefined') rem.dayOfMonth = 1;
+                    if (typeof rem.enabled === 'undefined') rem.enabled = true;
 
+                    var card = document.createElement('div');
+                    card.className = 'alarm-card-advanced';
+
+                    // Top Row: Enabled toggle, Name, Time, Recurrence, Delete
+                    var topRow = document.createElement('div');
+                    topRow.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 10px;';
+
+                    // Enabled toggle checkbox
+                    var enableLabel = document.createElement('label');
+                    enableLabel.style.cssText = 'display: inline-flex; align-items: center; gap: 5px; font-weight: 700; font-size: 0.85rem; color: #1e293b; cursor: pointer;';
+                    var enableCheck = document.createElement('input');
+                    enableCheck.type = 'checkbox';
+                    enableCheck.checked = Boolean(rem.enabled);
+                    enableCheck.onchange = function() {
+                        rem.enabled = this.checked;
+                    };
+                    enableLabel.appendChild(enableCheck);
+                    enableLabel.appendChild(document.createTextNode('Active'));
+
+                    // Name input
+                    var nameInput = document.createElement('input');
+                    nameInput.type = 'text';
+                    nameInput.className = 'settings-input';
+                    nameInput.style.cssText = 'flex: 1; min-width: 130px; font-weight: 600; padding: 6px 10px; font-size: 0.88rem;';
+                    nameInput.value = rem.name;
+                    nameInput.placeholder = 'Alarm Name / Label';
+                    nameInput.onchange = function() {
+                        rem.name = this.value;
+                    };
+
+                    // Time input
                     var timeInput = document.createElement('input');
                     timeInput.type = 'time';
                     timeInput.className = 'settings-input';
-                    timeInput.style.cssText = 'width: 120px; font-weight: 700; padding: 6px 10px;';
-                    timeInput.value = rem.time || '12:00';
+                    timeInput.style.cssText = 'width: 115px; font-weight: 800; padding: 6px 10px; font-size: 0.95rem;';
+                    timeInput.value = rem.time || '06:00';
                     timeInput.onchange = function() {
-                        if (currentReminders[idx]) currentReminders[idx].time = this.value;
+                        rem.time = this.value;
                     };
 
-                    var audioSelect = document.createElement('select');
-                    audioSelect.className = 'settings-select';
-                    audioSelect.style.cssText = 'flex: 1; min-width: 160px; padding: 6px 10px;';
-                    populateAudioSelect(audioSelect, rem.audio || 'azan/fajr.mp3');
-                    audioSelect.onchange = function() {
-                        if (currentReminders[idx]) currentReminders[idx].audio = this.value;
+                    // Recurrence Selector
+                    var recSelect = document.createElement('select');
+                    recSelect.className = 'settings-select';
+                    recSelect.style.cssText = 'width: 155px; font-weight: 700; padding: 6px 10px; font-size: 0.85rem;';
+                    
+                    var optDaily = document.createElement('option');
+                    optDaily.value = 'daily';
+                    optDaily.textContent = '🔄 Daily';
+                    if (rem.recurrence === 'daily') optDaily.selected = true;
+
+                    var optWeekly = document.createElement('option');
+                    optWeekly.value = 'weekly';
+                    optWeekly.textContent = '📅 Weekly (Days)';
+                    if (rem.recurrence === 'weekly') optWeekly.selected = true;
+
+                    var optMonthly = document.createElement('option');
+                    optMonthly.value = 'monthly';
+                    optMonthly.textContent = '🗓️ Monthly (Date)';
+                    if (rem.recurrence === 'monthly') optMonthly.selected = true;
+
+                    var optOnce = document.createElement('option');
+                    optOnce.value = 'once';
+                    optOnce.textContent = '⏱️ One-Time';
+                    if (rem.recurrence === 'once') optOnce.selected = true;
+
+                    recSelect.appendChild(optDaily);
+                    recSelect.appendChild(optWeekly);
+                    recSelect.appendChild(optMonthly);
+                    recSelect.appendChild(optOnce);
+
+                    recSelect.onchange = function() {
+                        rem.recurrence = this.value;
+                        renderRemindersUI();
                     };
 
-                    var repeatLabel = document.createElement('label');
-                    repeatLabel.style.cssText = 'display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: #334155; cursor: pointer;';
-                    var repeatCheck = document.createElement('input');
-                    repeatCheck.type = 'checkbox';
-                    repeatCheck.checked = Boolean(rem.repeat);
-                    repeatCheck.onchange = function() {
-                        if (currentReminders[idx]) currentReminders[idx].repeat = this.checked;
-                    };
-                    repeatLabel.appendChild(repeatCheck);
-                    repeatLabel.appendChild(document.createTextNode('Repeat Daily'));
-
+                    // Delete button
                     var delBtn = document.createElement('button');
                     delBtn.type = 'button';
-                    delBtn.style.cssText = 'background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; cursor: pointer; font-weight: 700;';
+                    delBtn.style.cssText = 'background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; border-radius: 6px; padding: 6px 10px; font-size: 0.85rem; cursor: pointer; font-weight: 700; margin-left: auto;';
                     delBtn.textContent = '🗑️ Delete';
                     delBtn.onclick = function() {
                         currentReminders.splice(idx, 1);
                         renderRemindersUI();
                     };
 
-                    row.appendChild(timeInput);
-                    row.appendChild(audioSelect);
-                    row.appendChild(repeatLabel);
-                    row.appendChild(delBtn);
-                    container.appendChild(row);
+                    topRow.appendChild(enableLabel);
+                    topRow.appendChild(nameInput);
+                    topRow.appendChild(timeInput);
+                    topRow.appendChild(recSelect);
+                    topRow.appendChild(delBtn);
+
+                    // Second Row: Audio Selector & Test Play Button
+                    var secondRow = document.createElement('div');
+                    secondRow.style.cssText = 'display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 6px;';
+
+                    var audioSelect = document.createElement('select');
+                    audioSelect.className = 'settings-select';
+                    audioSelect.style.cssText = 'flex: 1; min-width: 170px; padding: 6px 10px; font-size: 0.85rem; font-weight: 600;';
+                    populateAudioSelect(audioSelect, rem.audio || 'azan/fajr.mp3');
+                    audioSelect.onchange = function() {
+                        rem.audio = this.value;
+                    };
+
+                    var testBtn = document.createElement('button');
+                    testBtn.type = 'button';
+                    testBtn.className = 'btn-secondary';
+                    testBtn.style.cssText = 'padding: 6px 14px; font-size: 0.85rem; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;';
+                    testBtn.textContent = '▶ Test';
+                    testBtn.onclick = function() {
+                        playKioskAudio(rem.audio || 'azan/fajr.mp3', rem.name || 'Alarm Test');
+                    };
+
+                    secondRow.appendChild(audioSelect);
+                    secondRow.appendChild(testBtn);
+
+                    // Recurrence Conditional Controls:
+                    // Weekly Day Pills
+                    if (rem.recurrence === 'weekly') {
+                        var daysRow = document.createElement('div');
+                        daysRow.style.cssText = 'margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;';
+                        var daysLabel = document.createElement('span');
+                        daysLabel.style.cssText = 'font-size: 0.8rem; font-weight: 700; color: #475569;';
+                        daysLabel.textContent = 'Days to ring:';
+                        daysRow.appendChild(daysLabel);
+
+                        var pillsWrap = document.createElement('div');
+                        pillsWrap.className = 'alarm-days-group';
+
+                        for (var d = 0; d < 7; d++) {
+                            (function(dayNum) {
+                                var dayBtn = document.createElement('button');
+                                dayBtn.type = 'button';
+                                dayBtn.className = 'day-pill-btn' + (rem.days.indexOf(dayNum) !== -1 ? ' active' : '');
+                                dayBtn.textContent = dayNames[dayNum];
+                                dayBtn.onclick = function() {
+                                    var dayIdx = rem.days.indexOf(dayNum);
+                                    if (dayIdx !== -1) {
+                                        if (rem.days.length > 1) { // keep at least 1 day
+                                            rem.days.splice(dayIdx, 1);
+                                            dayBtn.classList.remove('active');
+                                        }
+                                    } else {
+                                        rem.days.push(dayNum);
+                                        dayBtn.classList.add('active');
+                                    }
+                                };
+                                pillsWrap.appendChild(dayBtn);
+                            })(d);
+                        }
+                        daysRow.appendChild(pillsWrap);
+                        secondRow.appendChild(daysRow);
+                    } else if (rem.recurrence === 'monthly') {
+                        var monthRow = document.createElement('div');
+                        monthRow.style.cssText = 'margin-top: 8px; padding-top: 8px; border-top: 1px dashed #e2e8f0; display: flex; align-items: center; gap: 8px;';
+                        var mLabel = document.createElement('span');
+                        mLabel.style.cssText = 'font-size: 0.8rem; font-weight: 700; color: #475569;';
+                        mLabel.textContent = 'Day of Month:';
+
+                        var domInput = document.createElement('input');
+                        domInput.type = 'number';
+                        domInput.min = '1';
+                        domInput.max = '31';
+                        domInput.className = 'settings-input';
+                        domInput.style.cssText = 'width: 70px; font-weight: 800; padding: 4px 8px; font-size: 0.9rem; text-align: center;';
+                        domInput.value = rem.dayOfMonth || 1;
+                        domInput.onchange = function() {
+                            rem.dayOfMonth = Math.max(1, Math.min(31, parseInt(this.value, 10) || 1));
+                        };
+
+                        var mNote = document.createElement('span');
+                        mNote.style.cssText = 'font-size: 0.8rem; color: #64748b;';
+                        mNote.textContent = '(Rings on this calendar date every month)';
+
+                        monthRow.appendChild(mLabel);
+                        monthRow.appendChild(domInput);
+                        monthRow.appendChild(mNote);
+                        secondRow.appendChild(monthRow);
+                    }
+
+                    card.appendChild(topRow);
+                    card.appendChild(secondRow);
+                    container.appendChild(card);
                 })(i);
             }
+        }
+
+        // Custom MP3 Audio Upload Handler in Settings Modal
+        var modalAudioUploadInput = document.getElementById('modal-audio-file-input');
+        var btnModalUploadAudio = document.getElementById('btn-modal-upload-audio');
+        var modalUploadStatus = document.getElementById('modal-upload-status');
+
+        if (btnModalUploadAudio && modalAudioUploadInput) {
+            btnModalUploadAudio.onclick = function() {
+                modalAudioUploadInput.click();
+            };
+
+            modalAudioUploadInput.onchange = function() {
+                var file = this.files && this.files[0];
+                if (!file) return;
+
+                if (modalUploadStatus) {
+                    modalUploadStatus.style.display = 'block';
+                    modalUploadStatus.style.background = '#e0f2fe';
+                    modalUploadStatus.style.color = '#0284c7';
+                    modalUploadStatus.textContent = '⏳ Uploading ' + file.name + '...';
+                }
+
+                var reader = new FileReader();
+                reader.onload = function(e) {
+                    var base64Data = e.target.result;
+                    var cleanFileName = file.name.replace(/[^a-zA-Z0-9_\-\. ]/g, '_');
+                    if (!cleanFileName.toLowerCase().endsWith('.mp3')) cleanFileName += '.mp3';
+
+                    // Save directly to Android internal storage if in Android Kiosk app
+                    if (window.AndroidAudio && typeof window.AndroidAudio.saveCustomAudio === 'function') {
+                        try {
+                            window.AndroidAudio.saveCustomAudio(cleanFileName, base64Data);
+                        } catch (ae) {
+                            console.warn("Android native save audio:", ae);
+                        }
+                    }
+
+                    // Upload via server endpoint
+                    var xhr = new XMLHttpRequest();
+                    xhr.open('POST', '/upload_audio.php', true);
+                    xhr.setRequestHeader('Content-Type', 'application/json');
+                    xhr.onreadystatechange = function() {
+                        if (xhr.readyState === 4) {
+                            if (xhr.status === 200) {
+                                try {
+                                    var res = JSON.parse(xhr.responseText);
+                                    if (res && res.status === 'success') {
+                                        if (modalUploadStatus) {
+                                            modalUploadStatus.style.background = '#dcfce7';
+                                            modalUploadStatus.style.color = '#15803d';
+                                            modalUploadStatus.textContent = '✓ Successfully uploaded "' + res.fileName + '"!';
+                                            setTimeout(function() {
+                                                if (modalUploadStatus) modalUploadStatus.style.display = 'none';
+                                            }, 4000);
+                                        }
+
+                                        fetchAvailableAudioTracks(function() {
+                                            if (!Array.isArray(currentReminders)) currentReminders = [];
+                                            currentReminders.unshift({
+                                                id: 'alarm_' + Date.now(),
+                                                name: cleanFileName.replace('.mp3', ''),
+                                                time: '06:00',
+                                                audio: 'azan/' + res.fileName,
+                                                recurrence: 'daily',
+                                                days: [0, 1, 2, 3, 4, 5, 6],
+                                                dayOfMonth: 1,
+                                                enabled: true
+                                            });
+                                            renderRemindersUI();
+                                            playKioskAudio('azan/' + res.fileName, 'Uploaded Preview');
+                                        });
+                                        return;
+                                    }
+                                } catch (pe) {}
+                            }
+                            if (modalUploadStatus) {
+                                modalUploadStatus.style.background = '#fee2e2';
+                                modalUploadStatus.style.color = '#b91c1c';
+                                modalUploadStatus.textContent = '⚠️ Upload failed. Please verify format/network.';
+                            }
+                        }
+                    };
+                    xhr.onerror = function() {
+                        if (modalUploadStatus) {
+                            modalUploadStatus.style.background = '#fee2e2';
+                            modalUploadStatus.style.color = '#b91c1c';
+                            modalUploadStatus.textContent = '⚠️ Network error during upload.';
+                        }
+                    };
+                    xhr.send(JSON.stringify({
+                        fileName: cleanFileName,
+                        base64: base64Data
+                    }));
+                };
+                reader.readAsDataURL(file);
+            };
         }
 
         var addReminderBtn = document.getElementById('btn-add-reminder');
@@ -1196,9 +1604,14 @@
             addReminderBtn.onclick = function() {
                 if (!Array.isArray(currentReminders)) currentReminders = [];
                 currentReminders.push({
-                    time: '12:00',
+                    id: 'alarm_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+                    name: 'Reminder ' + (currentReminders.length + 1),
+                    time: '06:00',
                     audio: 'azan/' + (availableMp3Files[0] || 'fajr.mp3'),
-                    repeat: true
+                    recurrence: 'daily',
+                    days: [0, 1, 2, 3, 4, 5, 6],
+                    dayOfMonth: 1,
+                    enabled: true
                 });
                 renderRemindersUI();
             };
@@ -1297,6 +1710,18 @@
                 }
                 if (volumeInput) volumeInput.value = currentAzanVolume;
                 if (volumeLabel) volumeLabel.textContent = currentAzanVolume + '%';
+
+                var pinInput = document.getElementById('setting-admin-pin');
+                var pinBadge = document.getElementById('current-pin-badge');
+                var currentPin = parsed.adminPin || '1234';
+                if (pinInput) pinInput.value = currentPin;
+                if (pinBadge) pinBadge.textContent = currentPin;
+
+                var remoteUrlEl = document.getElementById('display-remote-url');
+                var remoteBtn = document.getElementById('btn-open-remote-admin');
+                var adminUrl = window.location.origin + '/admin.html';
+                if (remoteUrlEl) remoteUrlEl.textContent = adminUrl;
+                if (remoteBtn) remoteBtn.href = adminUrl;
 
             } catch (e) {
                 console.warn("Load modal fields warning:", e);
@@ -1419,6 +1844,33 @@
             })(audioButtons[ab]);
         }
 
+        // Sync Native Alarms with Android Hardware AlarmManager
+        function syncNativeAndroidAlarms(alarms) {
+            if (!window.AndroidAudio || typeof window.AndroidAudio.scheduleNativeAlarm !== 'function') return;
+            try {
+                if (Array.isArray(alarms)) {
+                    for (var i = 0; i < alarms.length; i++) {
+                        var a = alarms[i];
+                        if (a && a.enabled !== false && a.time) {
+                            var tp = a.time.split(':');
+                            var h = parseInt(tp[0], 10);
+                            var m = parseInt(tp[1], 10);
+                            if (a.recurrence === 'weekly' && Array.isArray(a.days)) {
+                                for (var wd = 0; wd < a.days.length; wd++) {
+                                    // Calendar.DAY_OF_WEEK: 1=Sun, 2=Mon... 7=Sat
+                                    window.AndroidAudio.scheduleNativeAlarm(a.id + '_d' + a.days[wd], h, m, a.days[wd] + 1, a.audio || 'azan/fajr.mp3', a.name || 'Alarm');
+                                }
+                            } else {
+                                window.AndroidAudio.scheduleNativeAlarm(a.id, h, m, 0, a.audio || 'azan/fajr.mp3', a.name || 'Alarm');
+                            }
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("Sync native alarms warning:", e);
+            }
+        }
+
         // Save & Apply Settings Dynamically (Zero Reload, Zero State Loss)
         if (saveBtn) {
             saveBtn.onclick = function() {
@@ -1427,8 +1879,7 @@
                 var countryVal = (document.getElementById('setting-country') || {}).value || 'India';
                 var calcVal = (document.getElementById('setting-calc-method') || {}).value || '2';
                 var hijriVal = (document.getElementById('setting-hijri-adj') || {}).value || '0';
-                var alarmTimeVal = (document.getElementById('setting-alarm-time') || {}).value || '00:00';
-                var alarmAudioVal = (document.getElementById('setting-alarm-audio') || {}).value || 'azan/fajr.mp3';
+                var adminPinVal = ((document.getElementById('setting-admin-pin') || {}).value || '1234').trim();
 
                 var currentSettings = {};
                 try {
@@ -1444,15 +1895,24 @@
                 currentSettings.adjustment = hijriVal;
                 currentSettings.theme = currentSelectedTheme;
                 currentSettings.layout = currentSelectedLayout;
-                currentSettings.alarmTime = alarmTimeVal;
-                currentSettings.alarmAudio = alarmAudioVal;
+                currentSettings.alarms = currentReminders;
                 currentSettings.reminders = currentReminders;
                 currentSettings.azanAudioEnabled = currentAzanEnabled;
                 currentSettings.azanVolume = currentAzanVolume;
+                currentSettings.adminPin = adminPinVal;
+
+                // Sync first alarm time to legacy alarmTime for backwards compatibility
+                if (currentReminders.length > 0) {
+                    currentSettings.alarmTime = currentReminders[0].time;
+                    currentSettings.alarmAudio = currentReminders[0].audio;
+                }
 
                 localStorage.setItem('settings', JSON.stringify(currentSettings));
                 localStorage.setItem('selectedTheme', currentSelectedTheme);
                 localStorage.setItem('selectedLayout', currentSelectedLayout);
+
+                // Hardware AlarmManager exact scheduling on Android
+                syncNativeAndroidAlarms(currentReminders);
 
                 // Sync with server-side settings.json
                 try {
@@ -1526,6 +1986,55 @@
                 }, 600);
             };
         }
+
+        // Live Network Polling for Remote Settings Changes (from admin.html on another phone/device)
+        var lastRemotePollHash = '';
+        function pollRemoteSettingsFromNetwork() {
+            try {
+                var xhr = new XMLHttpRequest();
+                xhr.open('GET', '/save_settings.php?_t=' + Date.now(), true);
+                xhr.onreadystatechange = function() {
+                    if (xhr.readyState === 4 && xhr.status === 200) {
+                        try {
+                            var remoteObj = JSON.parse(xhr.responseText);
+                            if (remoteObj && typeof remoteObj === 'object') {
+                                var remoteStr = JSON.stringify(remoteObj);
+                                if (lastRemotePollHash && lastRemotePollHash !== remoteStr) {
+                                    console.log("[Remote Sync] Remote settings change detected!");
+                                    lastRemotePollHash = remoteStr;
+                                    localStorage.setItem('settings', remoteStr);
+
+                                    // Instantly apply layout and theme on wall screen
+                                    if (remoteObj.layout) applyLayoutToDOM(remoteObj.layout);
+                                    if (remoteObj.theme) applyThemeToDOM(remoteObj.theme);
+                                    if (remoteObj.city) {
+                                        var cEl = document.getElementById('current-city');
+                                        if (cEl) cEl.textContent = remoteObj.city;
+                                    }
+                                    if (typeof remoteObj.adjustment !== 'undefined') {
+                                        var iEl = document.getElementById('islamic-date');
+                                        if (iEl) iEl.textContent = getHijriEnglishDate(remoteObj.adjustment);
+                                    }
+                                    if (typeof remoteObj.azanAudioEnabled !== 'undefined') {
+                                        currentAzanEnabled = (remoteObj.azanAudioEnabled !== false);
+                                    }
+                                    if (typeof remoteObj.azanVolume !== 'undefined') {
+                                        currentAzanVolume = parseInt(remoteObj.azanVolume, 10);
+                                    }
+                                    if (Array.isArray(remoteObj.alarms)) {
+                                        syncNativeAndroidAlarms(remoteObj.alarms);
+                                    }
+                                } else if (!lastRemotePollHash) {
+                                    lastRemotePollHash = remoteStr;
+                                }
+                            }
+                        } catch (e) {}
+                    }
+                };
+                xhr.send();
+            } catch (e) {}
+        }
+        setInterval(pollRemoteSettingsFromNetwork, 2500);
     })();
     </script>
     <script src="script.js"></script>
