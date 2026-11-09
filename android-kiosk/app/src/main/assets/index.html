@@ -666,6 +666,17 @@
             if (thm !== 'default') {
                 document.body.classList.add('theme-' + thm);
             }
+            // Update active state in settings modal if open
+            try {
+                var themeOptions = document.querySelectorAll('.theme-option');
+                for (var j = 0; j < themeOptions.length; j++) {
+                    if (themeOptions[j].getAttribute('data-theme') === thm) {
+                        themeOptions[j].classList.add('selected');
+                    } else {
+                        themeOptions[j].classList.remove('selected');
+                    }
+                }
+            } catch (e) {}
         }
 
         function applyLayoutToDOM(lay) {
@@ -676,9 +687,20 @@
                 grid.classList.remove('layout-' + ALL_LAYOUTS[i]);
             }
             grid.classList.add('layout-' + lay);
+            // Update active state in settings modal if open
+            try {
+                var layoutOptions = document.querySelectorAll('.layout-option');
+                for (var k = 0; k < layoutOptions.length; k++) {
+                    if (layoutOptions[k].getAttribute('data-layout') === lay) {
+                        layoutOptions[k].classList.add('selected');
+                    } else {
+                        layoutOptions[k].classList.remove('selected');
+                    }
+                }
+            } catch (e) {}
         }
 
-        // Live Apply Remote Settings from Wi-Fi Phone / Admin Remote
+        // Live Apply Remote Settings from Wi-Fi Phone/Companion App
         function applyRemoteSettings(remoteObj) {
             if (!remoteObj || typeof remoteObj !== 'object') return;
             console.log('[Remote Sync] Instantly applying remote settings to DOM:', remoteObj);
@@ -686,21 +708,13 @@
             // 1. Theme
             if (remoteObj.theme) {
                 applyThemeToDOM(remoteObj.theme);
-                try { localStorage.setItem('selectedTheme', remoteObj.theme); } catch(e) {}
-                currentSelectedTheme = remoteObj.theme;
-                if (typeof setThemeActive === 'function') {
-                    setThemeActive(remoteObj.theme);
-                }
+                localStorage.setItem('selectedTheme', remoteObj.theme);
             }
 
             // 2. Layout
             if (remoteObj.layout) {
                 applyLayoutToDOM(remoteObj.layout);
-                try { localStorage.setItem('selectedLayout', remoteObj.layout); } catch(e) {}
-                currentSelectedLayout = remoteObj.layout;
-                if (typeof setLayoutActive === 'function') {
-                    setLayoutActive(remoteObj.layout);
-                }
+                localStorage.setItem('selectedLayout', remoteObj.layout);
             }
 
             // 3. City & Country
@@ -741,9 +755,6 @@
             try {
                 localStorage.setItem('settings', JSON.stringify(remoteObj));
             } catch (e) {}
-            if (typeof fitClockToScreen === 'function') {
-                setTimeout(fitClockToScreen, 20);
-            }
         }
 
         // Attach globally so native Java WebView and outside scripts can call them immediately
@@ -1388,6 +1399,7 @@
             };
             xhr.send();
         }
+        window.fetchAvailableAudioTracks = fetchAvailableAudioTracks;
 
         function populateAudioSelect(selectEl, selectedVal) {
             if (!selectEl) return;
@@ -1640,23 +1652,17 @@
                     if (!cleanFileName.toLowerCase().endsWith('.mp3')) cleanFileName += '.mp3';
 
                     // Save directly to Android internal storage if in Android Kiosk app
-                    var nativeSaved = false;
                     if (window.AndroidAudio && typeof window.AndroidAudio.saveCustomAudio === 'function') {
                         try {
-                            nativeSaved = window.AndroidAudio.saveCustomAudio(cleanFileName, base64Data);
+                            window.AndroidAudio.saveCustomAudio(cleanFileName, base64Data);
                         } catch (ae) {
                             console.warn("Android native save audio:", ae);
                         }
                     }
 
-                    // Route to correct local or web server endpoint
-                    var uploadEndpoint = '/upload_audio.php';
-                    if (window.location.protocol === 'file:' || (window.AndroidAudio && window.location.origin.includes('appassets'))) {
-                        uploadEndpoint = 'http://127.0.0.1:8080/upload_audio.php';
-                    }
-
+                    // Upload via server endpoint
                     var xhr = new XMLHttpRequest();
-                    xhr.open('POST', uploadEndpoint, true);
+                    xhr.open('POST', '/upload_audio.php', true);
                     xhr.setRequestHeader('Content-Type', 'application/json');
                     xhr.onreadystatechange = function() {
                         if (xhr.readyState === 4) {
@@ -1692,35 +1698,6 @@
                                     }
                                 } catch (pe) {}
                             }
-
-                            // If native Android storage save succeeded, treat as success
-                            if (nativeSaved) {
-                                if (modalUploadStatus) {
-                                    modalUploadStatus.style.background = '#dcfce7';
-                                    modalUploadStatus.style.color = '#15803d';
-                                    modalUploadStatus.textContent = '✓ Saved "' + cleanFileName + '" to device storage!';
-                                    setTimeout(function() {
-                                        if (modalUploadStatus) modalUploadStatus.style.display = 'none';
-                                    }, 4000);
-                                }
-                                fetchAvailableAudioTracks(function() {
-                                    if (!Array.isArray(currentReminders)) currentReminders = [];
-                                    currentReminders.unshift({
-                                        id: 'alarm_' + Date.now(),
-                                        name: cleanFileName.replace('.mp3', ''),
-                                        time: '06:00',
-                                        audio: 'azan/' + cleanFileName,
-                                        recurrence: 'daily',
-                                        days: [0, 1, 2, 3, 4, 5, 6],
-                                        dayOfMonth: 1,
-                                        enabled: true
-                                    });
-                                    renderRemindersUI();
-                                    playKioskAudio('azan/' + cleanFileName, 'Uploaded Preview');
-                                });
-                                return;
-                            }
-
                             if (modalUploadStatus) {
                                 modalUploadStatus.style.background = '#fee2e2';
                                 modalUploadStatus.style.color = '#b91c1c';
@@ -1729,33 +1706,6 @@
                         }
                     };
                     xhr.onerror = function() {
-                        if (nativeSaved) {
-                            if (modalUploadStatus) {
-                                modalUploadStatus.style.background = '#dcfce7';
-                                modalUploadStatus.style.color = '#15803d';
-                                modalUploadStatus.textContent = '✓ Saved "' + cleanFileName + '" to device storage!';
-                                setTimeout(function() {
-                                    if (modalUploadStatus) modalUploadStatus.style.display = 'none';
-                                }, 4000);
-                            }
-                            fetchAvailableAudioTracks(function() {
-                                if (!Array.isArray(currentReminders)) currentReminders = [];
-                                currentReminders.unshift({
-                                    id: 'alarm_' + Date.now(),
-                                    name: cleanFileName.replace('.mp3', ''),
-                                    time: '06:00',
-                                    audio: 'azan/' + cleanFileName,
-                                    recurrence: 'daily',
-                                    days: [0, 1, 2, 3, 4, 5, 6],
-                                    dayOfMonth: 1,
-                                    enabled: true
-                                });
-                                renderRemindersUI();
-                                playKioskAudio('azan/' + cleanFileName, 'Uploaded Preview');
-                            });
-                            return;
-                        }
-
                         if (modalUploadStatus) {
                             modalUploadStatus.style.background = '#fee2e2';
                             modalUploadStatus.style.color = '#b91c1c';
@@ -2234,10 +2184,10 @@
             };
         }
 
-        // Live Network Polling for Remote Settings Changes (from admin.html on phone / remote device)
+        // Live Network Polling for Remote Settings Changes (from admin.html on another phone/device)
         var lastRemotePollHash = '';
         function pollRemoteSettingsFromNetwork() {
-            // 1. Android native bridge check (instant local query)
+            // 1. Check Android native bridge directly (zero latency)
             if (window.AndroidAudio && typeof window.AndroidAudio.getLatestSettingsJson === 'function') {
                 try {
                     var nativeJson = window.AndroidAudio.getLatestSettingsJson();
@@ -2248,22 +2198,15 @@
                             applyRemoteSettings(obj);
                         } else if (!lastRemotePollHash) {
                             lastRemotePollHash = nativeJson;
-                            var objInit = JSON.parse(nativeJson);
-                            if (objInit && objInit.theme) applyThemeToDOM(objInit.theme);
-                            if (objInit && objInit.layout) applyLayoutToDOM(objInit.layout);
                         }
                     }
                 } catch (e) {}
             }
 
-            // 2. HTTP polling (Web preview or Android internal web server)
+            // 2. Poll HTTP endpoint (works in both Web Preview and Android local network server)
             try {
-                var pollUrl = '/save_settings.php?_t=' + Date.now();
-                if (window.location.protocol === 'file:' || (window.AndroidAudio && window.location.origin.includes('appassets'))) {
-                    pollUrl = 'http://127.0.0.1:8080/save_settings.php?_t=' + Date.now();
-                }
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', pollUrl, true);
+                xhr.open('GET', '/save_settings.php?_t=' + Date.now(), true);
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4 && xhr.status === 200) {
                         try {
@@ -2271,13 +2214,11 @@
                             if (remoteObj && typeof remoteObj === 'object') {
                                 var remoteStr = JSON.stringify(remoteObj);
                                 if (lastRemotePollHash && lastRemotePollHash !== remoteStr) {
-                                    console.log("[Remote Sync] Remote settings change detected!");
+                                    console.log("[Remote Sync] Remote settings change detected via HTTP!");
                                     lastRemotePollHash = remoteStr;
                                     applyRemoteSettings(remoteObj);
                                 } else if (!lastRemotePollHash) {
                                     lastRemotePollHash = remoteStr;
-                                    if (remoteObj.theme) applyThemeToDOM(remoteObj.theme);
-                                    if (remoteObj.layout) applyLayoutToDOM(remoteObj.layout);
                                 }
                             }
                         } catch (e) {}
@@ -2287,32 +2228,6 @@
             } catch (e) {}
         }
         setInterval(pollRemoteSettingsFromNetwork, 1500);
-
-        // 3. Instant Cross-Tab Storage Event (when admin.html is saved in another window/tab)
-        window.addEventListener('storage', function(e) {
-            if ((e.key === 'settings' || e.key === 'prayerSettings') && e.newValue) {
-                try {
-                    var parsed = JSON.parse(e.newValue);
-                    applyRemoteSettings(parsed);
-                } catch (err) {}
-            } else if (e.key === 'selectedTheme' && e.newValue) {
-                applyThemeToDOM(e.newValue);
-            } else if (e.key === 'selectedLayout' && e.newValue) {
-                applyLayoutToDOM(e.newValue);
-            }
-        });
-
-        // 4. Instant Cross-Tab / Cross-Window BroadcastChannel
-        if (typeof BroadcastChannel !== 'undefined') {
-            try {
-                var syncChannel = new BroadcastChannel('kiosk_settings_sync');
-                syncChannel.onmessage = function(ev) {
-                    if (ev.data && ev.data.settings) {
-                        applyRemoteSettings(ev.data.settings);
-                    }
-                };
-            } catch (e) {}
-        }
     })();
     </script>
     <script src="script.js"></script>
