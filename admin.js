@@ -1,4 +1,4 @@
-var BASE_URL = (window.location.origin && window.location.origin !== 'null' && !window.location.origin.startsWith('file:')) ? window.location.origin : '';
+var BASE_URL = window.location.origin;
 var audioPlayer = new Audio();
 var currentlyPlayingTrack = null;
 var azanFiles = [];
@@ -194,6 +194,15 @@ function setupAudioUpload() {
         var file = this.files && this.files[0];
         if (!file) return;
 
+        if (file.size > 15 * 1024 * 1024) {
+            if (statusEl) {
+                statusEl.classList.remove('hidden');
+                statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 block';
+                statusEl.textContent = '⚠️ File is too large (' + (file.size / (1024*1024)).toFixed(1) + 'MB). Please choose an MP3 under 15MB.';
+            }
+            return;
+        }
+
         if (statusEl) {
             statusEl.classList.remove('hidden');
             statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-sky-50 text-sky-700 border border-sky-200 block';
@@ -206,20 +215,24 @@ function setupAudioUpload() {
             var cleanName = file.name.replace(/[^a-zA-Z0-9_\-\. ]/g, '_');
             if (!cleanName.toLowerCase().endsWith('.mp3')) cleanName += '.mp3';
 
-            var targetUrl = (BASE_URL || '') + '/upload_audio.php';
+            // Native Android bridge save if running inside Android Kiosk app
+            if (window.AndroidAudio && typeof window.AndroidAudio.saveCustomAudio === 'function') {
+                try {
+                    window.AndroidAudio.saveCustomAudio(cleanName, base64);
+                } catch (ae) {
+                    console.warn('Native Android save audio:', ae);
+                }
+            }
 
-            fetch(targetUrl, {
+            var uploadTargetUrl = (typeof BASE_URL !== 'undefined' && BASE_URL ? BASE_URL : window.location.origin) + '/upload_audio.php';
+
+            fetch(uploadTargetUrl, {
                 method: 'POST',
-                headers: { 
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ fileName: cleanName, base64: base64 })
             })
             .then(function(res) {
-                if (!res.ok) {
-                    throw new Error('Server returned HTTP ' + res.status);
-                }
+                if (!res.ok) throw new Error('HTTP ' + res.status + ' (' + res.statusText + ')');
                 return res.json();
             })
             .then(function(data) {
@@ -227,8 +240,9 @@ function setupAudioUpload() {
                     if (statusEl) {
                         statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 block';
                         statusEl.textContent = '✓ Successfully uploaded "' + data.fileName + '"!';
-                        setTimeout(function() { statusEl.classList.add('hidden'); }, 5000);
+                        setTimeout(function() { statusEl.classList.add('hidden'); }, 4000);
                     }
+                    if (fileInput) fileInput.value = '';
                     fetchAzanFiles().then(function() {
                         if (!Array.isArray(settings.reminders)) settings.reminders = [];
                         settings.reminders.unshift({
@@ -251,16 +265,46 @@ function setupAudioUpload() {
             })
             .catch(function(err) {
                 console.error('Audio upload error:', err);
+                if (window.AndroidAudio && typeof window.AndroidAudio.saveCustomAudio === 'function') {
+                    if (statusEl) {
+                        statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200 block';
+                        statusEl.textContent = '✓ Saved "' + cleanName + '" to device storage!';
+                        setTimeout(function() { statusEl.classList.add('hidden'); }, 4000);
+                    }
+                    if (fileInput) fileInput.value = '';
+                    fetchAzanFiles().then(function() {
+                        if (!Array.isArray(settings.reminders)) settings.reminders = [];
+                        settings.reminders.unshift({
+                            id: 'alarm_' + Date.now(),
+                            name: cleanName.replace('.mp3', ''),
+                            time: '06:00',
+                            audio: 'azan/' + cleanName,
+                            recurrence: 'daily',
+                            days: [0, 1, 2, 3, 4, 5, 6],
+                            dayOfMonth: 1,
+                            enabled: true
+                        });
+                        settings.alarms = settings.reminders;
+                        updateRemindersList();
+                        showNotification('Uploaded and added ' + cleanName);
+                    });
+                    return;
+                }
+
                 if (statusEl) {
                     statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 block';
-                    statusEl.textContent = '⚠️ Upload failed: ' + (err.message || 'Network error (check Wi-Fi connection)');
+                    var errMsg = err.message || 'Network error';
+                    if (errMsg.toLowerCase().includes('fetch')) {
+                        errMsg = 'Failed to connect to kiosk server. Check network connection.';
+                    }
+                    statusEl.textContent = '⚠️ Upload failed: ' + errMsg;
                 }
             });
         };
         reader.onerror = function() {
             if (statusEl) {
                 statusEl.className = 'mt-3 text-xs font-semibold px-3 py-2 rounded-lg bg-rose-50 text-rose-700 border border-rose-200 block';
-                statusEl.textContent = '⚠️ Error reading local audio file.';
+                statusEl.textContent = '⚠️ Failed to read audio file from device.';
             }
         };
         reader.readAsDataURL(file);
@@ -321,6 +365,14 @@ async function saveSettings() {
     localStorage.setItem('selectedTheme', settings.theme);
     localStorage.setItem('selectedLayout', settings.layout);
 
+    // Cross-tab broadcast channel for immediate multi-screen updates
+    if (typeof BroadcastChannel !== 'undefined') {
+        try {
+            var syncChannel = new BroadcastChannel('kiosk_settings_sync');
+            syncChannel.postMessage({ type: 'GENERAL_SETTINGS_UPDATED', settings: settings });
+        } catch (e) {}
+    }
+
     try {
         var res = await fetch(BASE_URL + '/save_settings.php', {
             method: 'POST',
@@ -332,7 +384,9 @@ async function saveSettings() {
         showNotification(result.status === 'success' ? '✓ Settings saved & applied instantly!' : 'Error saving settings');
         lastSavedSettings = JSON.parse(JSON.stringify(settings));
 
-        window.postMessage({ type: 'GENERAL_SETTINGS_UPDATED', settings: settings }, BASE_URL);
+        try {
+            window.postMessage({ type: 'GENERAL_SETTINGS_UPDATED', settings: settings }, '*');
+        } catch (pe) {}
     } catch (e) {
         console.error('Error saving settings to server:', e);
         showNotification('✓ Saved locally (Server sync pending)');
@@ -648,7 +702,7 @@ function showNotification(message) {
 
 async function fetchAzanFiles() {
     try {
-        var response = await fetch((BASE_URL || '') + '/list_mp3.php');
+        var response = await fetch('list_mp3.php');
         if (!response.ok) throw new Error('HTTP error ' + response.status);
         azanFiles = await response.json();
 

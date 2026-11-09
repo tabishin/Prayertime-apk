@@ -37,7 +37,8 @@
             <div class="current-time" id="current-time">--:--:--</div>
             <div class="next-prayer" id="next-prayer">Next Prayer: Calculating...</div>
             <div class="date-info">
-                <span id="gregorian-date"></span> <span class="date-separator">|</span> <span id="islamic-date"></span>
+                <span id="gregorian-date"></span> | 
+                <span id="islamic-date"></span>
             </div>
             <div id="location">Location: <span id="current-city">Mumbai</span> <button id="open-settings-btn" class="settings-btn" type="button" title="Open Settings" aria-label="Settings">⚙️</button></div>
         </div>
@@ -665,17 +666,6 @@
             if (thm !== 'default') {
                 document.body.classList.add('theme-' + thm);
             }
-            // Update active state in settings modal if open
-            try {
-                var themeOptions = document.querySelectorAll('.theme-option');
-                for (var j = 0; j < themeOptions.length; j++) {
-                    if (themeOptions[j].getAttribute('data-theme') === thm) {
-                        themeOptions[j].classList.add('selected');
-                    } else {
-                        themeOptions[j].classList.remove('selected');
-                    }
-                }
-            } catch (e) {}
         }
 
         function applyLayoutToDOM(lay) {
@@ -686,128 +676,9 @@
                 grid.classList.remove('layout-' + ALL_LAYOUTS[i]);
             }
             grid.classList.add('layout-' + lay);
-            // Update active state in settings modal if open
-            try {
-                var layoutOptions = document.querySelectorAll('.layout-option');
-                for (var k = 0; k < layoutOptions.length; k++) {
-                    if (layoutOptions[k].getAttribute('data-layout') === lay) {
-                        layoutOptions[k].classList.add('selected');
-                    } else {
-                        layoutOptions[k].classList.remove('selected');
-                    }
-                }
-            } catch (e) {}
-            setTimeout(fitClockToScreen, 20);
         }
 
-        // Dynamic Universal Auto-Fitter for Wall Clock Displays
-        function fitClockToScreen() {
-            try {
-                var vh = window.innerHeight || document.documentElement.clientHeight || 600;
-                var vw = window.innerWidth || document.documentElement.clientWidth || 800;
-
-                // 1. Top bar: Live Time and Dates font size matching reference exactly
-                var topBar = document.querySelector('.top-bar');
-                var topBarH = topBar ? topBar.offsetHeight : 70;
-                if (topBarH < 40 || topBarH > 100) topBarH = Math.max(48, Math.min(Math.round(vh * 0.08), 85));
-
-                // Both live time and date info match each other in size (around 52% of top-bar height)
-                var topBarFontSize = Math.max(16, Math.min(Math.round(topBarH * 0.52), Math.round(vw * 0.034), 44));
-                if (vw < 950) {
-                    topBarFontSize = Math.max(14, Math.min(topBarFontSize, Math.round(vw * 0.026)));
-                }
-
-                document.documentElement.style.setProperty('--topbar-time-size', topBarFontSize + 'px');
-                document.documentElement.style.setProperty('--topbar-date-size', topBarFontSize + 'px');
-
-                // 2. Prayer card dynamic proportional auto-fit
-                // CRITICAL: Calculate card dimensions directly from viewport geometry, NOT from rendered card height
-                // This prevents recursive measurement loops where setting font size expands the card on the next tick!
-                var gridH = vh - topBarH;
-                var gridW = vw;
-
-                var grid = document.getElementById('prayer-grid') || document.querySelector('.prayer-grid');
-                var isHorizontal = grid && grid.classList.contains('layout-horizontal');
-                var isVertical = grid && grid.classList.contains('layout-vertical');
-
-                var bH = 0;
-                var bW = 0;
-
-                if (isHorizontal) {
-                    // 1 row of 6 cards
-                    bH = Math.max(80, gridH - 24);
-                    bW = Math.max(80, Math.floor((gridW - 36) / 6));
-                } else if (isVertical) {
-                    // 6 rows of 1 card
-                    bH = Math.max(50, Math.floor((gridH - 36) / 6));
-                    bW = Math.max(150, gridW - 24);
-                } else {
-                    // Standard 3 rows x 2 columns (Default, Compact, Modern)
-                    // Grid padding ~16px total (8px top + 8px bot), row gaps ~16px x 2 = 32px
-                    var totalGapsH = Math.max(16, Math.round(vh * 0.035));
-                    bH = Math.max(70, Math.floor((gridH - totalGapsH) / 3));
-
-                    var totalGapsW = Math.max(16, Math.round(vw * 0.03));
-                    bW = Math.max(120, Math.floor((gridW - totalGapsW) / 2));
-                }
-
-                if (bH > 50 && bW > 50) {
-                    // Balanced proportional sizing that cleanly fills ~70% of card height without overflow
-                    var timeSize = Math.round(bH * 0.32);
-                    var nameSize = Math.round(bH * 0.15);
-                    var detailsSize = Math.round(bH * 0.088);
-
-                    // Horizontal constraint for Prayer Time ("05:30 AM" = 8 chars ~ 5.2 * font size)
-                    var maxTimeForWidth = Math.floor((bW * 0.88) / 5.2);
-                    if (timeSize > maxTimeForWidth) {
-                        timeSize = maxTimeForWidth;
-                    }
-
-                    // Horizontal constraint for Details ("SUBAH SADIQ 05:22 AM" = 20 chars ~ 11.5 * font size)
-                    var maxDetailsForWidth = Math.floor((bW * 0.90) / 11.5);
-                    if (detailsSize > maxDetailsForWidth) {
-                        detailsSize = maxDetailsForWidth;
-                    }
-
-                    // Strict vertical ceiling to ensure all cards fit completely within the screen
-                    var totalContentH = nameSize * 1.1 + timeSize * 1.0 + detailsSize * 2.6;
-                    if (totalContentH > bH * 0.80) {
-                        var scaleFactor = (bH * 0.80) / totalContentH;
-                        timeSize = Math.floor(timeSize * scaleFactor);
-                        nameSize = Math.floor(nameSize * scaleFactor);
-                        detailsSize = Math.floor(detailsSize * scaleFactor);
-                    }
-
-                    // Absolute safe bounds
-                    timeSize = Math.max(20, Math.min(timeSize, 85));
-                    nameSize = Math.max(12, Math.min(nameSize, 36));
-                    detailsSize = Math.max(9, Math.min(detailsSize, 22));
-
-                    var hadithTitleSize = Math.max(13, Math.round(nameSize * 0.95));
-                    var hadithContentSize = Math.max(11, Math.round(detailsSize * 1.15));
-                    var hadithSourceSize = Math.max(9, Math.round(detailsSize * 0.88));
-
-                    document.documentElement.style.setProperty('--card-time-size', timeSize + 'px');
-                    document.documentElement.style.setProperty('--card-name-size', nameSize + 'px');
-                    document.documentElement.style.setProperty('--card-details-size', detailsSize + 'px');
-                    document.documentElement.style.setProperty('--hadith-title-size', hadithTitleSize + 'px');
-                    document.documentElement.style.setProperty('--hadith-content-size', hadithContentSize + 'px');
-                    document.documentElement.style.setProperty('--hadith-source-size', hadithSourceSize + 'px');
-                }
-            } catch (err) {
-                console.warn('fitClockToScreen error:', err);
-            }
-        }
-
-        window.fitClockToScreen = fitClockToScreen;
-        window.addEventListener('resize', fitClockToScreen);
-        window.addEventListener('orientationchange', fitClockToScreen);
-        window.addEventListener('load', fitClockToScreen);
-        setTimeout(fitClockToScreen, 50);
-        setTimeout(fitClockToScreen, 250);
-        setTimeout(fitClockToScreen, 1000);
-
-        // Live Apply Remote Settings from Wi-Fi Phone/Companion App
+        // Live Apply Remote Settings from Wi-Fi Phone / Admin Remote
         function applyRemoteSettings(remoteObj) {
             if (!remoteObj || typeof remoteObj !== 'object') return;
             console.log('[Remote Sync] Instantly applying remote settings to DOM:', remoteObj);
@@ -815,13 +686,21 @@
             // 1. Theme
             if (remoteObj.theme) {
                 applyThemeToDOM(remoteObj.theme);
-                localStorage.setItem('selectedTheme', remoteObj.theme);
+                try { localStorage.setItem('selectedTheme', remoteObj.theme); } catch(e) {}
+                currentSelectedTheme = remoteObj.theme;
+                if (typeof setThemeActive === 'function') {
+                    setThemeActive(remoteObj.theme);
+                }
             }
 
             // 2. Layout
             if (remoteObj.layout) {
                 applyLayoutToDOM(remoteObj.layout);
-                localStorage.setItem('selectedLayout', remoteObj.layout);
+                try { localStorage.setItem('selectedLayout', remoteObj.layout); } catch(e) {}
+                currentSelectedLayout = remoteObj.layout;
+                if (typeof setLayoutActive === 'function') {
+                    setLayoutActive(remoteObj.layout);
+                }
             }
 
             // 3. City & Country
@@ -862,7 +741,9 @@
             try {
                 localStorage.setItem('settings', JSON.stringify(remoteObj));
             } catch (e) {}
-            setTimeout(fitClockToScreen, 20);
+            if (typeof fitClockToScreen === 'function') {
+                setTimeout(fitClockToScreen, 20);
+            }
         }
 
         // Attach globally so native Java WebView and outside scripts can call them immediately
@@ -1268,16 +1149,10 @@
             try {
                 var now = new Date();
 
-                // 1. Live Time (12-hour AM/PM with leading zero, matching reference image)
+                // 1. Live Time (12-hour AM/PM)
                 var timeElem = document.getElementById('current-time');
                 if (timeElem) {
-                    var curH = now.getHours();
-                    var curM = now.getMinutes();
-                    var curS = now.getSeconds();
-                    var curAmpm = curH >= 12 ? 'pm' : 'am';
-                    curH = curH % 12;
-                    if (curH === 0) curH = 12;
-                    timeElem.textContent = (curH < 10 ? '0' : '') + curH + ':' + (curM < 10 ? '0' : '') + curM + ':' + (curS < 10 ? '0' : '') + curS + ' ' + curAmpm;
+                    timeElem.textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
                 }
 
                 // 2. Gregorian Date (English characters)
@@ -1513,7 +1388,6 @@
             };
             xhr.send();
         }
-        window.fetchAvailableAudioTracks = fetchAvailableAudioTracks;
 
         function populateAudioSelect(selectEl, selectedVal) {
             if (!selectEl) return;
@@ -1766,17 +1640,23 @@
                     if (!cleanFileName.toLowerCase().endsWith('.mp3')) cleanFileName += '.mp3';
 
                     // Save directly to Android internal storage if in Android Kiosk app
+                    var nativeSaved = false;
                     if (window.AndroidAudio && typeof window.AndroidAudio.saveCustomAudio === 'function') {
                         try {
-                            window.AndroidAudio.saveCustomAudio(cleanFileName, base64Data);
+                            nativeSaved = window.AndroidAudio.saveCustomAudio(cleanFileName, base64Data);
                         } catch (ae) {
                             console.warn("Android native save audio:", ae);
                         }
                     }
 
-                    // Upload via server endpoint
+                    // Route to correct local or web server endpoint
+                    var uploadEndpoint = '/upload_audio.php';
+                    if (window.location.protocol === 'file:' || (window.AndroidAudio && window.location.origin.includes('appassets'))) {
+                        uploadEndpoint = 'http://127.0.0.1:8080/upload_audio.php';
+                    }
+
                     var xhr = new XMLHttpRequest();
-                    xhr.open('POST', '/upload_audio.php', true);
+                    xhr.open('POST', uploadEndpoint, true);
                     xhr.setRequestHeader('Content-Type', 'application/json');
                     xhr.onreadystatechange = function() {
                         if (xhr.readyState === 4) {
@@ -1812,6 +1692,35 @@
                                     }
                                 } catch (pe) {}
                             }
+
+                            // If native Android storage save succeeded, treat as success
+                            if (nativeSaved) {
+                                if (modalUploadStatus) {
+                                    modalUploadStatus.style.background = '#dcfce7';
+                                    modalUploadStatus.style.color = '#15803d';
+                                    modalUploadStatus.textContent = '✓ Saved "' + cleanFileName + '" to device storage!';
+                                    setTimeout(function() {
+                                        if (modalUploadStatus) modalUploadStatus.style.display = 'none';
+                                    }, 4000);
+                                }
+                                fetchAvailableAudioTracks(function() {
+                                    if (!Array.isArray(currentReminders)) currentReminders = [];
+                                    currentReminders.unshift({
+                                        id: 'alarm_' + Date.now(),
+                                        name: cleanFileName.replace('.mp3', ''),
+                                        time: '06:00',
+                                        audio: 'azan/' + cleanFileName,
+                                        recurrence: 'daily',
+                                        days: [0, 1, 2, 3, 4, 5, 6],
+                                        dayOfMonth: 1,
+                                        enabled: true
+                                    });
+                                    renderRemindersUI();
+                                    playKioskAudio('azan/' + cleanFileName, 'Uploaded Preview');
+                                });
+                                return;
+                            }
+
                             if (modalUploadStatus) {
                                 modalUploadStatus.style.background = '#fee2e2';
                                 modalUploadStatus.style.color = '#b91c1c';
@@ -1820,6 +1729,33 @@
                         }
                     };
                     xhr.onerror = function() {
+                        if (nativeSaved) {
+                            if (modalUploadStatus) {
+                                modalUploadStatus.style.background = '#dcfce7';
+                                modalUploadStatus.style.color = '#15803d';
+                                modalUploadStatus.textContent = '✓ Saved "' + cleanFileName + '" to device storage!';
+                                setTimeout(function() {
+                                    if (modalUploadStatus) modalUploadStatus.style.display = 'none';
+                                }, 4000);
+                            }
+                            fetchAvailableAudioTracks(function() {
+                                if (!Array.isArray(currentReminders)) currentReminders = [];
+                                currentReminders.unshift({
+                                    id: 'alarm_' + Date.now(),
+                                    name: cleanFileName.replace('.mp3', ''),
+                                    time: '06:00',
+                                    audio: 'azan/' + cleanFileName,
+                                    recurrence: 'daily',
+                                    days: [0, 1, 2, 3, 4, 5, 6],
+                                    dayOfMonth: 1,
+                                    enabled: true
+                                });
+                                renderRemindersUI();
+                                playKioskAudio('azan/' + cleanFileName, 'Uploaded Preview');
+                            });
+                            return;
+                        }
+
                         if (modalUploadStatus) {
                             modalUploadStatus.style.background = '#fee2e2';
                             modalUploadStatus.style.color = '#b91c1c';
@@ -2298,10 +2234,10 @@
             };
         }
 
-        // Live Network Polling for Remote Settings Changes (from admin.html on another phone/device)
+        // Live Network Polling for Remote Settings Changes (from admin.html on phone / remote device)
         var lastRemotePollHash = '';
         function pollRemoteSettingsFromNetwork() {
-            // 1. Check Android native bridge directly (zero latency)
+            // 1. Android native bridge check (instant local query)
             if (window.AndroidAudio && typeof window.AndroidAudio.getLatestSettingsJson === 'function') {
                 try {
                     var nativeJson = window.AndroidAudio.getLatestSettingsJson();
@@ -2312,15 +2248,22 @@
                             applyRemoteSettings(obj);
                         } else if (!lastRemotePollHash) {
                             lastRemotePollHash = nativeJson;
+                            var objInit = JSON.parse(nativeJson);
+                            if (objInit && objInit.theme) applyThemeToDOM(objInit.theme);
+                            if (objInit && objInit.layout) applyLayoutToDOM(objInit.layout);
                         }
                     }
                 } catch (e) {}
             }
 
-            // 2. Poll HTTP endpoint (works in both Web Preview and Android local network server)
+            // 2. HTTP polling (Web preview or Android internal web server)
             try {
+                var pollUrl = '/save_settings.php?_t=' + Date.now();
+                if (window.location.protocol === 'file:' || (window.AndroidAudio && window.location.origin.includes('appassets'))) {
+                    pollUrl = 'http://127.0.0.1:8080/save_settings.php?_t=' + Date.now();
+                }
                 var xhr = new XMLHttpRequest();
-                xhr.open('GET', '/save_settings.php?_t=' + Date.now(), true);
+                xhr.open('GET', pollUrl, true);
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4 && xhr.status === 200) {
                         try {
@@ -2328,11 +2271,13 @@
                             if (remoteObj && typeof remoteObj === 'object') {
                                 var remoteStr = JSON.stringify(remoteObj);
                                 if (lastRemotePollHash && lastRemotePollHash !== remoteStr) {
-                                    console.log("[Remote Sync] Remote settings change detected via HTTP!");
+                                    console.log("[Remote Sync] Remote settings change detected!");
                                     lastRemotePollHash = remoteStr;
                                     applyRemoteSettings(remoteObj);
                                 } else if (!lastRemotePollHash) {
                                     lastRemotePollHash = remoteStr;
+                                    if (remoteObj.theme) applyThemeToDOM(remoteObj.theme);
+                                    if (remoteObj.layout) applyLayoutToDOM(remoteObj.layout);
                                 }
                             }
                         } catch (e) {}
@@ -2342,6 +2287,32 @@
             } catch (e) {}
         }
         setInterval(pollRemoteSettingsFromNetwork, 1500);
+
+        // 3. Instant Cross-Tab Storage Event (when admin.html is saved in another window/tab)
+        window.addEventListener('storage', function(e) {
+            if ((e.key === 'settings' || e.key === 'prayerSettings') && e.newValue) {
+                try {
+                    var parsed = JSON.parse(e.newValue);
+                    applyRemoteSettings(parsed);
+                } catch (err) {}
+            } else if (e.key === 'selectedTheme' && e.newValue) {
+                applyThemeToDOM(e.newValue);
+            } else if (e.key === 'selectedLayout' && e.newValue) {
+                applyLayoutToDOM(e.newValue);
+            }
+        });
+
+        // 4. Instant Cross-Tab / Cross-Window BroadcastChannel
+        if (typeof BroadcastChannel !== 'undefined') {
+            try {
+                var syncChannel = new BroadcastChannel('kiosk_settings_sync');
+                syncChannel.onmessage = function(ev) {
+                    if (ev.data && ev.data.settings) {
+                        applyRemoteSettings(ev.data.settings);
+                    }
+                };
+            } catch (e) {}
+        }
     })();
     </script>
     <script src="script.js"></script>
