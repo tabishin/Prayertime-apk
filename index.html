@@ -37,8 +37,7 @@
             <div class="current-time" id="current-time">--:--:--</div>
             <div class="next-prayer" id="next-prayer">Next Prayer: Calculating...</div>
             <div class="date-info">
-                <span id="gregorian-date"></span> | 
-                <span id="islamic-date"></span>
+                <span id="gregorian-date"></span> <span class="date-separator">|</span> <span id="islamic-date"></span>
             </div>
             <div id="location">Location: <span id="current-city">Mumbai</span> <button id="open-settings-btn" class="settings-btn" type="button" title="Open Settings" aria-label="Settings">⚙️</button></div>
         </div>
@@ -698,7 +697,93 @@
                     }
                 }
             } catch (e) {}
+            setTimeout(fitClockToScreen, 20);
         }
+
+        // Dynamic Universal Auto-Fitter for Wall Clock Displays
+        function fitClockToScreen() {
+            try {
+                var vh = window.innerHeight || document.documentElement.clientHeight || 600;
+                var vw = window.innerWidth || document.documentElement.clientWidth || 800;
+
+                // 1. Top bar: Live Time and Dates font size matching reference exactly
+                var topBar = document.querySelector('.top-bar');
+                var topBarH = topBar ? topBar.clientHeight : 70;
+                if (topBarH < 40) topBarH = 70;
+
+                // Both live time and date info match each other in size
+                var topBarFontSize = Math.max(16, Math.min(Math.round(topBarH * 0.58), Math.round(vw * 0.038)));
+                if (vw < 950) {
+                    topBarFontSize = Math.max(14, Math.min(topBarFontSize, Math.round(vw * 0.028)));
+                }
+
+                document.documentElement.style.setProperty('--topbar-time-size', topBarFontSize + 'px');
+                document.documentElement.style.setProperty('--topbar-date-size', topBarFontSize + 'px');
+
+                // 2. Prayer card dynamic proportional auto-fit
+                var sampleBox = document.querySelector('.prayer-box');
+                if (sampleBox) {
+                    var bH = sampleBox.clientHeight;
+                    var bW = sampleBox.clientWidth;
+
+                    if (bH > 50 && bW > 50) {
+                        // Height distribution for wall clock readability from 20ft:
+                        // Prayer Name: ~16% of card height
+                        // Prayer Time: ~38% of card height (giant, bold, long-distance visible)
+                        // Prayer Details: ~9.5% of card height per line
+                        var timeSize = Math.round(bH * 0.38);
+                        var nameSize = Math.round(bH * 0.16);
+                        var detailsSize = Math.round(bH * 0.095);
+
+                        // Horizontal constraint for Prayer Time ("05:30 AM" = 8 chars)
+                        var maxTimeForWidth = Math.floor((bW * 0.88) / 5.3);
+                        if (timeSize > maxTimeForWidth) {
+                            timeSize = maxTimeForWidth;
+                        }
+
+                        // Horizontal constraint for Details ("SUBAH SADIQ 05:22 AM" = 20 chars)
+                        var maxDetailsForWidth = Math.floor((bW * 0.90) / 11.5);
+                        if (detailsSize > maxDetailsForWidth) {
+                            detailsSize = maxDetailsForWidth;
+                        }
+
+                        // Vertical total check (ensure content fits comfortably with space-evenly)
+                        var totalContentH = nameSize * 1.1 + timeSize * 1.05 + detailsSize * 2.8;
+                        if (totalContentH > bH * 0.90) {
+                            var scaleFactor = (bH * 0.90) / totalContentH;
+                            timeSize = Math.floor(timeSize * scaleFactor);
+                            nameSize = Math.floor(nameSize * scaleFactor);
+                            detailsSize = Math.floor(detailsSize * scaleFactor);
+                        }
+
+                        timeSize = Math.max(28, timeSize);
+                        nameSize = Math.max(14, nameSize);
+                        detailsSize = Math.max(11, detailsSize);
+
+                        var hadithTitleSize = Math.max(16, Math.round(nameSize * 0.95));
+                        var hadithContentSize = Math.max(12, Math.round(detailsSize * 1.15));
+                        var hadithSourceSize = Math.max(11, Math.round(detailsSize * 0.9));
+
+                        document.documentElement.style.setProperty('--card-time-size', timeSize + 'px');
+                        document.documentElement.style.setProperty('--card-name-size', nameSize + 'px');
+                        document.documentElement.style.setProperty('--card-details-size', detailsSize + 'px');
+                        document.documentElement.style.setProperty('--hadith-title-size', hadithTitleSize + 'px');
+                        document.documentElement.style.setProperty('--hadith-content-size', hadithContentSize + 'px');
+                        document.documentElement.style.setProperty('--hadith-source-size', hadithSourceSize + 'px');
+                    }
+                }
+            } catch (err) {
+                console.warn('fitClockToScreen error:', err);
+            }
+        }
+
+        window.fitClockToScreen = fitClockToScreen;
+        window.addEventListener('resize', fitClockToScreen);
+        window.addEventListener('orientationchange', fitClockToScreen);
+        window.addEventListener('load', fitClockToScreen);
+        setTimeout(fitClockToScreen, 50);
+        setTimeout(fitClockToScreen, 250);
+        setTimeout(fitClockToScreen, 1000);
 
         // Live Apply Remote Settings from Wi-Fi Phone/Companion App
         function applyRemoteSettings(remoteObj) {
@@ -755,6 +840,7 @@
             try {
                 localStorage.setItem('settings', JSON.stringify(remoteObj));
             } catch (e) {}
+            setTimeout(fitClockToScreen, 20);
         }
 
         // Attach globally so native Java WebView and outside scripts can call them immediately

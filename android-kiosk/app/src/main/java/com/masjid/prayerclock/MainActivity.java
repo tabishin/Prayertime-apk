@@ -110,7 +110,8 @@ public class MainActivity extends AppCompatActivity {
 
         // Viewport settings for smooth auto-resizing across all screen sizes
         settings.setUseWideViewPort(true);
-        settings.setLoadWithOverviewMode(false);
+        settings.setLoadWithOverviewMode(true);
+        settings.setTextZoom(100);
         settings.setSupportZoom(false);
         settings.setBuiltInZoomControls(false);
         settings.setDisplayZoomControls(false);
