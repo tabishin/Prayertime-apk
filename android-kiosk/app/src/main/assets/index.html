@@ -708,69 +708,91 @@
 
                 // 1. Top bar: Live Time and Dates font size matching reference exactly
                 var topBar = document.querySelector('.top-bar');
-                var topBarH = topBar ? topBar.clientHeight : 70;
-                if (topBarH < 40) topBarH = 70;
+                var topBarH = topBar ? topBar.offsetHeight : 70;
+                if (topBarH < 40 || topBarH > 100) topBarH = Math.max(48, Math.min(Math.round(vh * 0.08), 85));
 
-                // Both live time and date info match each other in size
-                var topBarFontSize = Math.max(16, Math.min(Math.round(topBarH * 0.58), Math.round(vw * 0.038)));
+                // Both live time and date info match each other in size (around 52% of top-bar height)
+                var topBarFontSize = Math.max(16, Math.min(Math.round(topBarH * 0.52), Math.round(vw * 0.034), 44));
                 if (vw < 950) {
-                    topBarFontSize = Math.max(14, Math.min(topBarFontSize, Math.round(vw * 0.028)));
+                    topBarFontSize = Math.max(14, Math.min(topBarFontSize, Math.round(vw * 0.026)));
                 }
 
                 document.documentElement.style.setProperty('--topbar-time-size', topBarFontSize + 'px');
                 document.documentElement.style.setProperty('--topbar-date-size', topBarFontSize + 'px');
 
                 // 2. Prayer card dynamic proportional auto-fit
-                var sampleBox = document.querySelector('.prayer-box');
-                if (sampleBox) {
-                    var bH = sampleBox.clientHeight;
-                    var bW = sampleBox.clientWidth;
+                // CRITICAL: Calculate card dimensions directly from viewport geometry, NOT from rendered card height
+                // This prevents recursive measurement loops where setting font size expands the card on the next tick!
+                var gridH = vh - topBarH;
+                var gridW = vw;
 
-                    if (bH > 50 && bW > 50) {
-                        // Height distribution for wall clock readability from 20ft:
-                        // Prayer Name: ~16% of card height
-                        // Prayer Time: ~38% of card height (giant, bold, long-distance visible)
-                        // Prayer Details: ~9.5% of card height per line
-                        var timeSize = Math.round(bH * 0.38);
-                        var nameSize = Math.round(bH * 0.16);
-                        var detailsSize = Math.round(bH * 0.095);
+                var grid = document.getElementById('prayer-grid') || document.querySelector('.prayer-grid');
+                var isHorizontal = grid && grid.classList.contains('layout-horizontal');
+                var isVertical = grid && grid.classList.contains('layout-vertical');
 
-                        // Horizontal constraint for Prayer Time ("05:30 AM" = 8 chars)
-                        var maxTimeForWidth = Math.floor((bW * 0.88) / 5.3);
-                        if (timeSize > maxTimeForWidth) {
-                            timeSize = maxTimeForWidth;
-                        }
+                var bH = 0;
+                var bW = 0;
 
-                        // Horizontal constraint for Details ("SUBAH SADIQ 05:22 AM" = 20 chars)
-                        var maxDetailsForWidth = Math.floor((bW * 0.90) / 11.5);
-                        if (detailsSize > maxDetailsForWidth) {
-                            detailsSize = maxDetailsForWidth;
-                        }
+                if (isHorizontal) {
+                    // 1 row of 6 cards
+                    bH = Math.max(80, gridH - 24);
+                    bW = Math.max(80, Math.floor((gridW - 36) / 6));
+                } else if (isVertical) {
+                    // 6 rows of 1 card
+                    bH = Math.max(50, Math.floor((gridH - 36) / 6));
+                    bW = Math.max(150, gridW - 24);
+                } else {
+                    // Standard 3 rows x 2 columns (Default, Compact, Modern)
+                    // Grid padding ~16px total (8px top + 8px bot), row gaps ~16px x 2 = 32px
+                    var totalGapsH = Math.max(16, Math.round(vh * 0.035));
+                    bH = Math.max(70, Math.floor((gridH - totalGapsH) / 3));
 
-                        // Vertical total check (ensure content fits comfortably with space-evenly)
-                        var totalContentH = nameSize * 1.1 + timeSize * 1.05 + detailsSize * 2.8;
-                        if (totalContentH > bH * 0.90) {
-                            var scaleFactor = (bH * 0.90) / totalContentH;
-                            timeSize = Math.floor(timeSize * scaleFactor);
-                            nameSize = Math.floor(nameSize * scaleFactor);
-                            detailsSize = Math.floor(detailsSize * scaleFactor);
-                        }
+                    var totalGapsW = Math.max(16, Math.round(vw * 0.03));
+                    bW = Math.max(120, Math.floor((gridW - totalGapsW) / 2));
+                }
 
-                        timeSize = Math.max(28, timeSize);
-                        nameSize = Math.max(14, nameSize);
-                        detailsSize = Math.max(11, detailsSize);
+                if (bH > 50 && bW > 50) {
+                    // Balanced proportional sizing that cleanly fills ~70% of card height without overflow
+                    var timeSize = Math.round(bH * 0.32);
+                    var nameSize = Math.round(bH * 0.15);
+                    var detailsSize = Math.round(bH * 0.088);
 
-                        var hadithTitleSize = Math.max(16, Math.round(nameSize * 0.95));
-                        var hadithContentSize = Math.max(12, Math.round(detailsSize * 1.15));
-                        var hadithSourceSize = Math.max(11, Math.round(detailsSize * 0.9));
-
-                        document.documentElement.style.setProperty('--card-time-size', timeSize + 'px');
-                        document.documentElement.style.setProperty('--card-name-size', nameSize + 'px');
-                        document.documentElement.style.setProperty('--card-details-size', detailsSize + 'px');
-                        document.documentElement.style.setProperty('--hadith-title-size', hadithTitleSize + 'px');
-                        document.documentElement.style.setProperty('--hadith-content-size', hadithContentSize + 'px');
-                        document.documentElement.style.setProperty('--hadith-source-size', hadithSourceSize + 'px');
+                    // Horizontal constraint for Prayer Time ("05:30 AM" = 8 chars ~ 5.2 * font size)
+                    var maxTimeForWidth = Math.floor((bW * 0.88) / 5.2);
+                    if (timeSize > maxTimeForWidth) {
+                        timeSize = maxTimeForWidth;
                     }
+
+                    // Horizontal constraint for Details ("SUBAH SADIQ 05:22 AM" = 20 chars ~ 11.5 * font size)
+                    var maxDetailsForWidth = Math.floor((bW * 0.90) / 11.5);
+                    if (detailsSize > maxDetailsForWidth) {
+                        detailsSize = maxDetailsForWidth;
+                    }
+
+                    // Strict vertical ceiling to ensure all cards fit completely within the screen
+                    var totalContentH = nameSize * 1.1 + timeSize * 1.0 + detailsSize * 2.6;
+                    if (totalContentH > bH * 0.80) {
+                        var scaleFactor = (bH * 0.80) / totalContentH;
+                        timeSize = Math.floor(timeSize * scaleFactor);
+                        nameSize = Math.floor(nameSize * scaleFactor);
+                        detailsSize = Math.floor(detailsSize * scaleFactor);
+                    }
+
+                    // Absolute safe bounds
+                    timeSize = Math.max(20, Math.min(timeSize, 85));
+                    nameSize = Math.max(12, Math.min(nameSize, 36));
+                    detailsSize = Math.max(9, Math.min(detailsSize, 22));
+
+                    var hadithTitleSize = Math.max(13, Math.round(nameSize * 0.95));
+                    var hadithContentSize = Math.max(11, Math.round(detailsSize * 1.15));
+                    var hadithSourceSize = Math.max(9, Math.round(detailsSize * 0.88));
+
+                    document.documentElement.style.setProperty('--card-time-size', timeSize + 'px');
+                    document.documentElement.style.setProperty('--card-name-size', nameSize + 'px');
+                    document.documentElement.style.setProperty('--card-details-size', detailsSize + 'px');
+                    document.documentElement.style.setProperty('--hadith-title-size', hadithTitleSize + 'px');
+                    document.documentElement.style.setProperty('--hadith-content-size', hadithContentSize + 'px');
+                    document.documentElement.style.setProperty('--hadith-source-size', hadithSourceSize + 'px');
                 }
             } catch (err) {
                 console.warn('fitClockToScreen error:', err);

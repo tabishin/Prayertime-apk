@@ -371,9 +371,10 @@ html, body {
 /* Prayer Grid (2x3 Grid filling 100% of remaining screen with zero overflow) */
 .prayer-grid {
     box-sizing: border-box;
-    width: 100%;
+    width: 100vw;
     flex: 1 1 0;
     height: calc(100vh - clamp(52px, 8.5vh, 85px));
+    max-height: calc(100vh - clamp(52px, 8.5vh, 85px));
     min-height: 0;
     padding: clamp(6px, 1.2vmin, 16px);
     overflow: hidden;
@@ -391,12 +392,13 @@ html, body {
     border-radius: clamp(8px, 1.2vmin, 16px);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
-    padding: clamp(6px, 1.0vh, 16px) clamp(10px, 1.8vw, 24px);
+    padding: clamp(4px, 0.8vh, 12px) clamp(8px, 1.4vw, 20px);
     overflow: hidden;
     position: relative;
     width: 100% !important;
     height: 100% !important;
-    min-height: 0;
+    max-height: 100% !important;
+    min-height: 0 !important;
 
     display: flex;
     flex-direction: column;
@@ -413,7 +415,7 @@ html, body {
 
 .layout-default .prayer-name,
 .prayer-name {
-    font-size: var(--card-name-size, clamp(1.4rem, min(4.2vh, 2.8vw), 3.4rem));
+    font-size: var(--card-name-size, clamp(1.2rem, min(3.8vh, 2.4vw), 2.8rem));
     font-weight: 900;
     text-transform: uppercase;
     margin: 0;
@@ -426,7 +428,7 @@ html, body {
 
 .layout-default .prayer-time,
 .prayer-time {
-    font-size: var(--card-time-size, clamp(3.2rem, min(12.5vh, 8.5vw), 8.5rem));
+    font-size: var(--card-time-size, clamp(2.2rem, min(9.0vh, 6.0vw), 5.5rem));
     font-weight: 900;
     margin: 0;
     text-align: center;
@@ -440,7 +442,7 @@ html, body {
 
 .layout-default .prayer-details,
 .prayer-details {
-    font-size: var(--card-details-size, clamp(1.0rem, min(2.8vh, 1.8vw), 2.2rem));
+    font-size: var(--card-details-size, clamp(0.9rem, min(2.4vh, 1.6vw), 1.8rem));
     text-align: center;
     width: 100%;
     display: flex;
@@ -928,19 +930,19 @@ html, body {
         font-weight: 900;
     }
     .layout-default .prayer-name {
-        font-size: var(--card-name-size, clamp(1.5rem, min(4.2vh, 2.8vw), 3.4rem));
+        font-size: var(--card-name-size, clamp(1.3rem, min(3.8vh, 2.4vw), 2.8rem));
         font-weight: 900;
     }
     .layout-default .prayer-time {
-        font-size: var(--card-time-size, clamp(3.4rem, min(12.5vh, 8.5vw), 8.5rem));
+        font-size: var(--card-time-size, clamp(2.4rem, min(9.5vh, 6.2vw), 5.8rem));
         font-weight: 900;
     }
     .layout-default .prayer-details {
-        font-size: var(--card-details-size, clamp(1.1rem, min(2.8vh, 1.8vw), 2.2rem));
+        font-size: var(--card-details-size, clamp(0.95rem, min(2.4vh, 1.6vw), 1.9rem));
         font-weight: 700;
     }
     .hadith-title {
-        font-size: var(--hadith-title-size, clamp(1.5rem, min(4.0vh, 2.8vw), 3.4rem));
+        font-size: var(--hadith-title-size, clamp(1.3rem, min(3.8vh, 2.4vw), 2.8rem));
         font-weight: 900;
     }
     .hadith-content {
