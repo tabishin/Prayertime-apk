@@ -287,6 +287,15 @@
                 bottom: 84px;
             }
         }
+
+        .admin-font-preset-btn.active {
+            border-color: #059669 !important;
+            background-color: #ecfdf5 !important;
+            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.2);
+        }
+        .admin-font-preset-btn.active .text-slate-800 {
+            color: #065f46 !important;
+        }
     </style>
 </head>
 <body class="admin-page bg-slate-50 min-h-screen pb-24 md:pb-28">
@@ -678,6 +687,55 @@
                                     <span class="text-[11px] font-bold text-slate-600 uppercase">Vertical Totem</span>
                                 </div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Wall Clock Dynamic Font Sizing Card -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-slate-100">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-xl">🔍</span>
+                                <div>
+                                    <h2 class="text-lg font-bold text-slate-800">Wall Clock Font Sizing &amp; Scale</h2>
+                                    <p class="text-xs text-slate-500">Auto-resizes dynamic typography across different screen size types</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold bg-emerald-50 text-emerald-700 px-3 py-1 rounded-full border border-emerald-200 self-start sm:self-auto">
+                                Dynamic Wall Clock Engine
+                            </span>
+                        </div>
+
+                        <!-- Presets Grid -->
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+                            <button type="button" onclick="selectFontScaleMode('auto', 100)" class="admin-font-preset-btn active p-3 bg-slate-50 hover:bg-emerald-50 border-2 border-slate-200 rounded-xl text-center transition-all" data-scale-mode="auto">
+                                <span class="text-lg block mb-1">⚡</span>
+                                <div class="text-xs font-bold text-slate-800">Auto Dynamic</div>
+                                <div class="text-[11px] text-slate-500">Adaptive Fit</div>
+                            </button>
+                            <button type="button" onclick="selectFontScaleMode('tv-large', 115)" class="admin-font-preset-btn p-3 bg-slate-50 hover:bg-emerald-50 border-2 border-slate-200 rounded-xl text-center transition-all" data-scale-mode="tv-large">
+                                <span class="text-lg block mb-1">🛋️</span>
+                                <div class="text-xs font-bold text-slate-800">Living Room TV</div>
+                                <div class="text-[11px] text-slate-500">+15% Far View</div>
+                            </button>
+                            <button type="button" onclick="selectFontScaleMode('tv-xlarge', 130)" class="admin-font-preset-btn p-3 bg-slate-50 hover:bg-emerald-50 border-2 border-slate-200 rounded-xl text-center transition-all" data-scale-mode="tv-xlarge">
+                                <span class="text-lg block mb-1">🏛️</span>
+                                <div class="text-xs font-bold text-slate-800">Giant 65"+ TV</div>
+                                <div class="text-[11px] text-slate-500">+30% Maximum</div>
+                            </button>
+                            <button type="button" onclick="selectFontScaleMode('compact', 90)" class="admin-font-preset-btn p-3 bg-slate-50 hover:bg-emerald-50 border-2 border-slate-200 rounded-xl text-center transition-all" data-scale-mode="compact">
+                                <span class="text-lg block mb-1">📱</span>
+                                <div class="text-xs font-bold text-slate-800">Compact / Desk</div>
+                                <div class="text-[11px] text-slate-500">-10% Near View</div>
+                            </button>
+                        </div>
+
+                        <!-- Fine-tuning Slider -->
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                            <div class="flex items-center gap-3">
+                                <span class="text-sm font-bold text-slate-700">Font Scale:</span>
+                                <span id="admin-font-scale-label" class="font-mono font-bold text-sm bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-lg">100%</span>
+                            </div>
+                            <input type="range" id="admin-font-scale-slider" min="70" max="150" step="5" value="100" class="flex-1 accent-emerald-600 cursor-pointer" oninput="onAdminFontSliderChange(this.value)">
                         </div>
                     </div>
                 </div>

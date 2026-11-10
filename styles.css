@@ -9,6 +9,19 @@
     --theme-gold: #ffd54f;
     --theme-topbar-bg: rgba(0, 0, 0, 0.45);
     --theme-topbar-text: #FFFFFF;
+
+    /* Dynamic Wall Clock Font Sizing & Viewport Variables */
+    --user-font-scale: 1;
+    --dynamic-topbar-height: clamp(48px, 9vh, 120px);
+    --time-font-size: clamp(1.8rem, calc(5.4vh * var(--user-font-scale, 1)), 9.5rem);
+    --date-font-size: clamp(1.1rem, calc(4.0vh * var(--user-font-scale, 1)), 6.0rem);
+    --topbar-sub-size: clamp(0.85rem, calc(2.2vh * var(--user-font-scale, 1)), 2.8rem);
+    --prayer-name-size: clamp(1.0rem, calc(4.2vmin * var(--user-font-scale, 1)), 5.5rem);
+    --prayer-time-size: clamp(1.6rem, calc(7.8vmin * var(--user-font-scale, 1)), 10.5rem);
+    --prayer-details-size: clamp(0.7rem, calc(2.3vmin * var(--user-font-scale, 1)), 3.2rem);
+    --hadith-title-size: clamp(0.9rem, calc(2.8vmin * var(--user-font-scale, 1)), 3.8rem);
+    --hadith-content-size: clamp(0.75rem, calc(2.1vmin * var(--user-font-scale, 1)), 2.8rem);
+    --hadith-source-size: clamp(0.65rem, calc(1.6vmin * var(--user-font-scale, 1)), 2.2rem);
 }
 
 /* 1. Blue Theme (Royal Navy Blue) */
@@ -261,13 +274,15 @@ html, body {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-    padding: clamp(4px, 0.8vh, 10px) clamp(8px, 1.8vw, 24px);
-    background-color: rgba(0, 0, 0, 0.45);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    padding: clamp(4px, 0.8vh, 12px) clamp(8px, 1.8vw, 28px);
+    background-color: var(--theme-topbar-bg, rgba(0, 0, 0, 0.45));
+    border-bottom: 1px solid var(--theme-card-border, rgba(255, 255, 255, 0.08));
     min-height: 44px;
-    height: clamp(50px, 9vh, 88px);
+    height: var(--dynamic-topbar-height, clamp(50px, 9vh, 120px));
     flex-shrink: 0;
     gap: 1.2vw;
+    box-sizing: border-box;
+    transition: height 0.2s ease, padding 0.2s ease;
 }
 
 .top-bar > div {
@@ -276,20 +291,20 @@ html, body {
 }
 
 .current-time {
-    font-size: clamp(1.8rem, 5.2vh, 4.2rem);
+    font-size: var(--time-font-size, clamp(1.8rem, 5.2vh, 8.5rem));
     font-weight: 800;
     letter-spacing: -0.5px;
     line-height: 1;
 }
 
 .next-prayer {
-    font-size: clamp(0.95rem, 2.4vh, 1.6rem);
+    font-size: var(--topbar-sub-size, clamp(0.95rem, 2.4vh, 2.6rem));
     font-weight: 600;
     line-height: 1.1;
 }
 
 .date-info {
-    font-size: clamp(1.4rem, 4.4vh, 3.4rem);
+    font-size: var(--date-font-size, clamp(1.4rem, 4.4vh, 5.5rem));
     font-weight: 800;
     letter-spacing: -0.5px;
     display: flex;
@@ -309,9 +324,12 @@ html, body {
 }
 
 #location {
-    font-size: clamp(0.95rem, 2.4vh, 1.6rem);
+    font-size: var(--topbar-sub-size, clamp(0.95rem, 2.4vh, 2.6rem));
     opacity: 0.95;
     line-height: 1.1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .makruh-warning {
@@ -379,6 +397,7 @@ html, body {
     transition: background-color 0.3s ease, transform 0.2s ease;
     position: relative;
     min-height: 0;
+    container-type: size;
 
     /* Flexbox 2-column dimensions (guarantees exactly 2 columns per row in flexbox) */
     width: 48.8%;
@@ -415,7 +434,7 @@ html, body {
 
 .layout-default .prayer-name,
 .prayer-name {
-    font-size: clamp(1.1rem, 4.4vmin, 3.2rem);
+    font-size: var(--card-prayer-name-size, var(--prayer-name-size, clamp(1.1rem, 4.4vmin, 5.5rem)));
     font-weight: 800;
     text-transform: uppercase;
     margin-bottom: 0.2vmin;
@@ -427,17 +446,18 @@ html, body {
 
 .layout-default .prayer-time,
 .prayer-time {
-    font-size: clamp(1.8rem, 7.5vmin, 5.5rem);
+    font-size: var(--card-prayer-time-size, var(--prayer-time-size, clamp(1.8rem, 7.5vmin, 10.5rem)));
     font-weight: 900;
     margin: 0.2vmin 0;
     text-align: center;
     width: 100%;
     line-height: 1.05;
+    white-space: nowrap;
 }
 
 .layout-default .prayer-details,
 .prayer-details {
-    font-size: clamp(0.75rem, 2.4vmin, 1.8rem);
+    font-size: var(--card-prayer-details-size, var(--prayer-details-size, clamp(0.75rem, 2.4vmin, 3.2rem)));
     text-align: center;
     width: 100%;
     display: -webkit-flex;
@@ -469,7 +489,7 @@ html, body {
 }
 
 .layout-compact .prayer-name {
-    font-size: clamp(1.1rem, 3.8vmin, 2.6rem);
+    font-size: var(--card-prayer-name-size, clamp(1.1rem, 3.8vmin, 4.5rem));
     font-weight: 800;
     text-transform: uppercase;
     text-align: center;
@@ -478,15 +498,16 @@ html, body {
 }
 
 .layout-compact .prayer-time {
-    font-size: clamp(1.6rem, 5.5vmin, 4.2rem);
+    font-size: var(--card-prayer-time-size, clamp(1.6rem, 5.5vmin, 8.5rem));
     font-weight: 900;
     text-align: center;
     width: 100%;
     line-height: 1.05;
+    white-space: nowrap;
 }
 
 .layout-compact .prayer-details {
-    font-size: clamp(0.72rem, 2vmin, 1.4rem);
+    font-size: var(--card-prayer-details-size, clamp(0.72rem, 2vmin, 2.8rem));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -519,7 +540,7 @@ html, body {
 }
 
 .layout-modern .prayer-name {
-    font-size: clamp(1.2rem, 4vmin, 3rem);
+    font-size: var(--card-prayer-name-size, clamp(1.2rem, 4vmin, 5.0rem));
     font-weight: 800;
     text-transform: uppercase;
     text-align: center;
@@ -528,15 +549,16 @@ html, body {
 }
 
 .layout-modern .prayer-time {
-    font-size: clamp(1.8rem, 6.2vmin, 4.8rem);
+    font-size: var(--card-prayer-time-size, clamp(1.8rem, 6.2vmin, 9.5rem));
     font-weight: 900;
     text-align: center;
     width: 100%;
     line-height: 1.05;
+    white-space: nowrap;
 }
 
 .layout-modern .prayer-details {
-    font-size: clamp(0.75rem, 2.2vmin, 1.5rem);
+    font-size: var(--card-prayer-details-size, clamp(0.75rem, 2.2vmin, 3.0rem));
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -665,9 +687,7 @@ html, body {
 }
 
 .hadith-title {
-    font-size: 1.4rem;
-    font-size: 2.8vmin;
-    font-size: clamp(0.9rem, 2.8vmin, 2rem);
+    font-size: var(--card-hadith-title-size, var(--hadith-title-size, clamp(0.9rem, 2.8vmin, 3.8rem)));
     font-weight: 800;
     text-transform: uppercase;
     margin-bottom: 0.4vmin;
@@ -675,9 +695,7 @@ html, body {
 }
 
 .hadith-content {
-    font-size: 1.1rem;
-    font-size: 2.2vmin;
-    font-size: clamp(0.8rem, 2.2vmin, 1.45rem);
+    font-size: var(--card-hadith-content-size, var(--hadith-content-size, clamp(0.75rem, 2.2vmin, 2.8rem)));
     margin: 0.3vmin 0;
     line-height: 1.35;
     max-height: 100%;
@@ -685,9 +703,7 @@ html, body {
 }
 
 .hadith-source {
-    font-size: 0.85rem;
-    font-size: 1.8vmin;
-    font-size: clamp(0.7rem, 1.8vmin, 1.15rem);
+    font-size: var(--card-hadith-source-size, var(--hadith-source-size, clamp(0.65rem, 1.8vmin, 2.2rem)));
     font-style: italic;
     opacity: 0.85;
     margin-top: 0.3vmin;
@@ -786,120 +802,238 @@ html, body {
    - Handles Tablets & Android TV
    ========================================================================== */
 
-/* Proportional scaling for smaller screens while strictly preserving the authentic webview 2x3 grid board */
-@media screen and (max-width: 820px) {
+/* ==========================================================================
+   DYNAMIC RESPONSIVE SYSTEM FOR HOME WALL CLOCKS
+   - Supports 4K / UHD TVs (3840x2160, 2560x1440) for massive across-the-room visibility
+   - Supports Full HD 1080p Smart TVs and monitors
+   - Supports Tablets (iPad, Galaxy Tab, 1280x800) in portrait and landscape
+   - Supports Small Kiosk / Raspberry Pi 7" (800x480, 1024x600)
+   - Supports Phones in portrait and landscape
+   ========================================================================== */
+
+/* 1. Mobile Phone Portrait (<= 640px) - Smart 2-row header, zero horizontal overflow */
+@media screen and (max-width: 640px) {
     .top-bar {
-        padding: 0.5vh 2vw;
-        gap: 1.5vw;
+        height: auto !important;
+        min-height: 56px;
+        padding: 6px 12px;
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-rows: auto auto;
+        row-gap: 3px;
+        column-gap: 8px;
     }
-
-    .current-time, .date-info {
-        font-size: clamp(1.2rem, 3.8vw, 2.2rem);
-        font-weight: 800;
+    .current-time {
+        grid-column: 1;
+        grid-row: 1;
+        font-size: clamp(1.3rem, 6.2vw, 2.0rem);
+        text-align: left;
     }
-
-    .next-prayer, #location {
-        font-size: clamp(0.7rem, 2vw, 1rem);
+    .next-prayer {
+        grid-column: 2;
+        grid-row: 1;
+        font-size: clamp(0.72rem, 3.2vw, 0.95rem);
+        text-align: right;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
     }
-
+    .date-info {
+        grid-column: 1;
+        grid-row: 2;
+        font-size: clamp(0.76rem, 3.4vw, 1.05rem);
+        text-align: left;
+        gap: 4px;
+    }
+    #location {
+        grid-column: 2;
+        grid-row: 2;
+        font-size: clamp(0.72rem, 3.2vw, 0.95rem);
+        text-align: right;
+        justify-content: flex-end;
+    }
     .prayer-grid {
-        gap: clamp(4px, 1.2vmin, 10px);
-        padding: clamp(4px, 1.2vmin, 10px);
+        gap: clamp(4px, 1.2vmin, 8px);
+        padding: clamp(4px, 1.2vmin, 8px);
     }
-
     .prayer-box, .hadith-box {
-        padding: clamp(4px, 1vmin, 10px);
+        padding: 4px 6px;
         border-radius: 8px;
+    }
+    .layout-default .prayer-name, .prayer-name {
+        font-size: clamp(0.85rem, 3.6vmin, 1.3rem);
+    }
+    .layout-default .prayer-time, .prayer-time {
+        font-size: clamp(1.25rem, 5.8vmin, 2.0rem);
+    }
+    .layout-default .prayer-details, .prayer-details {
+        font-size: clamp(0.62rem, 2.2vmin, 0.85rem);
     }
 }
 
-/* 2. Mobile Phone Landscape (Short screens, e.g. Redmi K20 Pro 2340x1080 held horizontally) */
+/* 2. Tablet & Medium Screens (641px - 1024px) */
+@media screen and (min-width: 641px) and (max-width: 1024px) {
+    .top-bar {
+        padding: 0.6vh 2vw;
+        gap: 1.5vw;
+        height: clamp(52px, 8.5vh, 76px);
+    }
+    .current-time {
+        font-size: clamp(1.5rem, 4.6vw, 2.8rem);
+        font-weight: 800;
+    }
+    .date-info {
+        font-size: clamp(1.1rem, 3.2vw, 2.2rem);
+    }
+    .next-prayer, #location {
+        font-size: clamp(0.82rem, 2vw, 1.25rem);
+    }
+    .prayer-grid {
+        gap: clamp(6px, 1.5vmin, 14px);
+        padding: clamp(6px, 1.5vmin, 14px);
+    }
+}
+
+/* 3. Mobile Phone Landscape / Short Height Displays (height <= 520px, e.g. Raspberry Pi 7" 800x480) */
 @media screen and (orientation: landscape) and (max-height: 520px) {
     .top-bar {
-        height: 44px;
-        min-height: 40px;
-        padding: 4px 14px;
-        gap: 12px;
+        height: 42px !important;
+        min-height: 38px;
+        padding: 2px 12px;
+        gap: 10px;
     }
-
-    .current-time, .date-info {
+    .current-time {
         font-size: clamp(1.1rem, 7vh, 1.7rem);
         font-weight: 800;
     }
-
-    .next-prayer, #location {
-        font-size: clamp(0.75rem, 4vh, 0.95rem);
+    .date-info {
+        font-size: clamp(0.9rem, 5.5vh, 1.4rem);
     }
-
+    .next-prayer, #location {
+        font-size: clamp(0.72rem, 4vh, 0.95rem);
+    }
     .prayer-grid {
         height: auto;
         flex: 1 1 0;
         min-height: 0;
-        gap: 6px;
-        padding: 6px 10px;
-    }
-
-    .prayer-box, .hadith-box {
+        gap: 4px;
         padding: 4px 8px;
+    }
+    .prayer-box, .hadith-box {
+        padding: 3px 6px;
         border-radius: 6px;
     }
-
     .layout-default .prayer-name,
     .layout-compact .prayer-name,
     .layout-modern .prayer-name {
-        font-size: clamp(0.85rem, 4vh, 1.25rem);
+        font-size: clamp(0.8rem, 4.2vh, 1.2rem);
         margin-bottom: 0;
     }
-
     .layout-default .prayer-time,
     .layout-compact .prayer-time,
     .layout-modern .prayer-time {
-        font-size: clamp(1.1rem, 6.5vh, 1.75rem);
+        font-size: clamp(1.1rem, 7.2vh, 1.85rem);
         margin: 0;
     }
-
     .layout-default .prayer-details,
     .layout-compact .prayer-details,
     .layout-modern .prayer-details {
-        font-size: clamp(0.65rem, 2.8vh, 0.85rem);
+        font-size: clamp(0.6rem, 2.8vh, 0.85rem);
         margin-top: 1px;
         line-height: 1.15;
     }
-
     .hadith-title {
-        font-size: clamp(0.8rem, 3.5vh, 1rem);
+        font-size: clamp(0.8rem, 3.8vh, 1rem);
         margin-bottom: 1px;
     }
-
     .hadith-content {
-        font-size: clamp(0.7rem, 2.8vh, 0.85rem);
+        font-size: clamp(0.65rem, 2.9vh, 0.85rem);
         line-height: 1.2;
     }
-
     .hadith-source {
-        font-size: clamp(0.6rem, 2.2vh, 0.75rem);
+        font-size: clamp(0.58rem, 2.2vh, 0.72rem);
     }
 }
 
-/* 3. Dual Monitor & Variable Screen Resolution Fixes (Screen 1 vs Screen 2 resolution adaptation) */
-@media screen and (min-width: 1440px) and (min-height: 800px) {
+/* 4. Full HD 1080p Smart TVs & Wall Displays (1600px - 2199px) */
+@media screen and (min-width: 1600px) and (min-height: 850px) {
+    :root {
+        --dynamic-topbar-height: clamp(75px, 8.8vh, 110px);
+        --time-font-size: clamp(2.8rem, calc(5.8vh * var(--user-font-scale, 1)), 6.5rem);
+        --date-font-size: clamp(1.8rem, calc(4.2vh * var(--user-font-scale, 1)), 4.8rem);
+        --topbar-sub-size: clamp(1.1rem, calc(2.4vh * var(--user-font-scale, 1)), 2.4rem);
+        --prayer-name-size: clamp(1.8rem, calc(4.4vmin * var(--user-font-scale, 1)), 4.6rem);
+        --prayer-time-size: clamp(2.8rem, calc(8.2vmin * var(--user-font-scale, 1)), 8.5rem);
+        --prayer-details-size: clamp(1.1rem, calc(2.5vmin * var(--user-font-scale, 1)), 2.8rem);
+    }
     .prayer-grid {
-        gap: clamp(10px, 1.8vmin, 24px);
+        gap: clamp(12px, 1.8vmin, 26px);
         padding: clamp(12px, 1.8vmin, 28px);
     }
-    .current-time, .date-info {
-        font-size: clamp(2.4rem, 5.5vh, 4.8rem);
-        font-weight: 800;
+}
+
+/* 5. 4K Ultra HD TVs & Large Wall Displays (>= 2200px or height >= 1300px) */
+@media screen and (min-width: 2200px) or (min-height: 1300px) {
+    :root {
+        --dynamic-topbar-height: clamp(95px, 9.5vh, 160px);
+        --time-font-size: clamp(3.8rem, calc(6.6vh * var(--user-font-scale, 1)), 10.5rem);
+        --date-font-size: clamp(2.4rem, calc(4.6vh * var(--user-font-scale, 1)), 7.2rem);
+        --topbar-sub-size: clamp(1.4rem, calc(2.6vh * var(--user-font-scale, 1)), 3.8rem);
+        --prayer-name-size: clamp(2.2rem, calc(4.8vmin * var(--user-font-scale, 1)), 7.0rem);
+        --prayer-time-size: clamp(3.6rem, calc(9.0vmin * var(--user-font-scale, 1)), 13.0rem);
+        --prayer-details-size: clamp(1.3rem, calc(2.8vmin * var(--user-font-scale, 1)), 4.6rem);
+        --hadith-title-size: clamp(2.0rem, calc(3.4vmin * var(--user-font-scale, 1)), 5.0rem);
+        --hadith-content-size: clamp(1.5rem, calc(2.6vmin * var(--user-font-scale, 1)), 3.6rem);
+        --hadith-source-size: clamp(1.2rem, calc(2.0vmin * var(--user-font-scale, 1)), 2.8rem);
     }
-    .layout-default .prayer-name {
-        font-size: clamp(1.8rem, 4.6vmin, 3.6rem);
+    .prayer-grid {
+        gap: clamp(16px, 2vmin, 36px);
+        padding: clamp(18px, 2.2vmin, 40px);
     }
-    .layout-default .prayer-time {
-        font-size: clamp(2.8rem, 7.8vmin, 6.2rem);
+    .prayer-box, .hadith-box {
+        border-radius: 18px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
     }
-    .layout-default .prayer-details {
-        font-size: clamp(1.1rem, 2.6vmin, 2.2rem);
-    }
+}
+
+/* Screen Type Classes (dynamically attached by JS engine) */
+html.screen-tv-4k {
+    font-size: 22px;
+}
+html.screen-mobile-portrait {
+    font-size: 14px;
+}
+
+/* Preset Buttons for In-App & Admin Modal */
+.font-scale-preset-btn {
+    background: #f8fafc;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    cursor: pointer;
+    color: #1e293b;
+    font-size: 0.82rem;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.font-scale-preset-btn:hover {
+    background: #ecfdf5;
+    border-color: #10b981;
+    transform: translateY(-1px);
+}
+.font-scale-preset-btn.active {
+    background: #15803d !important;
+    border-color: #15803d !important;
+    color: #ffffff !important;
+    box-shadow: 0 3px 8px rgba(21, 128, 61, 0.3);
+}
+.font-scale-preset-btn.active strong,
+.font-scale-preset-btn.active span {
+    color: #ffffff !important;
 }
 
 /* In-App Dynamic Settings Modal (Single Page Application, TV-ready, High-Contrast) */

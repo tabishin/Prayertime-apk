@@ -40,7 +40,7 @@
                 <span id="gregorian-date"></span> | 
                 <span id="islamic-date"></span>
             </div>
-            <div id="location">Location: <span id="current-city">Mumbai</span> <button id="open-settings-btn" class="settings-btn" type="button" title="Open Settings" aria-label="Settings">⚙️</button></div>
+            <div id="location">Location: <span id="current-city">Mumbai</span> <button id="btn-fullscreen-toggle" class="settings-btn" type="button" title="Toggle Fullscreen Wall Clock (F)" aria-label="Fullscreen">⛶</button> <button id="open-settings-btn" class="settings-btn" type="button" title="Open Settings" aria-label="Settings">⚙️</button></div>
         </div>
 
         <!-- Prayer Times Grid -->
@@ -347,11 +347,56 @@
                                 <div class="layout-card-label">Vertical</div>
                             </div>
                         </div>
-                        <div style="display: flex; justify-content: center; margin-top: 14px;">
-                            <button type="button" onclick="var b=document.querySelector('.settings-modal-body');if(b)b.scrollTop=0;" style="background: #f1f5f9; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 18px; font-size: 0.88rem; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
-                                <span>↑</span> Back to Top / Tabs
+                    <!-- Wall Clock Dynamic Font Sizing & Screen Mode Section -->
+                    <div class="settings-card-box">
+                        <div class="settings-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <span>🔍 Wall Clock Dynamic Font Sizing</span>
+                            <span id="detected-screen-badge" style="font-size: 0.76rem; font-weight: 700; background: #e0f2fe; color: #0284c7; padding: 3px 10px; border-radius: 999px;">Detecting...</span>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #475569; margin-bottom: 12px; line-height: 1.4;">
+                            Automatically auto-resizes fonts dynamically to fit TVs, tablets, monitors, and small kiosks. Choose a viewing distance preset or fine-tune with the slider.
+                        </div>
+
+                        <!-- Presets -->
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-bottom: 14px;">
+                            <button type="button" class="font-scale-preset-btn active" data-scale-mode="auto" data-scale-val="100">
+                                <span style="font-size: 1.1rem; display: block; margin-bottom: 2px;">⚡</span>
+                                <strong>Auto Dynamic</strong>
+                                <span style="display: block; font-size: 0.72rem; opacity: 0.8;">Adaptive Fit</span>
+                            </button>
+                            <button type="button" class="font-scale-preset-btn" data-scale-mode="tv-large" data-scale-val="115">
+                                <span style="font-size: 1.1rem; display: block; margin-bottom: 2px;">🛋️</span>
+                                <strong>Living Room TV</strong>
+                                <span style="display: block; font-size: 0.72rem; opacity: 0.8;">+15% Far View</span>
+                            </button>
+                            <button type="button" class="font-scale-preset-btn" data-scale-mode="tv-xlarge" data-scale-val="130">
+                                <span style="font-size: 1.1rem; display: block; margin-bottom: 2px;">🏛️</span>
+                                <strong>Giant 65"+ TV</strong>
+                                <span style="display: block; font-size: 0.72rem; opacity: 0.8;">+30% Maximum</span>
+                            </button>
+                            <button type="button" class="font-scale-preset-btn" data-scale-mode="compact" data-scale-val="90">
+                                <span style="font-size: 1.1rem; display: block; margin-bottom: 2px;">📱</span>
+                                <strong>Compact / Desk</strong>
+                                <span style="display: block; font-size: 0.72rem; opacity: 0.8;">-10% Near View</span>
                             </button>
                         </div>
+
+                        <!-- Slider Fine-Tuning -->
+                        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+                            <div style="font-size: 0.86rem; font-weight: 700; color: #1e293b; min-width: 140px;">
+                                Font Size Scale: <span id="font-scale-percentage-label" style="color: #15803d; font-weight: 800; font-family: monospace;">100%</span>
+                            </div>
+                            <input type="range" id="setting-font-scale-slider" min="70" max="150" step="5" value="100" style="flex: 1; min-width: 150px; accent-color: #15803d; cursor: pointer;">
+                            <button type="button" id="btn-toggle-fullscreen-modal" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 14px; font-size: 0.82rem; font-weight: 700; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                                <span>⛶</span> Fullscreen Mode
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: center; margin-top: 14px;">
+                        <button type="button" onclick="var b=document.querySelector('.settings-modal-body');if(b)b.scrollTop=0;" style="background: #f1f5f9; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 8px 18px; font-size: 0.88rem; font-weight: 700; color: #334155; cursor: pointer; display: flex; align-items: center; gap: 6px;">
+                            <span>↑</span> Back to Top / Tabs
+                        </button>
                     </div>
                 </div>
 
@@ -698,7 +743,232 @@
                     }
                 }
             } catch (e) {}
+            // Reflow dynamic typography to new card geometry
+            setTimeout(applyDynamicFontSizing, 20);
         }
+
+        // ==========================================================================
+        // DYNAMIC WALL CLOCK AUTO-RESIZER ENGINE (Rock-solid for all screens & types)
+        // ==========================================================================
+        var currentFontScaleMode = 'auto'; // 'auto', 'tv-large', 'tv-xlarge', 'compact', 'custom'
+        var currentFontScaleValue = 100;   // percentage: 70 - 150
+
+        // Initialize from saved settings if available
+        try {
+            var initS = localStorage.getItem('settings');
+            if (initS) {
+                var initParsed = JSON.parse(initS);
+                if (initParsed.fontScaleMode) currentFontScaleMode = initParsed.fontScaleMode;
+                if (typeof initParsed.fontScaleValue !== 'undefined') currentFontScaleValue = parseInt(initParsed.fontScaleValue, 10);
+            }
+        } catch (e) {}
+
+        function getActiveFontScaleMultiplier() {
+            if (currentFontScaleMode === 'tv-large') return 1.15;
+            if (currentFontScaleMode === 'tv-xlarge') return 1.30;
+            if (currentFontScaleMode === 'compact') return 0.90;
+            if (currentFontScaleMode === 'custom') return Math.max(0.7, Math.min(1.5, currentFontScaleValue / 100.0));
+            return 1.0;
+        }
+
+        function applyDynamicFontSizing() {
+            var vw = window.innerWidth || document.documentElement.clientWidth || screen.width;
+            var vh = window.innerHeight || document.documentElement.clientHeight || screen.height;
+            if (!vw || !vh) return;
+
+            var isPortrait = vh > vw;
+            var userMultiplier = getActiveFontScaleMultiplier();
+
+            // 1. Identify Screen Type Category
+            var screenType = 'screen-desktop';
+            var screenLabel = 'Desktop / Monitor (' + vw + ' × ' + vh + ')';
+
+            if (vw >= 2400 || (vw >= 1920 && (window.devicePixelRatio || 1) >= 2 && vh >= 1300)) {
+                screenType = 'screen-tv-4k';
+                screenLabel = '📺 4K UHD TV Wall Display (' + vw + ' × ' + vh + ')';
+            } else if (vw >= 1500 && vh >= 800) {
+                screenType = 'screen-tv-fhd';
+                screenLabel = '📺 Full HD Wall Clock (' + vw + ' × ' + vh + ')';
+            } else if (vh <= 520 && !isPortrait) {
+                screenType = 'screen-mobile-landscape';
+                screenLabel = '📱 Landscape / Kiosk Display (' + vw + ' × ' + vh + ')';
+            } else if (vw <= 640 && isPortrait) {
+                screenType = 'screen-mobile-portrait';
+                screenLabel = '📱 Mobile Phone Portrait (' + vw + ' × ' + vh + ')';
+            } else if (vw <= 1100) {
+                if (isPortrait) {
+                    screenType = 'screen-tablet-portrait';
+                    screenLabel = '📱 Tablet Portrait (' + vw + ' × ' + vh + ')';
+                } else {
+                    screenType = 'screen-tablet-landscape';
+                    screenLabel = '📱 Tablet / Wall Mount (' + vw + ' × ' + vh + ')';
+                }
+            }
+
+            document.documentElement.setAttribute('data-screen-type', screenType);
+            var allTypes = ['screen-tv-4k', 'screen-tv-fhd', 'screen-desktop', 'screen-tablet-landscape', 'screen-tablet-portrait', 'screen-mobile-landscape', 'screen-mobile-portrait'];
+            for (var st = 0; st < allTypes.length; st++) {
+                document.documentElement.classList.remove(allTypes[st]);
+            }
+            document.documentElement.classList.add(screenType);
+
+            // Update screen badge in modal if present
+            var screenBadge = document.getElementById('detected-screen-badge');
+            if (screenBadge) {
+                screenBadge.textContent = screenLabel;
+            }
+
+            // 2. Set user scale CSS variable on :root
+            document.documentElement.style.setProperty('--user-font-scale', userMultiplier);
+
+            // 3. Dynamic Top Bar Fitting
+            var topBar = document.querySelector('.top-bar');
+            if (topBar) {
+                var topBarH = topBar.clientHeight || 56;
+                if (vw > 640) {
+                    var timeFontPx = Math.max(22, Math.min(topBarH * 0.62 * userMultiplier, 120));
+                    var dateFontPx = Math.max(16, Math.min(topBarH * 0.46 * userMultiplier, 72));
+                    var subFontPx = Math.max(12, Math.min(topBarH * 0.28 * userMultiplier, 36));
+
+                    document.documentElement.style.setProperty('--time-font-size', timeFontPx + 'px');
+                    document.documentElement.style.setProperty('--date-font-size', dateFontPx + 'px');
+                    document.documentElement.style.setProperty('--topbar-sub-size', subFontPx + 'px');
+                } else {
+                    document.documentElement.style.removeProperty('--time-font-size');
+                    document.documentElement.style.removeProperty('--date-font-size');
+                    document.documentElement.style.removeProperty('--topbar-sub-size');
+                }
+            }
+
+            // 4. Container-Aware Card Typography Fitting
+            var cards = document.querySelectorAll('.prayer-box');
+            var firstCard = cards.length > 0 ? cards[0] : null;
+            if (firstCard && firstCard.clientHeight > 20 && firstCard.clientWidth > 20) {
+                var cardW = firstCard.clientWidth;
+                var cardH = firstCard.clientHeight;
+
+                var curLayout = 'default';
+                var grid = document.getElementById('prayer-grid');
+                if (grid) {
+                    for (var l = 0; l < ALL_LAYOUTS.length; l++) {
+                        if (grid.classList.contains('layout-' + ALL_LAYOUTS[l])) {
+                            curLayout = ALL_LAYOUTS[l]; break;
+                        }
+                    }
+                }
+
+                var pTimePx, pNamePx, pDetailsPx;
+
+                if (curLayout === 'vertical') {
+                    pTimePx = Math.max(18, Math.min(cardH * 0.58, cardW * 0.16) * userMultiplier);
+                    pNamePx = Math.max(14, Math.min(cardH * 0.40, cardW * 0.08, pTimePx * 0.65) * userMultiplier);
+                    pDetailsPx = Math.max(11, Math.min(cardH * 0.28, cardW * 0.05, pTimePx * 0.42) * userMultiplier);
+                } else if (curLayout === 'horizontal') {
+                    pTimePx = Math.max(16, Math.min(cardH * 0.28, cardW * 0.18) * userMultiplier);
+                    pNamePx = Math.max(12, Math.min(cardH * 0.18, cardW * 0.12, pTimePx * 0.6) * userMultiplier);
+                    pDetailsPx = Math.max(10, Math.min(cardH * 0.11, cardW * 0.065, pTimePx * 0.35) * userMultiplier);
+                } else if (curLayout === 'compact') {
+                    pTimePx = Math.max(18, Math.min(cardH * 0.36, cardW * 0.17) * userMultiplier);
+                    pNamePx = Math.max(13, Math.min(cardH * 0.22, cardW * 0.12, pTimePx * 0.6) * userMultiplier);
+                    pDetailsPx = Math.max(10, Math.min(cardH * 0.13, cardW * 0.068, pTimePx * 0.36) * userMultiplier);
+                } else {
+                    pTimePx = Math.max(20, Math.min(cardH * 0.40, cardW * 0.16) * userMultiplier);
+                    pNamePx = Math.max(14, Math.min(cardH * 0.24, cardW * 0.11, pTimePx * 0.58) * userMultiplier);
+                    pDetailsPx = Math.max(11, Math.min(cardH * 0.14, cardW * 0.065, pTimePx * 0.36) * userMultiplier);
+                }
+
+                document.documentElement.style.setProperty('--card-prayer-time-size', pTimePx.toFixed(1) + 'px');
+                document.documentElement.style.setProperty('--card-prayer-name-size', pNamePx.toFixed(1) + 'px');
+                document.documentElement.style.setProperty('--card-prayer-details-size', pDetailsPx.toFixed(1) + 'px');
+            }
+
+            // 5. Dynamic Hadith Fitting
+            var hadithBox = document.getElementById('hadith-box');
+            var hadithContent = document.getElementById('hadith-english');
+            if (hadithBox && hadithBox.clientHeight > 20) {
+                var hH = hadithBox.clientHeight;
+                var hW = hadithBox.clientWidth;
+                var textLen = (hadithContent && hadithContent.textContent) ? hadithContent.textContent.length : 80;
+                
+                var lenFactor = textLen > 140 ? 0.75 : (textLen > 100 ? 0.88 : 1.0);
+                var hTitlePx = Math.max(12, Math.min(hH * 0.20, hW * 0.09) * userMultiplier);
+                var hContentPx = Math.max(11, Math.min(hH * 0.14 * lenFactor, hW * 0.06 * lenFactor) * userMultiplier);
+                var hSourcePx = Math.max(9, Math.min(hH * 0.10, hW * 0.045) * userMultiplier);
+
+                document.documentElement.style.setProperty('--card-hadith-title-size', hTitlePx.toFixed(1) + 'px');
+                document.documentElement.style.setProperty('--card-hadith-content-size', hContentPx.toFixed(1) + 'px');
+                document.documentElement.style.setProperty('--card-hadith-source-size', hSourcePx.toFixed(1) + 'px');
+            }
+        }
+
+        // Listen for screen/window resizing & orientation change
+        window.addEventListener('resize', function() {
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(applyDynamicFontSizing);
+            } else {
+                setTimeout(applyDynamicFontSizing, 50);
+            }
+        });
+        window.addEventListener('orientationchange', function() {
+            setTimeout(applyDynamicFontSizing, 100);
+        });
+        if (typeof ResizeObserver !== 'undefined') {
+            try {
+                var resizeObserver = new ResizeObserver(function() {
+                    applyDynamicFontSizing();
+                });
+                var clockElem = document.querySelector('.clock-container');
+                if (clockElem) resizeObserver.observe(clockElem);
+            } catch(e) {}
+        }
+        setTimeout(applyDynamicFontSizing, 100);
+
+        // Screen Wake Lock (Ensures home wall clock screen never turns off or dims)
+        function requestWallClockWakeLock() {
+            try {
+                if ('wakeLock' in navigator && navigator.wakeLock && typeof navigator.wakeLock.request === 'function') {
+                    navigator.wakeLock.request('screen').then(function() {
+                        console.log("[Wall Clock] Screen Wake Lock acquired successfully.");
+                        document.addEventListener('visibilitychange', function() {
+                            if (document.visibilityState === 'visible') {
+                                navigator.wakeLock.request('screen').catch(function() {});
+                            }
+                        });
+                    }).catch(function() {});
+                }
+            } catch (e) {}
+        }
+        requestWallClockWakeLock();
+
+        // Fullscreen Wall Clock Toggle
+        function toggleWallClockFullscreen() {
+            try {
+                if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+                    var docEl = document.documentElement;
+                    if (docEl.requestFullscreen) {
+                        docEl.requestFullscreen().catch(function() {});
+                    } else if (docEl.webkitRequestFullscreen) {
+                        docEl.webkitRequestFullscreen();
+                    }
+                } else {
+                    if (document.exitFullscreen) {
+                        document.exitFullscreen().catch(function() {});
+                    } else if (document.webkitExitFullscreen) {
+                        document.webkitExitFullscreen();
+                    }
+                }
+            } catch (e) {}
+        }
+        window.toggleWallClockFullscreen = toggleWallClockFullscreen;
+
+        // Listen for 'F' key to toggle fullscreen
+        document.addEventListener('keydown', function(e) {
+            if ((e.key === 'f' || e.key === 'F') && !e.ctrlKey && !e.metaKey && !e.altKey) {
+                var activeEl = document.activeElement;
+                if (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.tagName === 'SELECT')) return;
+                toggleWallClockFullscreen();
+            }
+        });
 
         // Live Apply Remote Settings from Wi-Fi Phone/Companion App
         function applyRemoteSettings(remoteObj) {
@@ -717,13 +987,21 @@
                 localStorage.setItem('selectedLayout', remoteObj.layout);
             }
 
-            // 3. City & Country
+            // 3. Dynamic Font Scale
+            if (remoteObj.fontScaleMode || typeof remoteObj.fontScaleValue !== 'undefined') {
+                if (remoteObj.fontScaleMode) currentFontScaleMode = remoteObj.fontScaleMode;
+                if (typeof remoteObj.fontScaleValue !== 'undefined') currentFontScaleValue = parseInt(remoteObj.fontScaleValue, 10);
+                if (typeof updateFontScaleUI === 'function') updateFontScaleUI();
+                applyDynamicFontSizing();
+            }
+
+            // 4. City & Country
             if (remoteObj.city) {
                 var cityEl = document.getElementById('current-city');
                 if (cityEl) cityEl.textContent = remoteObj.city;
             }
 
-            // 4. Hijri Adjustment
+            // 5. Hijri Adjustment
             if (typeof remoteObj.adjustment !== 'undefined') {
                 var iEl = document.getElementById('islamic-date');
                 if (iEl && typeof getHijriEnglishDate === 'function') {
@@ -731,7 +1009,7 @@
                 }
             }
 
-            // 5. Azan Audio Enabled / Volume
+            // 6. Azan Audio Enabled / Volume
             if (typeof remoteObj.azanAudioEnabled !== 'undefined') {
                 currentAzanEnabled = (remoteObj.azanAudioEnabled !== false);
                 if (typeof updateAzanToggleUI === 'function') updateAzanToggleUI();
@@ -745,13 +1023,13 @@
                 }
             }
 
-            // 6. Alarms / Reminders
+            // 7. Alarms / Reminders
             var alarmsList = remoteObj.alarms || remoteObj.reminders;
             if (Array.isArray(alarmsList) && typeof syncNativeAndroidAlarms === 'function') {
                 syncNativeAndroidAlarms(alarmsList);
             }
 
-            // 7. Store in localStorage
+            // 8. Store in localStorage
             try {
                 localStorage.setItem('settings', JSON.stringify(remoteObj));
             } catch (e) {}
@@ -760,6 +1038,7 @@
         // Attach globally so native Java WebView and outside scripts can call them immediately
         window.applyThemeToDOM = applyThemeToDOM;
         window.applyLayoutToDOM = applyLayoutToDOM;
+        window.applyDynamicFontSizing = applyDynamicFontSizing;
         window.applyRemoteSettings = applyRemoteSettings;
 
         // Shared Universal Kiosk Audio Player & Audio State
@@ -1818,6 +2097,10 @@
                 currentSelectedLayout = parsed.layout || 'default';
                 setLayoutActive(currentSelectedLayout);
 
+                if (parsed.fontScaleMode) currentFontScaleMode = parsed.fontScaleMode;
+                if (typeof parsed.fontScaleValue !== 'undefined') currentFontScaleValue = parseInt(parsed.fontScaleValue, 10);
+                updateFontScaleUI();
+
                 if (typeof parsed.azanAudioEnabled !== 'undefined') {
                     currentAzanEnabled = Boolean(parsed.azanAudioEnabled);
                 } else {
@@ -2041,6 +2324,53 @@
             })(audioButtons[ab]);
         }
 
+        // Wall Clock Font Scaling UI Handlers
+        var fontPresetBtns = document.querySelectorAll('.font-scale-preset-btn');
+        for (var fp = 0; fp < fontPresetBtns.length; fp++) {
+            (function(btn) {
+                btn.onclick = function() {
+                    var mode = btn.getAttribute('data-scale-mode');
+                    var val = parseInt(btn.getAttribute('data-scale-val'), 10) || 100;
+                    currentFontScaleMode = mode;
+                    currentFontScaleValue = val;
+                    updateFontScaleUI();
+                    applyDynamicFontSizing();
+                };
+            })(fontPresetBtns[fp]);
+        }
+
+        var fontSlider = document.getElementById('setting-font-scale-slider');
+        if (fontSlider) {
+            fontSlider.oninput = function() {
+                currentFontScaleValue = parseInt(this.value, 10);
+                currentFontScaleMode = 'custom';
+                updateFontScaleUI();
+                applyDynamicFontSizing();
+            };
+        }
+
+        function updateFontScaleUI() {
+            var fontPresetBtns = document.querySelectorAll('.font-scale-preset-btn');
+            for (var fp = 0; fp < fontPresetBtns.length; fp++) {
+                var m = fontPresetBtns[fp].getAttribute('data-scale-mode');
+                if (m === currentFontScaleMode) {
+                    fontPresetBtns[fp].classList.add('active');
+                } else {
+                    fontPresetBtns[fp].classList.remove('active');
+                }
+            }
+            var fontSlider = document.getElementById('setting-font-scale-slider');
+            var fontLabel = document.getElementById('font-scale-percentage-label');
+            if (fontSlider) fontSlider.value = currentFontScaleValue;
+            if (fontLabel) fontLabel.textContent = currentFontScaleValue + '%';
+        }
+
+        // Fullscreen Toggle Buttons
+        var btnFsTop = document.getElementById('btn-fullscreen-toggle');
+        var btnFsModal = document.getElementById('btn-toggle-fullscreen-modal');
+        if (btnFsTop) btnFsTop.onclick = toggleWallClockFullscreen;
+        if (btnFsModal) btnFsModal.onclick = toggleWallClockFullscreen;
+
         // Sync Native Alarms with Android Hardware AlarmManager
         function syncNativeAndroidAlarms(alarms) {
             if (!window.AndroidAudio || typeof window.AndroidAudio.scheduleNativeAlarm !== 'function') return;
@@ -2092,6 +2422,8 @@
                 currentSettings.adjustment = hijriVal;
                 currentSettings.theme = currentSelectedTheme;
                 currentSettings.layout = currentSelectedLayout;
+                currentSettings.fontScaleMode = currentFontScaleMode;
+                currentSettings.fontScaleValue = currentFontScaleValue;
                 currentSettings.alarms = currentReminders;
                 currentSettings.reminders = currentReminders;
                 currentSettings.azanAudioEnabled = currentAzanEnabled;

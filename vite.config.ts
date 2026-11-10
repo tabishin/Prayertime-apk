@@ -45,8 +45,8 @@ export default defineConfig(() => {
 
             if (pathname === '/save_settings.php') {
               res.setHeader('Access-Control-Allow-Origin', '*');
-              res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
-              res.setHeader('Access-Control-Allow-Headers', '*');
+              res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+              res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With');
 
               if (req.method === 'OPTIONS') {
                 res.writeHead(200);
@@ -76,7 +76,7 @@ export default defineConfig(() => {
                   res.end(data);
                 } catch (e) {
                   res.writeHead(200, { 'Content-Type': 'application/json' });
-                  res.end(JSON.stringify({ city: 'Mumbai', country: 'India', calcMethod: '2', asrMethod: 'hanafi', adjustment: '0' }));
+                  res.end(JSON.stringify({ city: 'Mumbai', country: 'India', calcMethod: '2', asrMethod: 'hanafi', adjustment: '0', fontScaleMode: 'auto', fontScaleValue: 100 }));
                 }
               }
               return;
@@ -143,7 +143,7 @@ export default defineConfig(() => {
             if (pathname === '/upload_audio.php' || pathname === '/upload_audio') {
               res.setHeader('Access-Control-Allow-Origin', '*');
               res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-              res.setHeader('Access-Control-Allow-Headers', '*');
+              res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Authorization, X-Requested-With');
 
               if (req.method === 'OPTIONS') {
                 res.writeHead(200);

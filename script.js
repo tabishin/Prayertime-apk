@@ -212,7 +212,9 @@ function loadSettings() {
                         alarmAudio: '',
                         reminders: [],
                         theme: 'default',
-                        layout: 'default'
+                        layout: 'default',
+                        fontScaleMode: 'auto',
+                        fontScaleValue: 100
                     };
                     isLocalApp = window.location.origin.includes('appassets') || window.location.protocol === 'file:' || !navigator.onLine;
                     storedSettings = null;
@@ -409,18 +411,21 @@ window.addEventListener('message', function (event) { return __awaiter(_this, vo
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                if (!(event.origin === BASE_URL && event.data.type === 'GENERAL_SETTINGS_UPDATED')) return [3 /*break*/, 2];
+                if (!(event.data && event.data.type === 'GENERAL_SETTINGS_UPDATED')) return [3 /*break*/, 2];
                 updatedGeneralSettings_1 = event.data.settings;
+                if (!updatedGeneralSettings_1) return [3 /*break*/, 2];
+                if (typeof window.applyRemoteSettings === 'function') {
+                    window.applyRemoteSettings(updatedGeneralSettings_1);
+                }
                 generalKeys = ['city', 'state', 'country', 'calcMethod', 'asrMethod', 'adjustment'];
-                hasGeneralChanges = generalKeys.some(function (key) { return settings[key] !== updatedGeneralSettings_1[key]; });
+                hasGeneralChanges = generalKeys.some(function (key) { return !settings || settings[key] !== updatedGeneralSettings_1[key]; });
+                if (settings) {
+                    settings = Object.assign(settings, updatedGeneralSettings_1);
+                } else {
+                    settings = updatedGeneralSettings_1;
+                }
                 if (!hasGeneralChanges) return [3 /*break*/, 2];
-                // Update only General Settings
-                settings.city = updatedGeneralSettings_1.city;
-                settings.state = updatedGeneralSettings_1.state;
-                settings.country = updatedGeneralSettings_1.country;
-                settings.calcMethod = updatedGeneralSettings_1.calcMethod;
-                settings.asrMethod = updatedGeneralSettings_1.asrMethod;
-                settings.adjustment = updatedGeneralSettings_1.adjustment;
+                // Update General Settings
                 console.log("General settings updated from admin:", settings);
                 localStorage.setItem('settings', JSON.stringify(settings));
                 prayerTimes30Days = {}; // Clear cache to force refetch
