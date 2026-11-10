@@ -18,7 +18,10 @@ var settings = {
     theme: 'default',
     layout: 'default',
     fontScaleMode: 'auto',
-    fontScaleValue: 100
+    fontScaleValue: 100,
+    clockFontScale: 100,
+    nextPrayerFontScale: 100,
+    dateFontScale: 100
 };
 var lastSavedSettings = null;
 
@@ -455,10 +458,51 @@ function updateFontScaleSelection() {
 
     var slider = document.getElementById('admin-font-scale-slider');
     if (slider) slider.value = val;
+
+    // Top Bar Component Font Scaling Sliders & Badges
+    var clockVal = (typeof settings.clockFontScale !== 'undefined') ? parseInt(settings.clockFontScale, 10) : 100;
+    var nextPrayerVal = (typeof settings.nextPrayerFontScale !== 'undefined') ? parseInt(settings.nextPrayerFontScale, 10) : 100;
+    var dateVal = (typeof settings.dateFontScale !== 'undefined') ? parseInt(settings.dateFontScale, 10) : 100;
+
+    var clockLabel = document.getElementById('admin-clock-scale-label');
+    if (clockLabel) clockLabel.textContent = clockVal + '%';
+    var clockSlider = document.getElementById('admin-clock-scale-slider');
+    if (clockSlider) clockSlider.value = clockVal;
+
+    var npLabel = document.getElementById('admin-next-prayer-scale-label');
+    if (npLabel) npLabel.textContent = nextPrayerVal + '%';
+    var npSlider = document.getElementById('admin-next-prayer-scale-slider');
+    if (npSlider) npSlider.value = nextPrayerVal;
+
+    var dateLabel = document.getElementById('admin-date-scale-label');
+    if (dateLabel) dateLabel.textContent = dateVal + '%';
+    var dateSlider = document.getElementById('admin-date-scale-slider');
+    if (dateSlider) dateSlider.value = dateVal;
+}
+
+function onAdminTopBarSliderChange(component, val) {
+    var intVal = parseInt(val, 10) || 100;
+    if (component === 'clock') {
+        settings.clockFontScale = intVal;
+    } else if (component === 'nextPrayer') {
+        settings.nextPrayerFontScale = intVal;
+    } else if (component === 'date') {
+        settings.dateFontScale = intVal;
+    }
+    updateFontScaleSelection();
+}
+
+function resetAdminTopBarFonts() {
+    settings.clockFontScale = 100;
+    settings.nextPrayerFontScale = 100;
+    settings.dateFontScale = 100;
+    updateFontScaleSelection();
 }
 
 window.selectFontScaleMode = selectFontScaleMode;
 window.onAdminFontSliderChange = onAdminFontSliderChange;
+window.onAdminTopBarSliderChange = onAdminTopBarSliderChange;
+window.resetAdminTopBarFonts = resetAdminTopBarFonts;
 
 function updateAsrButtons() {
     var standardBtn = document.getElementById('asr-standard');

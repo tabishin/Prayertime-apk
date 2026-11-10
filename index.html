@@ -384,12 +384,54 @@
                         <!-- Slider Fine-Tuning -->
                         <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
                             <div style="font-size: 0.86rem; font-weight: 700; color: #1e293b; min-width: 140px;">
-                                Font Size Scale: <span id="font-scale-percentage-label" style="color: #15803d; font-weight: 800; font-family: monospace;">100%</span>
+                                Overall Font Scale: <span id="font-scale-percentage-label" style="color: #15803d; font-weight: 800; font-family: monospace;">100%</span>
                             </div>
                             <input type="range" id="setting-font-scale-slider" min="70" max="150" step="5" value="100" style="flex: 1; min-width: 150px; accent-color: #15803d; cursor: pointer;">
                             <button type="button" id="btn-toggle-fullscreen-modal" style="background: #ffffff; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 6px 14px; font-size: 0.82rem; font-weight: 700; color: #334155; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
                                 <span>⛶</span> Fullscreen Mode
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- Top Bar Component Font Scaling Section -->
+                    <div class="settings-card-box">
+                        <div class="settings-section-title" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+                            <span>⏱️ Top Bar Component Font Scaling</span>
+                            <button type="button" id="btn-reset-topbar-fonts" style="background: #f0fdf4; border: 1.5px solid #86efac; border-radius: 6px; padding: 4px 10px; font-size: 0.78rem; font-weight: 700; color: #15803d; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                <span>↺</span> Reset to 100%
+                            </button>
+                        </div>
+                        <div style="font-size: 0.85rem; color: #475569; margin-bottom: 12px; line-height: 1.4;">
+                            Fine-tune font sizes specifically for the Live Clock, Next Prayer Countdown, and Date Display independently.
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Live Clock Slider -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                                <div style="font-size: 0.86rem; font-weight: 700; color: #1e293b; min-width: 170px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                    <span>⏰ Live Clock:</span>
+                                    <span id="label-clock-font-scale" style="color: #15803d; font-weight: 800; font-family: monospace; background: #dcfce7; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">100%</span>
+                                </div>
+                                <input type="range" id="setting-clock-font-slider" min="70" max="160" step="5" value="100" style="flex: 1; min-width: 160px; accent-color: #15803d; cursor: pointer;">
+                            </div>
+
+                            <!-- Next Prayer Countdown Slider -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                                <div style="font-size: 0.86rem; font-weight: 700; color: #1e293b; min-width: 170px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                    <span>⏳ Next Prayer:</span>
+                                    <span id="label-next-prayer-font-scale" style="color: #15803d; font-weight: 800; font-family: monospace; background: #dcfce7; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">100%</span>
+                                </div>
+                                <input type="range" id="setting-next-prayer-font-slider" min="70" max="160" step="5" value="100" style="flex: 1; min-width: 160px; accent-color: #15803d; cursor: pointer;">
+                            </div>
+
+                            <!-- Date Display Slider -->
+                            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                                <div style="font-size: 0.86rem; font-weight: 700; color: #1e293b; min-width: 170px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+                                    <span>📅 Date Display:</span>
+                                    <span id="label-date-font-scale" style="color: #15803d; font-weight: 800; font-family: monospace; background: #dcfce7; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">100%</span>
+                                </div>
+                                <input type="range" id="setting-date-font-slider" min="70" max="160" step="5" value="100" style="flex: 1; min-width: 160px; accent-color: #15803d; cursor: pointer;">
+                            </div>
                         </div>
                     </div>
 
@@ -752,6 +794,9 @@
         // ==========================================================================
         var currentFontScaleMode = 'auto'; // 'auto', 'tv-large', 'tv-xlarge', 'compact', 'custom'
         var currentFontScaleValue = 100;   // percentage: 70 - 150
+        var currentClockScale = 100;       // percentage: 70 - 160
+        var currentNextPrayerScale = 100;  // percentage: 70 - 160
+        var currentDateScale = 100;        // percentage: 70 - 160
 
         // Initialize from saved settings if available
         try {
@@ -760,6 +805,9 @@
                 var initParsed = JSON.parse(initS);
                 if (initParsed.fontScaleMode) currentFontScaleMode = initParsed.fontScaleMode;
                 if (typeof initParsed.fontScaleValue !== 'undefined') currentFontScaleValue = parseInt(initParsed.fontScaleValue, 10);
+                if (typeof initParsed.clockFontScale !== 'undefined') currentClockScale = parseInt(initParsed.clockFontScale, 10);
+                if (typeof initParsed.nextPrayerFontScale !== 'undefined') currentNextPrayerScale = parseInt(initParsed.nextPrayerFontScale, 10);
+                if (typeof initParsed.dateFontScale !== 'undefined') currentDateScale = parseInt(initParsed.dateFontScale, 10);
             }
         } catch (e) {}
 
@@ -818,24 +866,35 @@
                 screenBadge.textContent = screenLabel;
             }
 
-            // 2. Set user scale CSS variable on :root
+            // 2. Set user scale & top bar component CSS variables on :root
             document.documentElement.style.setProperty('--user-font-scale', userMultiplier);
+
+            var clockMultiplier = (currentClockScale || 100) / 100.0;
+            var nextPrayerMultiplier = (currentNextPrayerScale || 100) / 100.0;
+            var dateMultiplier = (currentDateScale || 100) / 100.0;
+
+            document.documentElement.style.setProperty('--clock-font-scale', clockMultiplier);
+            document.documentElement.style.setProperty('--next-prayer-font-scale', nextPrayerMultiplier);
+            document.documentElement.style.setProperty('--date-font-scale', dateMultiplier);
 
             // 3. Dynamic Top Bar Fitting
             var topBar = document.querySelector('.top-bar');
             if (topBar) {
                 var topBarH = topBar.clientHeight || 56;
                 if (vw > 640) {
-                    var timeFontPx = Math.max(22, Math.min(topBarH * 0.62 * userMultiplier, 120));
-                    var dateFontPx = Math.max(16, Math.min(topBarH * 0.46 * userMultiplier, 72));
-                    var subFontPx = Math.max(12, Math.min(topBarH * 0.28 * userMultiplier, 36));
+                    var timeFontPx = Math.max(20, Math.min(topBarH * 0.62 * userMultiplier * clockMultiplier, 160));
+                    var dateFontPx = Math.max(14, Math.min(topBarH * 0.46 * userMultiplier * dateMultiplier, 90));
+                    var nextPrayerFontPx = Math.max(11, Math.min(topBarH * 0.28 * userMultiplier * nextPrayerMultiplier, 48));
+                    var subFontPx = Math.max(11, Math.min(topBarH * 0.28 * userMultiplier, 40));
 
                     document.documentElement.style.setProperty('--time-font-size', timeFontPx + 'px');
                     document.documentElement.style.setProperty('--date-font-size', dateFontPx + 'px');
+                    document.documentElement.style.setProperty('--next-prayer-size', nextPrayerFontPx + 'px');
                     document.documentElement.style.setProperty('--topbar-sub-size', subFontPx + 'px');
                 } else {
                     document.documentElement.style.removeProperty('--time-font-size');
                     document.documentElement.style.removeProperty('--date-font-size');
+                    document.documentElement.style.removeProperty('--next-prayer-size');
                     document.documentElement.style.removeProperty('--topbar-sub-size');
                 }
             }
@@ -987,10 +1046,13 @@
                 localStorage.setItem('selectedLayout', remoteObj.layout);
             }
 
-            // 3. Dynamic Font Scale
-            if (remoteObj.fontScaleMode || typeof remoteObj.fontScaleValue !== 'undefined') {
+            // 3. Dynamic Font Scale & Top Bar Component Scales
+            if (remoteObj.fontScaleMode || typeof remoteObj.fontScaleValue !== 'undefined' || typeof remoteObj.clockFontScale !== 'undefined' || typeof remoteObj.nextPrayerFontScale !== 'undefined' || typeof remoteObj.dateFontScale !== 'undefined') {
                 if (remoteObj.fontScaleMode) currentFontScaleMode = remoteObj.fontScaleMode;
                 if (typeof remoteObj.fontScaleValue !== 'undefined') currentFontScaleValue = parseInt(remoteObj.fontScaleValue, 10);
+                if (typeof remoteObj.clockFontScale !== 'undefined') currentClockScale = parseInt(remoteObj.clockFontScale, 10);
+                if (typeof remoteObj.nextPrayerFontScale !== 'undefined') currentNextPrayerScale = parseInt(remoteObj.nextPrayerFontScale, 10);
+                if (typeof remoteObj.dateFontScale !== 'undefined') currentDateScale = parseInt(remoteObj.dateFontScale, 10);
                 if (typeof updateFontScaleUI === 'function') updateFontScaleUI();
                 applyDynamicFontSizing();
             }
@@ -2099,6 +2161,9 @@
 
                 if (parsed.fontScaleMode) currentFontScaleMode = parsed.fontScaleMode;
                 if (typeof parsed.fontScaleValue !== 'undefined') currentFontScaleValue = parseInt(parsed.fontScaleValue, 10);
+                if (typeof parsed.clockFontScale !== 'undefined') currentClockScale = parseInt(parsed.clockFontScale, 10);
+                if (typeof parsed.nextPrayerFontScale !== 'undefined') currentNextPrayerScale = parseInt(parsed.nextPrayerFontScale, 10);
+                if (typeof parsed.dateFontScale !== 'undefined') currentDateScale = parseInt(parsed.dateFontScale, 10);
                 updateFontScaleUI();
 
                 if (typeof parsed.azanAudioEnabled !== 'undefined') {
@@ -2349,6 +2414,45 @@
             };
         }
 
+        // Top Bar Component Font Scaling Sliders
+        var clockSlider = document.getElementById('setting-clock-font-slider');
+        if (clockSlider) {
+            clockSlider.oninput = function() {
+                currentClockScale = parseInt(this.value, 10) || 100;
+                updateFontScaleUI();
+                applyDynamicFontSizing();
+            };
+        }
+
+        var nextPrayerSlider = document.getElementById('setting-next-prayer-font-slider');
+        if (nextPrayerSlider) {
+            nextPrayerSlider.oninput = function() {
+                currentNextPrayerScale = parseInt(this.value, 10) || 100;
+                updateFontScaleUI();
+                applyDynamicFontSizing();
+            };
+        }
+
+        var dateSlider = document.getElementById('setting-date-font-slider');
+        if (dateSlider) {
+            dateSlider.oninput = function() {
+                currentDateScale = parseInt(this.value, 10) || 100;
+                updateFontScaleUI();
+                applyDynamicFontSizing();
+            };
+        }
+
+        var btnResetTopBar = document.getElementById('btn-reset-topbar-fonts');
+        if (btnResetTopBar) {
+            btnResetTopBar.onclick = function() {
+                currentClockScale = 100;
+                currentNextPrayerScale = 100;
+                currentDateScale = 100;
+                updateFontScaleUI();
+                applyDynamicFontSizing();
+            };
+        }
+
         function updateFontScaleUI() {
             var fontPresetBtns = document.querySelectorAll('.font-scale-preset-btn');
             for (var fp = 0; fp < fontPresetBtns.length; fp++) {
@@ -2363,6 +2467,21 @@
             var fontLabel = document.getElementById('font-scale-percentage-label');
             if (fontSlider) fontSlider.value = currentFontScaleValue;
             if (fontLabel) fontLabel.textContent = currentFontScaleValue + '%';
+
+            var cSlider = document.getElementById('setting-clock-font-slider');
+            var cLabel = document.getElementById('label-clock-font-scale');
+            if (cSlider) cSlider.value = currentClockScale;
+            if (cLabel) cLabel.textContent = currentClockScale + '%';
+
+            var npSlider = document.getElementById('setting-next-prayer-font-slider');
+            var npLabel = document.getElementById('label-next-prayer-font-scale');
+            if (npSlider) npSlider.value = currentNextPrayerScale;
+            if (npLabel) npLabel.textContent = currentNextPrayerScale + '%';
+
+            var dSlider = document.getElementById('setting-date-font-slider');
+            var dLabel = document.getElementById('label-date-font-scale');
+            if (dSlider) dSlider.value = currentDateScale;
+            if (dLabel) dLabel.textContent = currentDateScale + '%';
         }
 
         // Fullscreen Toggle Buttons
@@ -2424,6 +2543,9 @@
                 currentSettings.layout = currentSelectedLayout;
                 currentSettings.fontScaleMode = currentFontScaleMode;
                 currentSettings.fontScaleValue = currentFontScaleValue;
+                currentSettings.clockFontScale = currentClockScale;
+                currentSettings.nextPrayerFontScale = currentNextPrayerScale;
+                currentSettings.dateFontScale = currentDateScale;
                 currentSettings.alarms = currentReminders;
                 currentSettings.reminders = currentReminders;
                 currentSettings.azanAudioEnabled = currentAzanEnabled;

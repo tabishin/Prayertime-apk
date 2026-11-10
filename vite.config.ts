@@ -76,7 +76,7 @@ export default defineConfig(() => {
                   res.end(data);
                 } catch (e) {
                   res.writeHead(200, { 'Content-Type': 'application/json' });
-                  res.end(JSON.stringify({ city: 'Mumbai', country: 'India', calcMethod: '2', asrMethod: 'hanafi', adjustment: '0', fontScaleMode: 'auto', fontScaleValue: 100 }));
+                  res.end(JSON.stringify({ city: 'Mumbai', country: 'India', calcMethod: '2', asrMethod: 'hanafi', adjustment: '0', fontScaleMode: 'auto', fontScaleValue: 100, clockFontScale: 100, nextPrayerFontScale: 100, dateFontScale: 100 }));
                 }
               }
               return;

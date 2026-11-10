@@ -732,10 +732,60 @@
                         <!-- Fine-tuning Slider -->
                         <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
                             <div class="flex items-center gap-3">
-                                <span class="text-sm font-bold text-slate-700">Font Scale:</span>
+                                <span class="text-sm font-bold text-slate-700">Overall Font Scale:</span>
                                 <span id="admin-font-scale-label" class="font-mono font-bold text-sm bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-lg">100%</span>
                             </div>
                             <input type="range" id="admin-font-scale-slider" min="70" max="150" step="5" value="100" class="flex-1 accent-emerald-600 cursor-pointer" oninput="onAdminFontSliderChange(this.value)">
+                        </div>
+                    </div>
+
+                    <!-- Top Bar Component Font Scaling Card -->
+                    <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80 mb-6">
+                        <div class="flex items-center justify-between flex-wrap gap-2 mb-2">
+                            <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                                <span>⏱️</span> Top Bar Component Font Scaling
+                            </h3>
+                            <button type="button" onclick="resetAdminTopBarFonts()" class="text-xs font-bold text-emerald-700 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1">
+                                <span>↺</span> Reset to 100%
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-5 leading-relaxed">
+                            Fine-tune font sizes specifically for the Live Clock, Next Prayer Countdown, and Date Display without changing the rest of the display.
+                        </p>
+
+                        <div class="space-y-4">
+                            <!-- Live Clock Slider -->
+                            <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                                <div class="flex items-center justify-between sm:justify-start gap-3 sm:w-48">
+                                    <span class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                        <span>⏰</span> Live Clock
+                                    </span>
+                                    <span id="admin-clock-scale-label" class="font-mono font-bold text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">100%</span>
+                                </div>
+                                <input type="range" id="admin-clock-scale-slider" min="70" max="160" step="5" value="100" class="flex-1 accent-emerald-600 cursor-pointer" oninput="onAdminTopBarSliderChange('clock', this.value)">
+                            </div>
+
+                            <!-- Next Prayer Countdown Slider -->
+                            <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                                <div class="flex items-center justify-between sm:justify-start gap-3 sm:w-48">
+                                    <span class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                        <span>⏳</span> Next Prayer
+                                    </span>
+                                    <span id="admin-next-prayer-scale-label" class="font-mono font-bold text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">100%</span>
+                                </div>
+                                <input type="range" id="admin-next-prayer-scale-slider" min="70" max="160" step="5" value="100" class="flex-1 accent-emerald-600 cursor-pointer" oninput="onAdminTopBarSliderChange('nextPrayer', this.value)">
+                            </div>
+
+                            <!-- Date Display Slider -->
+                            <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                                <div class="flex items-center justify-between sm:justify-start gap-3 sm:w-48">
+                                    <span class="text-sm font-bold text-slate-700 flex items-center gap-2">
+                                        <span>📅</span> Date Display
+                                    </span>
+                                    <span id="admin-date-scale-label" class="font-mono font-bold text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-md">100%</span>
+                                </div>
+                                <input type="range" id="admin-date-scale-slider" min="70" max="160" step="5" value="100" class="flex-1 accent-emerald-600 cursor-pointer" oninput="onAdminTopBarSliderChange('date', this.value)">
+                            </div>
                         </div>
                     </div>
                 </div>
